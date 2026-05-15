@@ -1,0 +1,60 @@
+{
+  "UNKNOWN": "Something went wrong. Please try again.",
+  "NETWORK": "Network error — check your connection.",
+  "REQUEST_INVALID": "Malformed request.",
+
+  "AUTH_INVALID_CREDENTIALS": "Wrong email or password.",
+  "AUTH_TOKEN_EXPIRED": "Session expired. Please sign in again.",
+  "AUTH_REFRESH_EXPIRED": "Session expired. Please sign in again.",
+  "AUTH_REFRESH_INVALID": "Session invalid. Please sign in again.",
+  "AUTH_REQUIRED": "Please sign in first.",
+  "FORBIDDEN": "You don't have permission for that.",
+
+  "EMAIL_INVALID_FORMAT": "Invalid email format.",
+  "EMAIL_ALREADY_REGISTERED": "Email already registered.",
+  "EMAIL_RATE_LIMITED": "Too many requests. Try again later.",
+  "EMAIL_CODE_INVALID": "Verification code is incorrect.",
+  "EMAIL_CODE_EXPIRED": "Verification code expired.",
+  "EMAIL_SEND_FAILED": "Failed to send email — try again later.",
+
+  "USERNAME_TAKEN": "Username already taken.",
+  "USERNAME_INVALID": "Username must be 3–32 characters.",
+  "PASSWORD_TOO_WEAK": "Password must be 8+ chars with letters and digits.",
+  "USER_NOT_FOUND": "User not found.",
+  "USER_BANNED": "Account is banned.",
+  "BIO_TOO_LONG": "Bio is too long.",
+  "ROLE_INVALID": "Invalid role.",
+  "STATUS_INVALID": "Invalid status.",
+
+  "CHECKIN_ALREADY_TODAY": "You've already checked in today.",
+
+  "FORUM_NOT_FOUND": "Forum not found.",
+  "POST_NOT_FOUND": "Post not found.",
+  "POST_LOCKED": "This post is locked.",
+  "TITLE_INVALID": "Title must be 2–200 characters.",
+  "CONTENT_INVALID": "Content is required (max 50000 characters).",
+  "PARENT_NOT_FOUND": "Parent comment not found.",
+  "POST_CREATE_FAILED": "Failed to publish — try again.",
+  "COMMENT_CREATE_FAILED": "Failed to post comment — try again.",
+
+  "FILE_TOO_LARGE": "File too large (max 10 MB).",
+  "FILE_TYPE_FORBIDDEN": "File type not allowed.",
+
+  "SERVER_NOT_FOUND": "Server not found.",
+  "SERVER_OFFLINE": "Server is offline.",
+  "SERVER_NAME_TAKEN": "Server name already exists.",
+  "METRIC_INVALID": "Unsupported metric.",
+  "PLAYER_NOT_FOUND": "Player not found.",
+
+  "BIND_ALREADY_BOUND": "You already linked an account here.",
+  "BIND_NOT_FOUND": "No binding found.",
+  "BIND_CODE_INVALID": "Code invalid or expired.",
+
+  "DONATION_AMOUNT_INVALID": "Invalid amount.",
+  "AMOUNT_INVALID": "Invalid amount.",
+
+  "QUERY_TOO_SHORT": "Search query too short (min 2 chars).",
+  "QUERY_TOO_LONG": "Search query too long (max 64 chars).",
+
+  "RATE_LIMITED": "Too many requests. Slow down."
+}

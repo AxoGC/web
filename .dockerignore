@@ -1,0 +1,15 @@
+node_modules
+.output
+.nuxt
+.nitro
+.cache
+.git
+.gitignore
+.vscode
+.idea
+.DS_Store
+*.log
+.env
+.env.*
+README.md
+plan-*.md
