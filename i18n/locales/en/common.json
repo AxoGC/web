@@ -1,6 +1,6 @@
 {
   "brand": {
-    "name": "Game Service Platform",
+    "name": "Axolotland Gaming Club",
     "tagline": "Bridging your servers and community"
   },
   "nav": {
@@ -78,7 +78,7 @@
   },
   "home": {
     "title": "Home",
-    "hero_title": "Manage every server, all in one place",
+    "hero_title": "Welcome to Axolotland",
     "hero_subtitle": "Live status, forum threads, check-ins and donations — unified.",
     "announcements": "Announcements",
     "hot_posts": "Hot threads",
@@ -114,7 +114,7 @@
     "sort_hot": "Hot",
     "new_post": "New thread",
     "title_placeholder": "Thread title (2–200 chars)",
-    "content_placeholder": "Markdown supported",
+    "content_placeholder": "Body",
     "publish": "Publish",
     "comments": "Comments",
     "no_comments": "No comments yet — be the first!",
@@ -127,7 +127,16 @@
     "view_count": "{n} views",
     "comment_count": "{n} comments",
     "like_count": "{n} likes",
-    "tags": "Tags"
+    "tags": "Tags",
+    "voting_label": "Voting thread",
+    "voting_help": "When enabled, comments must declare an attitude (default neutral). Cannot be changed after publish.",
+    "voting_enable": "Enable voting",
+    "voting_tag": "Voting",
+    "voting_summary": "Vote summary",
+    "voting_affirmative": "Yes",
+    "voting_neutral": "Neutral",
+    "voting_negative": "No",
+    "attitude_prompt": "Attitude:"
   },
   "server": {
     "list_title": "Servers",
@@ -140,8 +149,23 @@
     "stats_7d": "7d",
     "stats_30d": "30d",
     "online_trend": "Online players",
+    "online_players": "Players online",
+    "no_online_players": "Nobody is online right now",
     "leaderboard": "Leaderboard",
     "metric": "Metric",
+    "connect_missing": "No connection info configured",
+    "bedrock_address": "Address",
+    "bedrock_port": "Port",
+    "dst_search_name": "Search in-game",
+    "dst_search_name_short": "Search: {name}",
+    "dst_password_hint": "Password: ",
+    "dst_world_info": "World",
+    "dst_game_mode": "Mode",
+    "dst_season": "Season",
+    "dst_mods": "Mods",
+    "terraria_world_info": "World",
+    "terraria_world": "World",
+    "terraria_difficulty": "Difficulty",
     "bind_title": "Link in-game account",
     "bind_get_code": "Generate code",
     "bind_instruction": "Within 5 minutes, join the server and type /bind {code}",
@@ -187,12 +211,32 @@
     "avatar": "Avatar",
     "bio": "Bio",
     "language": "Language",
-    "appearance": "Appearance"
+    "appearance": "Appearance",
+    "likes_title": "My likes",
+    "likes_subtitle": "All threads you have liked"
+  },
+  "profile": {
+    "joined_at": "Joined {date}",
+    "last_login": "Last seen",
+    "last_login_never": "Never signed in",
+    "checkin_streak": "Check-in streak",
+    "checkin_streak_value": "{n} days",
+    "checkin_total": "Total check-ins",
+    "checkin_total_value": "{n} times",
+    "bindings_title": "Linked game accounts",
+    "bindings_empty": "This user hasn't linked any game account yet",
+    "bindings_playtime": "Play time {value}",
+    "bindings_bound_at": "Linked on {date}",
+    "forum_title": "Forum activity",
+    "forum_posts": "Threads",
+    "forum_comments": "Replies",
+    "forum_likes": "Likes received"
   },
   "admin": {
     "dashboard": "Overview",
     "users": "Users",
     "servers": "Servers",
+    "forums": "Forums",
     "donations": "Donations",
     "logs": "Audit log",
     "audit": "Bedrock audit",
@@ -209,11 +253,39 @@
     "token_reset": "Token reset (shown once)",
     "server_form_name": "Name",
     "server_form_type": "Type",
-    "server_form_host": "Host",
-    "server_form_port": "Port",
     "server_form_desc": "Description",
     "server_form_meta": "Meta (JSON)",
-    "mobile_unsupported": "Use a desktop browser for admin tools"
+    "server_form_connect": "How players connect",
+    "server_form_extra_meta": "Other meta (JSON)",
+    "server_form_extra_meta_hint": "Free-form fields outside of the connection payload (motd, mods, etc.).",
+    "server_form_extra_meta_invalid": "Other meta must be a JSON object",
+    "endpoint_label": "Label",
+    "endpoint_label_ph": "e.g. CN node",
+    "endpoint_host": "Host / domain",
+    "endpoint_port": "Port",
+    "endpoint_add": "Add endpoint",
+    "endpoint_help": "Leave the port empty to use the game's default ({port}).",
+    "dst_find_by_name": "In-game server name",
+    "dst_password_hint": "Password hint",
+    "dst_help": "DST clients join by searching this name in the in-game browser; there is no ip:port.",
+    "mobile_unsupported": "Use a desktop browser for admin tools",
+    "forum_form_name": "Forum name",
+    "forum_form_slug": "Slug (URL)",
+    "forum_form_slug_hint": "Lowercase letters, digits and hyphens only — locked after creation.",
+    "forum_form_description": "Description",
+    "forum_form_icon": "Icon URL",
+    "forum_form_banner": "Banner URL",
+    "forum_form_sort": "Sort order",
+    "forum_post_count": "Posts",
+    "forum_delete_blocked": "Cannot delete — the forum still has posts"
+  },
+  "chat": {
+    "title": "Server chat",
+    "placeholder": "Say something to the server…",
+    "empty": "No chat yet — be the first to say hi.",
+    "connected": "Live",
+    "disconnected": "Reconnecting…",
+    "login_required": "Sign in to join the chat."
   },
   "pk": {
     "title": "Player PK",
@@ -234,9 +306,27 @@
     "servers": "No servers listed",
     "donations": "No donations yet",
     "bindings": "You haven't linked any game accounts",
-    "search": "Nothing matches"
+    "search": "Nothing matches",
+    "likes": "You haven't liked anything yet"
   },
   "footer": {
-    "copyright": "© {year} Game Service Platform"
+    "copyright": "© {year} Axolotland Gaming Club"
+  },
+  "metric": {
+    "play_time": "Play time",
+    "mob_kills_total": "Mob kills",
+    "pvp_kills": "Player kills",
+    "deaths": "Deaths",
+    "damage_dealt": "Damage dealt",
+    "damage_taken": "Damage taken",
+    "distance_walked": "Distance walked",
+    "distance_sprinted": "Distance sprinted",
+    "distance_flown": "Distance flown",
+    "blocks_broken_total": "Blocks broken",
+    "play_time_fmt": "{h}h {m}m",
+    "days_survived": "Days survived",
+    "kills_total": "Total kills",
+    "sanity_lost": "Sanity lost",
+    "bosses_defeated": "Bosses defeated"
   }
 }

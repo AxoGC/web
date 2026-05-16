@@ -16,7 +16,17 @@
       </UiField>
 
       <UiField :label="$t('forum.content_placeholder')" required :error="contentErr">
-        <UiTextarea v-model="content" :rows="14" :placeholder="$t('forum.content_placeholder')" :invalid="!!contentErr" />
+        <RichEditor
+          v-model="contentDoc"
+          @update:text="contentText = $event"
+        />
+      </UiField>
+
+      <UiField :label="$t('forum.voting_label')" :help="$t('forum.voting_help')">
+        <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+          <input v-model="votingEnabled" type="checkbox" class="h-4 w-4 rounded border-border-default bg-bg-elevated">
+          <span class="text-sm">{{ $t('forum.voting_enable') }}</span>
+        </label>
       </UiField>
 
       <div class="flex items-center justify-end gap-2 mt-6">
@@ -31,9 +41,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import type { Forum } from '~/types/api'
+import type { Forum, TiptapDoc } from '~/types/api'
 import { ApiError } from '~/composables/useApi'
 import { useToast } from '~/composables/useToast'
+import { emptyDoc } from '~/utils/tiptap'
 
 definePageMeta({ layout: 'default', middleware: ['auth'], ssr: false })
 
@@ -44,7 +55,9 @@ const { t } = useI18n()
 
 const forumId = ref<number | string>(Number(route.query.forum_id) || '')
 const title = ref('')
-const content = ref('')
+const contentDoc = ref<TiptapDoc>(emptyDoc())
+const contentText = ref('')
+const votingEnabled = ref(false)
 const submitting = ref(false)
 const titleErr = ref('')
 const contentErr = ref('')
@@ -77,7 +90,7 @@ async function submit() {
     titleErr.value = t('errors.TITLE_INVALID')
     return
   }
-  if (!content.value.trim()) {
+  if (!contentText.value.trim()) {
     contentErr.value = t('errors.CONTENT_INVALID')
     return
   }
@@ -92,7 +105,9 @@ async function submit() {
       body: {
         forum_id: Number(forumId.value),
         title: trimmedTitle,
-        content: content.value,
+        content_json: contentDoc.value,
+        content_text: contentText.value,
+        voting_enabled: votingEnabled.value,
       },
     })
     toast.success(t('forum.post_created'))

@@ -5,13 +5,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
-  modules: [
-    '@nuxt/eslint',
-    '@nuxtjs/i18n',
-    'nuxt-lucide-icons',
-    '@pinia/nuxt',
-    'nuxt-echarts',
-  ],
+  modules: ['@nuxt/eslint', '@nuxtjs/i18n', 'nuxt-lucide-icons', '@pinia/nuxt', 'nuxt-echarts'],
 
   css: ['~/assets/css/main.css'],
 

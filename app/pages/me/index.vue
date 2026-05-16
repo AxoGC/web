@@ -44,6 +44,19 @@
             </div>
           </UiCard>
         </NuxtLink>
+        <NuxtLink to="/me/likes">
+          <UiCard hoverable padded>
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-md bg-brand-soft text-brand-400 grid place-items-center">
+                <LucideHeart :size="20" />
+              </div>
+              <div>
+                <p class="font-semibold">{{ $t('me.likes_title') }}</p>
+                <p class="text-xs text-text-tertiary">{{ $t('me.likes_subtitle') }}</p>
+              </div>
+            </div>
+          </UiCard>
+        </NuxtLink>
         <NuxtLink to="/me/settings">
           <UiCard hoverable padded>
             <div class="flex items-center gap-3">

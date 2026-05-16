@@ -27,7 +27,7 @@
           <NuxtLink :to="`/servers/${id}/players/${encodeURIComponent(item.name)}`" class="flex-1 font-medium hover:text-brand-400 truncate">
             {{ item.name }}
           </NuxtLink>
-          <span class="font-mono text-text-secondary">{{ item.score.toLocaleString() }}</span>
+          <span class="font-mono text-text-secondary">{{ formatScore(metric, item.score) }}</span>
         </li>
       </ul>
     </UiCard>
@@ -35,22 +35,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import type { LeaderboardItem } from '~/types/api'
+import { ref, computed, watch } from 'vue'
+import type { LeaderboardItem, ServerSummary } from '~/types/api'
 
 definePageMeta({ layout: 'detail' })
 const route = useRoute()
 const id = computed(() => String(route.params.id))
-const metric = ref('play_time')
 
-const metricOptions = [
-  { value: 'play_time', label: 'play_time' },
-  { value: 'mob_kills_total', label: 'mob_kills_total' },
-  { value: 'pvp_kills', label: 'pvp_kills' },
-  { value: 'deaths', label: 'deaths' },
-  { value: 'blocks_broken_total', label: 'blocks_broken_total' },
-  { value: 'distance_walked', label: 'distance_walked' },
-]
+// Need the server type to pick the right metric registry.
+const { data: server } = await useAsyncData(
+  () => `server.head.${id.value}`,
+  () => useApi<ServerSummary>(`/api/servers/${id.value}`),
+)
+const { options: metricOptions, formatScore } = useGameMetrics(() => server.value?.type)
+const metric = ref<string>('')
+
+watch(metricOptions, opts => {
+  if (!metric.value && opts.length) metric.value = opts[0]!.value
+}, { immediate: true })
 
 const { data, pending } = await useAsyncData(
   () => `srv.lb.${id.value}.${metric.value}`,

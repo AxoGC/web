@@ -14,7 +14,7 @@
           <th class="text-left px-4 py-2">ID</th>
           <th class="text-left px-4 py-2">{{ $t('admin.server_form_name') }}</th>
           <th class="text-left px-4 py-2">{{ $t('admin.server_form_type') }}</th>
-          <th class="text-left px-4 py-2">Host</th>
+          <th class="text-left px-4 py-2">{{ $t('admin.server_form_connect') }}</th>
           <th class="text-left px-4 py-2">{{ $t('admin.status') }}</th>
           <th class="text-right px-4 py-2">{{ $t('admin.actions') }}</th>
         </tr>
@@ -29,7 +29,7 @@
           <td class="px-4 py-2 text-text-tertiary">{{ s.id }}</td>
           <td class="px-4 py-2 font-medium">{{ s.name }}</td>
           <td class="px-4 py-2">{{ s.type }}</td>
-          <td class="px-4 py-2 font-mono text-xs">{{ s.host }}:{{ s.port }}</td>
+          <td class="px-4 py-2 font-mono text-xs">{{ connectHint(s) }}</td>
           <td class="px-4 py-2">
             <UiStatusDot :status="s.status">
               <span class="text-text-secondary">{{ s.online }}/{{ s.max }}</span>
@@ -45,24 +45,31 @@
     </UiTable>
 
     <UiModal :open="formOpen" :title="editing ? $t('actions.edit') : $t('actions.create')" @update:open="formOpen = $event">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <UiField :label="$t('admin.server_form_name')" required>
-          <UiInput v-model="form.name" />
-        </UiField>
-        <UiField :label="$t('admin.server_form_type')" required>
-          <UiInput v-model="form.type" placeholder="mc-java / mc-bedrock / dst …" />
-        </UiField>
-        <UiField :label="$t('admin.server_form_host')" required>
-          <UiInput v-model="form.host" />
-        </UiField>
-        <UiField :label="$t('admin.server_form_port')" required>
-          <UiInput v-model="form.port" type="number" />
-        </UiField>
-        <UiField :label="$t('admin.server_form_desc')">
-          <UiTextarea v-model="form.description" :rows="2" />
-        </UiField>
-        <UiField :label="$t('admin.server_form_meta')">
-          <UiTextarea v-model="form.metaText" :rows="2" placeholder='{"motd":"…"}' />
+      <div class="space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <UiField :label="$t('admin.server_form_name')" required>
+            <UiInput v-model="form.name" />
+          </UiField>
+          <UiField :label="$t('admin.server_form_type')" required>
+            <UiSelect v-model="form.type" :options="typeOptions" :disabled="!!editing" />
+          </UiField>
+          <UiField class="md:col-span-2" :label="$t('admin.server_form_desc')">
+            <UiTextarea v-model="form.description" :rows="2" />
+          </UiField>
+        </div>
+
+        <fieldset class="border border-border-subtle rounded-md p-3">
+          <legend class="text-sm font-medium px-1">{{ $t('admin.server_form_connect') }}</legend>
+          <ServerAdminConnectForm
+            :type="form.type"
+            :initial="connectInitial"
+            @update:connect="onConnectChange"
+          />
+        </fieldset>
+
+        <UiField :label="$t('admin.server_form_extra_meta')">
+          <UiTextarea v-model="form.extraMetaText" :rows="2" placeholder='{"motd":"…"}' />
+          <p class="text-xs text-text-tertiary mt-1">{{ $t('admin.server_form_extra_meta_hint') }}</p>
         </UiField>
       </div>
       <template #footer>
@@ -92,10 +99,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import type { ServerSummary } from '~/types/api'
+import { ref, reactive, computed, onMounted } from 'vue'
+import type { DstMeta, ServerSummary, ServerType } from '~/types/api'
 import { ApiError } from '~/composables/useApi'
 import { useToast } from '~/composables/useToast'
+import { extractEndpoints, formatEndpoint } from '~/composables/useServerConnect'
 
 definePageMeta({ layout: 'admin', middleware: ['admin'], ssr: false })
 const toast = useToast()
@@ -104,16 +112,33 @@ const { t } = useI18n()
 const servers = ref<ServerSummary[]>([])
 const pending = ref(false)
 
+const typeOptions = [
+  { value: 'mc-java', label: 'MC Java' },
+  { value: 'mc-bedrock', label: 'MC Bedrock' },
+  { value: 'dst', label: 'DST' },
+  { value: 'terraria', label: 'Terraria' },
+]
+
 const formOpen = ref(false)
 const editing = ref<ServerSummary | null>(null)
-const form = reactive({
+const form = reactive<{
+  name: string
+  type: ServerType
+  description: string
+  /** "Other" meta fields the admin wants to override as raw JSON (excluding connection keys). */
+  extraMetaText: string
+}>({
   name: '',
-  type: '',
-  host: '',
-  port: '25565',
+  type: 'mc-java',
   description: '',
-  metaText: '',
+  extraMetaText: '',
 })
+// Connection payload emitted by the subform (endpoints[] or DST fields).
+const connectPayload = ref<Record<string, unknown>>({})
+// Initial meta passed into the subform (only its connection keys are read).
+const connectInitial = ref<Record<string, unknown> | null>(null)
+function onConnectChange(p: Record<string, unknown>) { connectPayload.value = p }
+
 const saving = ref(false)
 
 const tokenOpen = ref(false)
@@ -131,44 +156,81 @@ async function load() {
   } finally { pending.value = false }
 }
 
+/** Human summary of how to connect, shown in the table. */
+function connectHint(s: ServerSummary): string {
+  if (s.type === 'dst') {
+    const n = (s.meta as DstMeta | undefined)?.find_by_name
+    return n ? `🔎 ${n}` : '—'
+  }
+  const eps = extractEndpoints(s)
+  if (!eps.length) return '—'
+  const first = formatEndpoint(s.type, eps[0]!)
+  return eps.length > 1 ? `${first} (+${eps.length - 1})` : first
+}
+
 function openCreate() {
   editing.value = null
   form.name = ''
   form.type = 'mc-java'
-  form.host = ''
-  form.port = '25565'
   form.description = ''
-  form.metaText = ''
+  form.extraMetaText = ''
+  connectInitial.value = null
+  connectPayload.value = {}
   formOpen.value = true
 }
+
+const CONNECT_KEYS = new Set(['endpoints', 'find_by_name', 'password_hint'])
 
 function openEdit(s: ServerSummary) {
   editing.value = s
   form.name = s.name
   form.type = s.type
-  form.host = s.host
-  form.port = String(s.port)
   form.description = (s as ServerSummary & { description?: string }).description || ''
-  form.metaText = s.meta ? JSON.stringify(s.meta, null, 2) : ''
+  const fullMeta = (s.meta || {}) as Record<string, unknown>
+  // Split the persisted meta into "connection" vs "extra" so the connect subform
+  // owns its fields and the textarea only carries the rest.
+  const extra: Record<string, unknown> = {}
+  const connect: Record<string, unknown> = {}
+  for (const [k, v] of Object.entries(fullMeta)) {
+    (CONNECT_KEYS.has(k) ? connect : extra)[k] = v
+  }
+  connectInitial.value = connect
+  form.extraMetaText = Object.keys(extra).length ? JSON.stringify(extra, null, 2) : ''
   formOpen.value = true
 }
 
+const _typeBoundary = computed(() => form.type)
+void _typeBoundary // keep reactive for the subform re-hydration via prop change
+
 async function submitForm() {
-  let meta: unknown = undefined
-  if (form.metaText.trim()) {
-    try { meta = JSON.parse(form.metaText) } catch {
-      toast.error('Invalid JSON in meta')
+  let extra: Record<string, unknown> = {}
+  if (form.extraMetaText.trim()) {
+    try {
+      const parsed = JSON.parse(form.extraMetaText)
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        extra = parsed as Record<string, unknown>
+      } else {
+        toast.error(t('admin.server_form_extra_meta_invalid'))
+        return
+      }
+    } catch {
+      toast.error(t('admin.server_form_extra_meta_invalid'))
       return
     }
   }
+  // Guardrail: connection-owned keys belong to the subform, not the raw textarea.
+  for (const k of Object.keys(extra)) {
+    if (CONNECT_KEYS.has(k)) delete extra[k]
+  }
+  const meta = { ...extra, ...connectPayload.value }
+
   const body: Record<string, unknown> = {
     name: form.name,
-    type: form.type,
-    host: form.host,
-    port: Number(form.port),
     description: form.description,
     meta,
   }
+  if (!editing.value) body.type = form.type
+
   saving.value = true
   try {
     if (editing.value) {

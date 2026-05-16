@@ -24,6 +24,16 @@ export function formatDate(unixSeconds: number) {
   return `${yyyy}-${mm}-${dd} ${HH}:${MM}`
 }
 
+/** Format seconds as "{h}h {m}m" / "{m}m" / "<1m". Negative or zero returns "<1m". */
+export function formatDuration(seconds: number): string {
+  if (!seconds || seconds < 60) return '<1m'
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  if (h === 0) return `${m}m`
+  if (m === 0) return `${h}h`
+  return `${h}h ${m}m`
+}
+
 export function formatNumber(n: number) {
   if (n < 1000) return String(n)
   if (n < 10_000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k'

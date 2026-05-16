@@ -11,6 +11,7 @@
           <h1 class="text-2xl md:text-3xl font-bold flex-1">{{ post.title }}</h1>
           <UiTag v-if="post.pinned" variant="warning">{{ $t('forum.pinned') }}</UiTag>
           <UiTag v-if="post.locked" variant="default">{{ $t('forum.locked') }}</UiTag>
+          <UiTag v-if="post.voting_enabled" variant="info">{{ $t('forum.voting_tag') }}</UiTag>
         </div>
         <div class="flex flex-wrap items-center gap-3 text-sm text-text-tertiary">
           <NuxtLink :to="`/users/${post.author.id}`" class="flex items-center gap-2 hover:text-brand-400">
@@ -27,7 +28,39 @@
         </div>
       </header>
 
-      <article class="markdown-body bg-bg-elevated border border-border-subtle rounded-lg p-6" v-html="renderedHtml" />
+      <article class="bg-bg-elevated border border-border-subtle rounded-lg p-6">
+        <RichContent :doc="post.content_json" />
+      </article>
+
+      <section v-if="post.voting_enabled && post.voting_summary" class="mt-4 bg-bg-elevated border border-border-subtle rounded-lg p-4">
+        <div class="text-sm font-semibold mb-3">{{ $t('forum.voting_summary') }}</div>
+        <div class="grid grid-cols-3 gap-3">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-success">{{ post.voting_summary.affirmative }}</div>
+            <div class="text-xs text-text-tertiary mt-1">{{ $t('forum.voting_affirmative') }}</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-text-secondary">{{ post.voting_summary.neutral }}</div>
+            <div class="text-xs text-text-tertiary mt-1">{{ $t('forum.voting_neutral') }}</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-danger">{{ post.voting_summary.negative }}</div>
+            <div class="text-xs text-text-tertiary mt-1">{{ $t('forum.voting_negative') }}</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="mt-4 flex items-center gap-3">
+        <UiButton
+          :variant="liked ? 'primary' : 'outline'"
+          :loading="likeBusy"
+          size="sm"
+          @click="toggleLike"
+        >
+          <template #leading><LucideHeart :size="14" :fill="liked ? 'currentColor' : 'none'" /></template>
+          {{ likeCount }}
+        </UiButton>
+      </div>
 
       <section v-if="post.attachments?.length" class="mt-4">
         <h3 class="text-sm font-semibold text-text-secondary mb-2">Attachments</h3>
@@ -52,6 +85,13 @@
 
         <div v-if="auth.isLoggedIn && !post.locked" class="mb-6">
           <UiTextarea v-model="commentDraft" :rows="4" :placeholder="$t('forum.reply_placeholder')" />
+          <div v-if="post.voting_enabled" class="mt-2 flex items-center gap-3 text-sm">
+            <span class="text-text-tertiary">{{ $t('forum.attitude_prompt') }}</span>
+            <label v-for="opt in attitudeOptions" :key="opt.value" class="inline-flex items-center gap-1 cursor-pointer">
+              <input v-model="commentAttitude" type="radio" :value="opt.value" class="accent-brand-500">
+              <span :class="opt.color">{{ opt.label }}</span>
+            </label>
+          </div>
           <div class="mt-2 flex justify-end">
             <UiButton :loading="commentSubmitting" :disabled="!commentDraft.trim()" @click="submitComment">
               {{ $t('forum.reply') }}
@@ -77,6 +117,10 @@
               </NuxtLink>
               <span class="text-xs text-text-tertiary">·</span>
               <span class="text-xs text-text-tertiary">{{ formatDate(c.created_at) }}</span>
+              <UiTag v-if="post.voting_enabled && c.attitude !== 2" size="sm"
+                :variant="c.attitude === 1 ? 'success' : 'danger'">
+                {{ c.attitude === 1 ? $t('forum.voting_affirmative') : $t('forum.voting_negative') }}
+              </UiTag>
             </div>
             <div class="text-text-primary text-sm whitespace-pre-wrap break-words">{{ c.content }}</div>
           </li>
@@ -91,13 +135,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { useToast } from '~/composables/useToast'
 import { ApiError } from '~/composables/useApi'
 import { formatDate } from '~/utils/format'
-import { renderMarkdown } from '~/utils/markdown'
-import type { PostDetail, CommentItem } from '~/types/api'
+import type { PostDetail, CommentItem, CommentAttitude } from '~/types/api'
 
 definePageMeta({ layout: 'detail' })
 
@@ -107,36 +150,46 @@ const toast = useToast()
 const { t } = useI18n()
 
 const id = computed(() => String(route.params.id))
-const renderedHtml = ref('')
 const commentDraft = ref('')
+const commentAttitude = ref<CommentAttitude>(2)
 const commentSubmitting = ref(false)
+const likeBusy = ref(false)
+const liked = ref(false)
+const likeCount = ref(0)
 
 const { data: post, error } = await useAsyncData(
   () => `post.${id.value}`,
   () => useApi<PostDetail>(`/api/posts/${id.value}`),
 )
 
-useHead(() => ({ title: post.value?.title || 'Post' }))
-
-watch(post, async (p) => {
-  if (p?.content) renderedHtml.value = await renderMarkdown(p.content)
-  else renderedHtml.value = ''
+watch(post, (p) => {
+  if (!p) return
+  liked.value = p.liked
+  likeCount.value = p.like_count
 }, { immediate: true })
+
+useHead(() => ({ title: post.value?.title || 'Post' }))
 
 const { data: comments, pending: pendingComments, refresh: refreshComments } = await useAsyncData(
   () => `post.comments.${id.value}`,
   () => useApi<{ items: CommentItem[], total: number }>(`/api/posts/${id.value}/comments?page=1&size=50`),
 )
 
+const attitudeOptions = computed(() => [
+  { value: 1 as const, label: t('forum.voting_affirmative'), color: 'text-success' },
+  { value: 2 as const, label: t('forum.voting_neutral'), color: 'text-text-secondary' },
+  { value: 3 as const, label: t('forum.voting_negative'), color: 'text-danger' },
+])
+
 async function submitComment() {
   if (!commentDraft.value.trim()) return
   commentSubmitting.value = true
   try {
-    await useApi(`/api/posts/${id.value}/comments`, {
-      method: 'POST',
-      body: { content: commentDraft.value },
-    })
+    const body: Record<string, unknown> = { content: commentDraft.value }
+    if (post.value?.voting_enabled) body.attitude = commentAttitude.value
+    await useApi(`/api/posts/${id.value}/comments`, { method: 'POST', body })
     commentDraft.value = ''
+    commentAttitude.value = 2
     toast.success(t('forum.comment_created'))
     await refreshComments()
   } catch (e) {
@@ -144,6 +197,27 @@ async function submitComment() {
     else toast.error(t('errors.UNKNOWN'))
   } finally {
     commentSubmitting.value = false
+  }
+}
+
+async function toggleLike() {
+  if (!auth.isLoggedIn) {
+    toast.error(t('common.not_logged_in'))
+    return
+  }
+  likeBusy.value = true
+  try {
+    const r = await useApi<{ liked: boolean, like_count: number }>(
+      `/api/posts/${id.value}/like`,
+      { method: liked.value ? 'DELETE' : 'POST' },
+    )
+    liked.value = r.liked
+    likeCount.value = r.like_count
+  } catch (e) {
+    if (e instanceof ApiError) toast.fromError(e)
+    else toast.error(t('errors.UNKNOWN'))
+  } finally {
+    likeBusy.value = false
   }
 }
 

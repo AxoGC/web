@@ -1,6 +1,6 @@
 {
   "brand": {
-    "name": "游戏服务平台",
+    "name": "Axolotland Gaming Club",
     "tagline": "联通你的服务器与社区"
   },
   "nav": {
@@ -78,7 +78,7 @@
   },
   "home": {
     "title": "首页",
-    "hero_title": "在一个地方，管理你所有的游戏服务器",
+    "hero_title": "Welcome to Axolotland",
     "hero_subtitle": "服务器状态、论坛社区、签到捐赠，一站式整合。",
     "announcements": "公告",
     "hot_posts": "热门讨论",
@@ -114,7 +114,7 @@
     "sort_hot": "热门",
     "new_post": "发表新帖",
     "title_placeholder": "帖子标题（2-200 字）",
-    "content_placeholder": "正文支持 Markdown",
+    "content_placeholder": "正文",
     "publish": "发布",
     "comments": "评论",
     "no_comments": "暂无评论，来抢沙发吧",
@@ -127,7 +127,16 @@
     "view_count": "{n} 浏览",
     "comment_count": "{n} 评论",
     "like_count": "{n} 赞",
-    "tags": "标签"
+    "tags": "标签",
+    "voting_label": "投票贴",
+    "voting_help": "勾选后，评论需要表态（默认中立）；发布后不可更改。",
+    "voting_enable": "启用投票",
+    "voting_tag": "投票贴",
+    "voting_summary": "投票汇总",
+    "voting_affirmative": "赞同",
+    "voting_neutral": "中立",
+    "voting_negative": "反对",
+    "attitude_prompt": "态度："
   },
   "server": {
     "list_title": "服务器列表",
@@ -140,8 +149,23 @@
     "stats_7d": "7 天",
     "stats_30d": "30 天",
     "online_trend": "在线人数趋势",
+    "online_players": "当前在线",
+    "no_online_players": "当前没有玩家在线",
     "leaderboard": "排行榜",
     "metric": "指标",
+    "connect_missing": "尚未配置连接信息",
+    "bedrock_address": "地址",
+    "bedrock_port": "端口",
+    "dst_search_name": "游戏内搜索",
+    "dst_search_name_short": "搜索：{name}",
+    "dst_password_hint": "密码：",
+    "dst_world_info": "世界信息",
+    "dst_game_mode": "游戏模式",
+    "dst_season": "当前季节",
+    "dst_mods": "模组",
+    "terraria_world_info": "世界信息",
+    "terraria_world": "世界",
+    "terraria_difficulty": "难度",
     "bind_title": "绑定游戏号",
     "bind_get_code": "生成验证码",
     "bind_instruction": "5 分钟内进入服务器输入 /bind {code}",
@@ -187,12 +211,32 @@
     "avatar": "头像",
     "bio": "签名",
     "language": "语言偏好",
-    "appearance": "外观偏好"
+    "appearance": "外观偏好",
+    "likes_title": "我的收藏",
+    "likes_subtitle": "所有点过赞的帖子"
+  },
+  "profile": {
+    "joined_at": "加入于 {date}",
+    "last_login": "最后上线",
+    "last_login_never": "从未登录",
+    "checkin_streak": "连续签到",
+    "checkin_streak_value": "{n} 天",
+    "checkin_total": "累计签到",
+    "checkin_total_value": "{n} 次",
+    "bindings_title": "绑定的游戏账号",
+    "bindings_empty": "该用户尚未绑定任何游戏号",
+    "bindings_playtime": "在线时长 {value}",
+    "bindings_bound_at": "绑定于 {date}",
+    "forum_title": "论坛活跃度",
+    "forum_posts": "发帖",
+    "forum_comments": "回复",
+    "forum_likes": "收到点赞"
   },
   "admin": {
     "dashboard": "数据概览",
     "users": "用户管理",
     "servers": "服务器管理",
+    "forums": "板块管理",
     "donations": "捐赠录入",
     "logs": "操作日志",
     "audit": "Bedrock 行为日志",
@@ -209,11 +253,39 @@
     "token_reset": "Token 已重置（仅显示一次）",
     "server_form_name": "名称",
     "server_form_type": "类型",
-    "server_form_host": "地址",
-    "server_form_port": "端口",
     "server_form_desc": "简介",
     "server_form_meta": "Meta（JSON）",
-    "mobile_unsupported": "管理后台请在桌面端使用"
+    "server_form_connect": "玩家连接方式",
+    "server_form_extra_meta": "其他 Meta（JSON）",
+    "server_form_extra_meta_hint": "连接信息之外的自由字段（motd、mods 等）。",
+    "server_form_extra_meta_invalid": "其他 Meta 必须是 JSON 对象",
+    "endpoint_label": "标签",
+    "endpoint_label_ph": "如：国内高防",
+    "endpoint_host": "地址 / 域名",
+    "endpoint_port": "端口",
+    "endpoint_add": "添加入口",
+    "endpoint_help": "端口留空使用游戏默认值（{port}）。",
+    "dst_find_by_name": "游戏内服务器名",
+    "dst_password_hint": "密码提示",
+    "dst_help": "DST 玩家通过游戏内服务器浏览器按名字搜索加入，不存在 ip:port。",
+    "mobile_unsupported": "管理后台请在桌面端使用",
+    "forum_form_name": "板块名称",
+    "forum_form_slug": "Slug (URL)",
+    "forum_form_slug_hint": "仅支持小写字母、数字和短横线；创建后不可修改。",
+    "forum_form_description": "简介",
+    "forum_form_icon": "图标 URL",
+    "forum_form_banner": "横幅 URL",
+    "forum_form_sort": "排序",
+    "forum_post_count": "帖子数",
+    "forum_delete_blocked": "板块下仍有帖子，无法删除"
+  },
+  "chat": {
+    "title": "服务器聊天",
+    "placeholder": "和服务器里的玩家聊一聊…",
+    "empty": "暂无聊天，等你来开口。",
+    "connected": "已连接",
+    "disconnected": "重连中…",
+    "login_required": "登录后即可参与聊天。"
   },
   "pk": {
     "title": "玩家 PK",
@@ -234,9 +306,27 @@
     "servers": "还没有上架的服务器",
     "donations": "暂无捐赠记录",
     "bindings": "你还没有绑定任何游戏号",
-    "search": "没有结果"
+    "search": "没有结果",
+    "likes": "你还没有点过赞"
   },
   "footer": {
-    "copyright": "© {year} 游戏服务平台"
+    "copyright": "© {year} Axolotland Gaming Club"
+  },
+  "metric": {
+    "play_time": "在线时长",
+    "mob_kills_total": "击杀生物",
+    "pvp_kills": "玩家击杀",
+    "deaths": "死亡次数",
+    "damage_dealt": "造成伤害",
+    "damage_taken": "受到伤害",
+    "distance_walked": "步行距离",
+    "distance_sprinted": "疾跑距离",
+    "distance_flown": "飞行距离",
+    "blocks_broken_total": "破坏方块",
+    "play_time_fmt": "{h}小时{m}分钟",
+    "days_survived": "生存天数",
+    "kills_total": "击杀总数",
+    "sanity_lost": "理智损失",
+    "bosses_defeated": "击败 Boss"
   }
 }

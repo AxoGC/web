@@ -17,7 +17,7 @@
             </UiStatusDot>
             <span v-if="server.status === 'online'">{{ server.online }}/{{ server.max }}</span>
           </div>
-          <p class="mt-2 font-mono text-xs text-text-tertiary truncate">{{ server.host }}:{{ server.port }}</p>
+          <p v-if="connectHint" class="mt-2 font-mono text-xs text-text-tertiary truncate">{{ connectHint }}</p>
         </div>
       </div>
     </UiCard>
@@ -26,7 +26,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { ServerSummary } from '~/types/api'
+import type { DstMeta, ServerSummary } from '~/types/api'
+import { extractEndpoints, formatEndpoint } from '~/composables/useServerConnect'
 
 const props = defineProps<{ server: ServerSummary }>()
 const { t } = useI18n()
@@ -37,5 +38,15 @@ const statusLabel = computed(() => {
     offline: t('common.offline'),
     maintenance: t('common.maintenance'),
   }[props.server.status] || props.server.status
+})
+
+// One-line connect hint for the list view. DST has no host:port so show its search name.
+const connectHint = computed(() => {
+  if (props.server.type === 'dst') {
+    const name = (props.server.meta as DstMeta | undefined)?.find_by_name
+    return name ? t('server.dst_search_name_short', { name }) : ''
+  }
+  const eps = extractEndpoints(props.server)
+  return eps.length ? formatEndpoint(props.server.type, eps[0]!) : ''
 })
 </script>

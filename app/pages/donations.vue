@@ -19,10 +19,10 @@
           </span>
           <UiAvatar :name="d.display_name" size="sm" />
           <div class="flex-1 min-w-0">
-            <p class="font-medium truncate">
-              {{ d.display_name || $t('donation.anonymous') }}
+            <p class="truncate">
+              <span class="font-medium">{{ d.display_name || $t('donation.anonymous') }}</span>
+              <span v-if="d.message" class="ml-2 text-xs text-text-tertiary">{{ d.message }}</span>
             </p>
-            <p v-if="d.message" class="text-xs text-text-tertiary truncate">{{ d.message }}</p>
           </div>
           <span class="font-mono font-semibold text-brand-400">¥{{ d.amount.toFixed(2) }}</span>
         </li>

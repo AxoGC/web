@@ -17,7 +17,7 @@
           </div>
           <div class="flex-1 min-w-0">
             <h3 class="font-semibold">{{ s.name }}</h3>
-            <p class="text-xs text-text-tertiary">{{ s.host }}:{{ s.port }}</p>
+            <p v-if="connectHint(s)" class="text-xs text-text-tertiary">{{ connectHint(s) }}</p>
             <p v-if="statusMap[s.id]?.bound" class="mt-2 text-sm text-success">
               {{ $t('server.bind_status_bound', { name: statusMap[s.id]?.player?.name }) }}
             </p>
@@ -66,9 +66,10 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
-import type { ServerSummary, BindStatus, BindCode } from '~/types/api'
+import type { DstMeta, ServerSummary, BindStatus, BindCode } from '~/types/api'
 import { ApiError } from '~/composables/useApi'
 import { useToast } from '~/composables/useToast'
+import { extractEndpoints, formatEndpoint } from '~/composables/useServerConnect'
 
 definePageMeta({ layout: 'default', middleware: ['auth'], ssr: false })
 const toast = useToast()
@@ -129,6 +130,15 @@ async function requestCode(sid: number) {
   } finally {
     actionId.value = null
   }
+}
+
+function connectHint(s: ServerSummary): string {
+  if (s.type === 'dst') {
+    const name = (s.meta as DstMeta | undefined)?.find_by_name
+    return name ? t('server.dst_search_name_short', { name }) : ''
+  }
+  const eps = extractEndpoints(s)
+  return eps.length ? formatEndpoint(s.type, eps[0]!) : ''
 }
 
 function askUnbind(sid: number) {
