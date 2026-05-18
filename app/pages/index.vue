@@ -1,7 +1,11 @@
 <template>
   <div class="space-y-10">
-    <!-- Hero -->
-    <section class="rounded-xl bg-gradient-to-br from-brand-soft/40 via-bg-elevated to-bg-elevated border border-border-subtle p-8 md:p-12">
+    <!-- Hero / Carousel -->
+    <HomeCarousel v-if="slides.length > 0" :slides="slides" />
+    <section
+      v-else
+      class="rounded-xl bg-gradient-to-br from-brand-soft/40 via-bg-elevated to-bg-elevated border border-border-subtle p-8 md:p-12"
+    >
       <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-text-primary">
         {{ $t('home.hero_title') }}
       </h1>
@@ -41,6 +45,9 @@
       </div>
     </section>
 
+    <!-- QQ communities -->
+    <HomeQqGroups />
+
     <!-- Hot threads -->
     <section>
       <header class="flex items-end justify-between mb-4">
@@ -73,12 +80,17 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { ServerSummary } from '~/types/api'
+import type { Carousel, ServerSummary } from '~/types/api'
 import type { Forum, PostListItem } from '~/types/api'
 
 definePageMeta({ layout: 'default' })
 
 useHead({ title: 'Home' })
+
+const { data: carouselResp } = await useAsyncData('home.carousels', () =>
+  useApi<{ items: Carousel[] }>('/api/carousels').catch(() => ({ items: [] as Carousel[] })),
+)
+const slides = computed<Carousel[]>(() => carouselResp.value?.items ?? [])
 
 const { data: servers, pending: serversPending } = await useAsyncData('home.servers', () =>
   useApi<{ items: ServerSummary[] }>('/api/servers'),

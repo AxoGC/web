@@ -28,7 +28,7 @@
         <tr v-for="s in servers" :key="s.id" class="border-t border-border-subtle">
           <td class="px-4 py-2 text-text-tertiary">{{ s.id }}</td>
           <td class="px-4 py-2 font-medium">{{ s.name }}</td>
-          <td class="px-4 py-2">{{ s.type }}</td>
+          <td class="px-4 py-2">{{ typeLabel(s.type) }}</td>
           <td class="px-4 py-2 font-mono text-xs">{{ connectHint(s) }}</td>
           <td class="px-4 py-2">
             <UiStatusDot :status="s.status">
@@ -37,7 +37,15 @@
           </td>
           <td class="px-4 py-2 text-right">
             <UiButton size="sm" variant="ghost" @click="openEdit(s)">{{ $t('actions.edit') }}</UiButton>
-            <UiButton size="sm" variant="ghost" @click="resetToken(s)">Token</UiButton>
+            <UiButton
+              size="sm"
+              variant="ghost"
+              :disabled="!supportsConsole(s.type)"
+              @click="openConsole(s)"
+            >
+              {{ $t('admin.console') }}
+            </UiButton>
+            <UiButton size="sm" variant="ghost" @click="askResetToken(s)">Token</UiButton>
             <UiButton size="sm" variant="ghost" class="text-danger" @click="askDelete(s)">{{ $t('actions.delete') }}</UiButton>
           </td>
         </tr>
@@ -54,7 +62,7 @@
             <UiSelect v-model="form.type" :options="typeOptions" :disabled="!!editing" />
           </UiField>
           <UiField class="md:col-span-2" :label="$t('admin.server_form_desc')">
-            <UiTextarea v-model="form.description" :rows="2" />
+            <RichEditor v-model="form.description" />
           </UiField>
         </div>
 
@@ -67,10 +75,14 @@
           />
         </fieldset>
 
-        <UiField :label="$t('admin.server_form_extra_meta')">
-          <UiTextarea v-model="form.extraMetaText" :rows="2" placeholder='{"motd":"…"}' />
-          <p class="text-xs text-text-tertiary mt-1">{{ $t('admin.server_form_extra_meta_hint') }}</p>
-        </UiField>
+        <fieldset class="border border-border-subtle rounded-md p-3">
+          <legend class="text-sm font-medium px-1">{{ $t('admin.server_form_extra_meta') }}</legend>
+          <ServerAdminMetaPanel
+            :type="form.type"
+            :model-value="form.metaExtras"
+            @update:model-value="form.metaExtras = $event"
+          />
+        </fieldset>
       </div>
       <template #footer>
         <UiButton variant="ghost" @click="formOpen = false">{{ $t('actions.cancel') }}</UiButton>
@@ -95,43 +107,66 @@
       @update:open="deleteOpen = $event"
       @confirm="doDelete"
     />
+
+    <UiConfirmModal
+      :open="tokenConfirmOpen"
+      :title="$t('admin.token_reset_title')"
+      :message="$t('admin.token_reset_confirm', { name: tokenTarget?.name })"
+      variant="danger"
+      :loading="tokenResetting"
+      @update:open="tokenConfirmOpen = $event"
+      @confirm="doResetToken"
+    />
+
+    <ServerAdminConsoleModal
+      :open="consoleOpen"
+      :server="consoleTarget"
+      @update:open="consoleOpen = $event"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
-import type { DstMeta, ServerSummary, ServerType } from '~/types/api'
+import type { AdminServerItem, DstMeta, ServerType } from '~/types/api'
 import { ApiError } from '~/composables/useApi'
 import { useToast } from '~/composables/useToast'
 import { extractEndpoints, formatEndpoint } from '~/composables/useServerConnect'
+import { emptyDoc, isEmptyDoc } from '~/utils/tiptap'
 
 definePageMeta({ layout: 'admin', middleware: ['admin'], ssr: false })
 const toast = useToast()
 const { t } = useI18n()
+const typeLabel = useServerTypeLabel()
 
-const servers = ref<ServerSummary[]>([])
+const servers = ref<AdminServerItem[]>([])
 const pending = ref(false)
 
-const typeOptions = [
-  { value: 'mc-java', label: 'MC Java' },
-  { value: 'mc-bedrock', label: 'MC Bedrock' },
-  { value: 'dst', label: 'DST' },
-  { value: 'terraria', label: 'Terraria' },
-]
+const typeOptions = computed(() => [
+  { value: 'mc-java', label: typeLabel('mc-java') },
+  { value: 'mc-bedrock', label: typeLabel('mc-bedrock') },
+  { value: 'dst', label: typeLabel('dst') },
+  { value: 'terraria', label: typeLabel('terraria') },
+])
 
 const formOpen = ref(false)
-const editing = ref<ServerSummary | null>(null)
+const editing = ref<AdminServerItem | null>(null)
 const form = reactive<{
   name: string
   type: ServerType
-  description: string
-  /** "Other" meta fields the admin wants to override as raw JSON (excluding connection keys). */
-  extraMetaText: string
+  // TipTap doc. Stored as-is and submitted as JSON; null when empty.
+  description: Record<string, unknown>
+  /**
+   * Non-connection meta keys. The ServerAdminMetaPanel owns editing via
+   * either structured per-type fields or a raw JSON view. On submit it's
+   * merged with `connectPayload` to form the persisted Meta.
+   */
+  metaExtras: Record<string, unknown>
 }>({
   name: '',
   type: 'mc-java',
-  description: '',
-  extraMetaText: '',
+  description: emptyDoc(),
+  metaExtras: {},
 })
 // Connection payload emitted by the subform (endpoints[] or DST fields).
 const connectPayload = ref<Record<string, unknown>>({})
@@ -143,21 +178,38 @@ const saving = ref(false)
 
 const tokenOpen = ref(false)
 const tokenValue = ref('')
+const tokenConfirmOpen = ref(false)
+const tokenTarget = ref<AdminServerItem | null>(null)
+const tokenResetting = ref(false)
 
 const deleteOpen = ref(false)
-const deleteTarget = ref<ServerSummary | null>(null)
+const deleteTarget = ref<AdminServerItem | null>(null)
 const deleting = ref(false)
+
+const consoleOpen = ref(false)
+const consoleTarget = ref<AdminServerItem | null>(null)
+
+const CONSOLE_SUPPORTED: ReadonlySet<string> = new Set(['mc-java', 'mc-bedrock'])
+function supportsConsole(type: string) { return CONSOLE_SUPPORTED.has(type) }
+
+function openConsole(s: AdminServerItem) {
+  if (!supportsConsole(s.type)) return
+  consoleTarget.value = s
+  consoleOpen.value = true
+}
 
 async function load() {
   pending.value = true
   try {
-    const r = await useApi<{ items: ServerSummary[] }>('/api/servers')
+    // Admin endpoint preserves description + the `_internal` envelope so the
+    // edit form can roundtrip credentials.
+    const r = await useApi<{ items: AdminServerItem[] }>('/api/admin/servers')
     servers.value = r.items
   } finally { pending.value = false }
 }
 
 /** Human summary of how to connect, shown in the table. */
-function connectHint(s: ServerSummary): string {
+function connectHint(s: AdminServerItem): string {
   if (s.type === 'dst') {
     const n = (s.meta as DstMeta | undefined)?.find_by_name
     return n ? `🔎 ${n}` : '—'
@@ -172,8 +224,8 @@ function openCreate() {
   editing.value = null
   form.name = ''
   form.type = 'mc-java'
-  form.description = ''
-  form.extraMetaText = ''
+  form.description = emptyDoc()
+  form.metaExtras = {}
   connectInitial.value = null
   connectPayload.value = {}
   formOpen.value = true
@@ -181,21 +233,21 @@ function openCreate() {
 
 const CONNECT_KEYS = new Set(['endpoints', 'find_by_name', 'password_hint'])
 
-function openEdit(s: ServerSummary) {
+function openEdit(s: AdminServerItem) {
   editing.value = s
   form.name = s.name
   form.type = s.type
-  form.description = (s as ServerSummary & { description?: string }).description || ''
+  form.description = (s.description && !isEmptyDoc(s.description)) ? s.description : emptyDoc()
   const fullMeta = (s.meta || {}) as Record<string, unknown>
   // Split the persisted meta into "connection" vs "extra" so the connect subform
-  // owns its fields and the textarea only carries the rest.
+  // owns its fields and the meta-panel only carries the rest.
   const extra: Record<string, unknown> = {}
   const connect: Record<string, unknown> = {}
   for (const [k, v] of Object.entries(fullMeta)) {
     (CONNECT_KEYS.has(k) ? connect : extra)[k] = v
   }
   connectInitial.value = connect
-  form.extraMetaText = Object.keys(extra).length ? JSON.stringify(extra, null, 2) : ''
+  form.metaExtras = extra
   formOpen.value = true
 }
 
@@ -203,22 +255,9 @@ const _typeBoundary = computed(() => form.type)
 void _typeBoundary // keep reactive for the subform re-hydration via prop change
 
 async function submitForm() {
-  let extra: Record<string, unknown> = {}
-  if (form.extraMetaText.trim()) {
-    try {
-      const parsed = JSON.parse(form.extraMetaText)
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-        extra = parsed as Record<string, unknown>
-      } else {
-        toast.error(t('admin.server_form_extra_meta_invalid'))
-        return
-      }
-    } catch {
-      toast.error(t('admin.server_form_extra_meta_invalid'))
-      return
-    }
-  }
-  // Guardrail: connection-owned keys belong to the subform, not the raw textarea.
+  // The meta panel guarantees a plain object; we just defensively strip any
+  // connection-owned keys an admin may have written via the JSON escape hatch.
+  const extra: Record<string, unknown> = { ...(form.metaExtras || {}) }
   for (const k of Object.keys(extra)) {
     if (CONNECT_KEYS.has(k)) delete extra[k]
   }
@@ -226,7 +265,7 @@ async function submitForm() {
 
   const body: Record<string, unknown> = {
     name: form.name,
-    description: form.description,
+    description: isEmptyDoc(form.description) ? null : form.description,
     meta,
   }
   if (!editing.value) body.type = form.type
@@ -250,17 +289,33 @@ async function submitForm() {
   }
 }
 
-async function resetToken(s: ServerSummary) {
+function askResetToken(s: AdminServerItem) {
+  tokenTarget.value = s
+  tokenConfirmOpen.value = true
+}
+
+// Rotating the token immediately disconnects the running plugin — admin must
+// edit its config + restart with the new value. Gating behind an explicit
+// confirm prevents an accidental click on the row's Token button from
+// silently breaking the server↔platform bridge.
+async function doResetToken() {
+  if (!tokenTarget.value) return
+  const s = tokenTarget.value
+  tokenResetting.value = true
   try {
     const r = await useApi<{ token: string }>(`/api/admin/servers/${s.id}/token/reset`, { method: 'POST' })
     tokenValue.value = r.token
+    tokenConfirmOpen.value = false
     tokenOpen.value = true
   } catch (e) {
     if (e instanceof ApiError) toast.fromError(e)
+  } finally {
+    tokenResetting.value = false
+    tokenTarget.value = null
   }
 }
 
-function askDelete(s: ServerSummary) {
+function askDelete(s: AdminServerItem) {
   deleteTarget.value = s
   deleteOpen.value = true
 }

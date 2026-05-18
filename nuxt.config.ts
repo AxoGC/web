@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
-  modules: ['@nuxt/eslint', '@nuxtjs/i18n', 'nuxt-lucide-icons', '@pinia/nuxt', 'nuxt-echarts'],
+  modules: ['@nuxt/eslint', '@nuxtjs/i18n', 'nuxt-lucide-icons', '@pinia/nuxt', 'nuxt-echarts', '@vite-pwa/nuxt'],
 
   css: ['~/assets/css/main.css'],
 
@@ -80,6 +80,68 @@ export default defineNuxtConfig({
       cookieKey: 'locale-preference',
       redirectOn: 'root',
       fallbackLocale: 'zh-CN',
+    },
+  },
+
+  pwa: {
+    registerType: 'autoUpdate',
+    manifest: {
+      name: 'Axolotland Gaming Club',
+      short_name: 'Axolotland',
+      description: 'Live server status, forum, check-ins and donations — unified.',
+      lang: 'zh-CN',
+      theme_color: '#28abce',
+      background_color: '#0f1115',
+      display: 'standalone',
+      start_url: '/',
+      scope: '/',
+      icons: [
+        { src: '/pwa-192.png',          sizes: '192x192', type: 'image/png', purpose: 'any' },
+        { src: '/pwa-512.png',          sizes: '512x512', type: 'image/png', purpose: 'any' },
+        { src: '/pwa-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+      ],
+    },
+    workbox: {
+      navigateFallback: '/',
+      // Precaching is auto-filled with hashed bundle files; we add explicit
+      // runtime caching for navigations and externals below.
+      globPatterns: ['**/*.{js,css,html,ico,svg,woff2}'],
+      runtimeCaching: [
+        {
+          // SSR HTML: try network first so post titles / forum lists stay fresh,
+          // but fall back to last good cache when offline.
+          urlPattern: ({ request }) => request.mode === 'navigate',
+          handler: 'NetworkFirst',
+          options: {
+            cacheName: 'pages',
+            networkTimeoutSeconds: 3,
+            expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 },
+          },
+        },
+        {
+          // Media (avatars, carousel, etc) — core serves these with immutable
+          // headers + ?v= cache-buster, so CacheFirst is safe.
+          urlPattern: ({ url }) => url.pathname.startsWith('/media/'),
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'media',
+            expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 90 },
+          },
+        },
+        {
+          // Backend API: never cache. Stale auth / list data would be worse
+          // than a brief offline error.
+          urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
+          handler: 'NetworkOnly',
+        },
+      ],
+    },
+    client: {
+      installPrompt: false,
+    },
+    devOptions: {
+      enabled: false, // SW off in dev to avoid stale-content surprises
+      type: 'module',
     },
   },
 

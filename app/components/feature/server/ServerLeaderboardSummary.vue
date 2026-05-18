@@ -35,10 +35,10 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { MetricChampion, ServerType } from '~/types/api'
+import type { MetricChampion } from '~/types/api'
 
-const props = defineProps<{ serverId: string | number, type: ServerType }>()
-const metrics = useGameMetrics(props.type)
+const props = defineProps<{ serverId: string | number }>()
+const metrics = useGameMetrics()
 
 const { data } = await useAsyncData(
   () => `server.champions.${props.serverId}`,

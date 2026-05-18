@@ -1,64 +1,90 @@
 <template>
   <div>
-    <header class="flex items-center justify-between gap-4 mb-6">
+    <header class="mb-6">
       <h1 class="text-2xl font-bold">{{ $t('server.leaderboard') }}</h1>
-      <div class="w-48">
-        <UiSelect v-model="metric" :options="metricOptions" />
-      </div>
     </header>
 
-    <div v-if="pending" class="space-y-2">
-      <UiSkeleton v-for="i in 8" :key="i" :height="44" />
+    <div class="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+      <UiCard
+        v-for="key in keys"
+        :key="key"
+        padded
+      >
+        <h2 class="text-sm font-semibold text-text-secondary mb-3 uppercase tracking-wide">
+          {{ labelFor(key) }}
+        </h2>
+
+        <UiSkeleton v-if="pending[key]" :height="320" />
+        <UiEmpty
+          v-else-if="!boards[key]?.length"
+          :message="$t('empty.default')"
+        />
+        <ul v-else class="divide-y divide-border-subtle">
+          <li
+            v-for="item in boards[key]"
+            :key="item.rank"
+            class="flex items-center gap-3 py-2"
+          >
+            <span :class="['w-7 h-7 grid place-items-center rounded-full font-bold text-xs shrink-0', rankClass(item.rank)]">
+              {{ item.rank }}
+            </span>
+            <UiAvatar :name="item.name" size="xs" />
+            <NuxtLink
+              :to="`/servers/${id}/players/${encodeURIComponent(item.name)}`"
+              class="flex-1 font-medium hover:text-brand-400 truncate"
+            >
+              {{ item.name }}
+            </NuxtLink>
+            <span class="font-mono text-xs text-text-secondary tabular-nums">
+              {{ formatScore(key, item.score) }}
+            </span>
+          </li>
+        </ul>
+      </UiCard>
     </div>
-    <div v-else-if="!data?.items?.length">
-      <UiEmpty :message="$t('empty.default')" />
-    </div>
-    <UiCard v-else>
-      <ul>
-        <li
-          v-for="item in data.items"
-          :key="item.rank"
-          class="flex items-center gap-4 px-5 py-3 border-b border-border-subtle last:border-b-0"
-        >
-          <span :class="['w-8 h-8 grid place-items-center rounded-full font-bold text-sm', rankClass(item.rank)]">
-            {{ item.rank }}
-          </span>
-          <UiAvatar :name="item.name" size="sm" />
-          <NuxtLink :to="`/servers/${id}/players/${encodeURIComponent(item.name)}`" class="flex-1 font-medium hover:text-brand-400 truncate">
-            {{ item.name }}
-          </NuxtLink>
-          <span class="font-mono text-text-secondary">{{ formatScore(metric, item.score) }}</span>
-        </li>
-      </ul>
-    </UiCard>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import type { LeaderboardItem, ServerSummary } from '~/types/api'
+import { computed, reactive, watch } from 'vue'
+import type { LeaderboardItem } from '~/types/api'
 
 definePageMeta({ layout: 'detail' })
 const route = useRoute()
 const id = computed(() => String(route.params.id))
 
-// Need the server type to pick the right metric registry.
-const { data: server } = await useAsyncData(
-  () => `server.head.${id.value}`,
-  () => useApi<ServerSummary>(`/api/servers/${id.value}`),
-)
-const { options: metricOptions, formatScore } = useGameMetrics(() => server.value?.type)
-const metric = ref<string>('')
+const { keys, labelFor, formatScore } = useGameMetrics()
 
-watch(metricOptions, opts => {
-  if (!metric.value && opts.length) metric.value = opts[0]!.value
-}, { immediate: true })
+// Per-axis state. Reactive object keyed by metric key so each card loads
+// independently — one slow / failing axis doesn't block the others.
+const boards = reactive<Record<string, LeaderboardItem[]>>({})
+const pending = reactive<Record<string, boolean>>({})
 
-const { data, pending } = await useAsyncData(
-  () => `srv.lb.${id.value}.${metric.value}`,
-  () => useApi<{ metric: string, items: LeaderboardItem[] }>(`/api/servers/${id.value}/leaderboard?metric=${metric.value}&limit=50`),
-  { watch: [id, metric] },
-)
+async function loadOne(metric: string) {
+  pending[metric] = true
+  try {
+    const res = await useApi<{ metric: string, items: LeaderboardItem[] }>(
+      `/api/servers/${id.value}/leaderboard?metric=${metric}&limit=6`,
+    )
+    boards[metric] = res.items || []
+  } catch {
+    boards[metric] = []
+  } finally {
+    pending[metric] = false
+  }
+}
+
+async function loadAll() {
+  // Prime everything in parallel; useAsyncData with a single key keeps SSR hydration coherent.
+  await Promise.all(keys.map(k => loadOne(k)))
+}
+
+await useAsyncData(() => `srv.lb.all.${id.value}`, async () => {
+  await loadAll()
+  return true
+}, { watch: [id] })
+
+watch(id, () => { void loadAll() })
 
 function rankClass(rank: number) {
   if (rank === 1) return 'bg-yellow-500/15 text-yellow-400'

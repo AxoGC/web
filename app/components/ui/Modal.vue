@@ -5,7 +5,8 @@
       <DialogContent
         :class="[
           'fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2',
-          'w-[min(94vw,32rem)] max-h-[88vh] overflow-auto',
+          widthClass,
+          'max-h-[88vh] overflow-auto',
           'bg-bg-elevated border border-border-default rounded-xl shadow-lg',
           'p-6 data-[state=open]:animate-popin focus:outline-none',
         ]"
@@ -36,6 +37,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import {
   DialogRoot,
   DialogPortal,
@@ -46,11 +48,19 @@ import {
   DialogClose,
 } from 'reka-ui'
 
-defineProps<{
+const props = withDefaults(defineProps<{
   open: boolean
   title?: string
   description?: string
-}>()
+  size?: 'sm' | 'md' | 'lg' | 'xl'
+}>(), { size: 'md' })
+
+const widthClass = computed(() => ({
+  sm: 'w-[min(94vw,24rem)]',
+  md: 'w-[min(94vw,32rem)]',
+  lg: 'w-[min(94vw,42rem)]',
+  xl: 'w-[min(94vw,56rem)]',
+}[props.size]))
 
 const emit = defineEmits<{ 'update:open': [value: boolean] }>()
 

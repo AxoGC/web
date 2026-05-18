@@ -17,7 +17,14 @@
       </div>
     </div>
     <ClientOnly>
-      <VChart v-if="chartOption" class="w-full h-64" :option="chartOption" autoresize />
+      <!-- echarts measures the container at init via offsetHeight; an explicit
+           height keeps it from collapsing to a few px while ClientOnly hydrates. -->
+      <VChart
+        v-if="chartOption"
+        :option="chartOption"
+        autoresize
+        style="width: 100%; height: 320px;"
+      />
     </ClientOnly>
   </UiCard>
 </template>

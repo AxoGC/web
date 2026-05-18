@@ -17,6 +17,13 @@
           <LucideCopy :size="12" /> {{ $t('actions.copy') }}
         </button>
       </div>
+      <a
+        :href="deepLink(ep)"
+        class="inline-flex items-center gap-1 text-xs text-brand-400 hover:underline"
+        :title="$t('server.bedrock_deeplink_hint')"
+      >
+        <LucideExternalLink :size="12" /> {{ $t('server.bedrock_add_to_game') }}
+      </a>
     </div>
   </div>
   <div v-else class="text-xs text-text-tertiary">{{ $t('server.connect_missing') }}</div>
@@ -31,5 +38,17 @@ const conn = useServerConnect(() => props.server)
 const endpoints = computed(() => conn.extractEndpoints(props.server))
 function portOf(ep: ServerEndpoint) {
   return ep.port ?? defaultPortFor('mc-bedrock')!
+}
+
+// Bedrock client URI handler (Win10 / iOS / Android, since 1.14). Format:
+//   minecraft://?addExternalServer=<DisplayName>|<host>:<port>
+// The display name surfaces inside the "External servers" list — we use the
+// server's public name plus the endpoint label so admins can differentiate
+// CN/海外 entries. URI-encode the params so `|`, `:`, CJK, spaces survive
+// transit; the client decodes before showing the confirm dialog.
+function deepLink(ep: ServerEndpoint) {
+  const display = ep.label ? `${props.server.name} · ${ep.label}` : props.server.name
+  const payload = `${display}|${ep.host}:${portOf(ep)}`
+  return `minecraft://?addExternalServer=${encodeURIComponent(payload)}`
 }
 </script>

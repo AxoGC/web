@@ -4,9 +4,38 @@
 
     <UiCard padded class="mb-6">
       <h2 class="text-lg font-semibold mb-4">{{ $t('me.edit_profile') }}</h2>
+
       <UiField :label="$t('me.avatar')">
-        <UiInput v-model="avatar" placeholder="https://…" />
+        <div class="flex items-start gap-4">
+          <!-- Square preview; instant upload on file select. -->
+          <div class="w-28 shrink-0">
+            <UiImageUpload
+              :file="null"
+              :preview-url="avatarPreview"
+              :max-size-mb="5"
+              aspect-ratio="1 / 1"
+              :allow-clear="false"
+              :placeholder="$t('me.avatar_hint')"
+              :alt="auth.user?.username || ''"
+              @update:file="onPickAvatar"
+            />
+          </div>
+          <div class="flex flex-col gap-2 pt-1">
+            <p v-if="uploading" class="text-sm text-text-secondary">{{ $t('me.avatar_uploading') }}</p>
+            <p v-else class="text-sm text-text-tertiary">{{ $t('me.avatar_hint') }}</p>
+            <UiButton
+              v-if="hasUploadedAvatar"
+              variant="ghost"
+              size="sm"
+              :disabled="uploading"
+              @click="removeAvatar"
+            >
+              {{ $t('me.avatar_remove') }}
+            </UiButton>
+          </div>
+        </div>
       </UiField>
+
       <UiField :label="$t('me.bio')" :error="bioErr">
         <UiTextarea v-model="bio" :rows="3" :invalid="!!bioErr" />
       </UiField>
@@ -48,7 +77,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { useTheme } from '~/composables/useTheme'
 import { useToast } from '~/composables/useToast'
@@ -63,17 +92,54 @@ const toast = useToast()
 const { t, locales, locale, setLocale } = useI18n()
 const currentLocale = computed(() => locale.value)
 
-const avatar = ref(auth.user?.avatar || '')
 const bio = ref(auth.user?.bio || '')
 const bioErr = ref('')
 const saving = ref(false)
+const uploading = ref(false)
+
+// Avatar URL from backend always points at /media/users/<id>?v=<unix>; when
+// avatar_at is null, ?v=0 → backend serves namespace default. So a non-zero
+// ?v= is the signal that the user actually has their own avatar.
+const hasUploadedAvatar = computed(() => {
+  const url = auth.user?.avatar || ''
+  const m = /[?&]v=(\d+)/.exec(url)
+  return !!m && m[1] !== '0'
+})
+
+const avatarPreview = computed(() => auth.user?.avatar || '')
 
 watch(() => auth.user, (u) => {
-  if (u) {
-    avatar.value = u.avatar
-    bio.value = u.bio
-  }
+  if (u) bio.value = u.bio
 })
+
+async function onPickAvatar(file: File | null) {
+  if (!file) return
+  uploading.value = true
+  try {
+    const fd = new FormData()
+    fd.append('image', file)
+    const u = await useApi<MeDTO>('/api/users/me/avatar', { method: 'POST', form: fd })
+    auth.setUser(u)
+    toast.success(t('actions.save'))
+  } catch (e) {
+    if (e instanceof ApiError) toast.fromError(e)
+  } finally {
+    uploading.value = false
+  }
+}
+
+async function removeAvatar() {
+  if (!confirm(t('me.avatar_remove_confirm'))) return
+  uploading.value = true
+  try {
+    const u = await useApi<MeDTO>('/api/users/me/avatar', { method: 'DELETE' })
+    auth.setUser(u)
+  } catch (e) {
+    if (e instanceof ApiError) toast.fromError(e)
+  } finally {
+    uploading.value = false
+  }
+}
 
 async function save() {
   bioErr.value = ''
@@ -85,7 +151,7 @@ async function save() {
   try {
     const u = await useApi<MeDTO>('/api/users/me', {
       method: 'PATCH',
-      body: { avatar: avatar.value, bio: bio.value },
+      body: { bio: bio.value },
     })
     auth.setUser(u)
     toast.success(t('actions.save'))

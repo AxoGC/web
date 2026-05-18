@@ -35,10 +35,31 @@ export interface UserProfileStats {
   forum_likes_received: number
 }
 
+export interface FollowStats {
+  follower_count: number
+  following_count: number
+  /** Present only when the request was authenticated and the viewer is not the target. */
+  is_following?: boolean
+}
+
+export interface UserListPage {
+  items: UserSummary[]
+  total: number
+  page: number
+  size: number
+}
+
 export interface MeDTO extends PublicUser {
   email: string
   email_verified: boolean
   status: string
+}
+
+export interface ForumLatestPost {
+  id: number
+  title: string
+  author: UserSummary
+  created_at: number
 }
 
 export interface Forum {
@@ -50,8 +71,9 @@ export interface Forum {
   banner_url?: string
   sort: number
   post_count: number
-  today_new_count?: number
-  active_users_7d?: number
+  comment_count: number
+  view_count: number
+  latest_post?: ForumLatestPost | null
 }
 
 export interface Tag {
@@ -59,6 +81,12 @@ export interface Tag {
   name: string
   color: string
   post_count?: number
+}
+
+export interface PostLatestReply {
+  author: UserSummary
+  content_excerpt: string
+  created_at: number
 }
 
 export interface PostListItem {
@@ -72,6 +100,24 @@ export interface PostListItem {
   last_reply_at: number
   created_at: number
   tags: Tag[]
+  latest_reply?: PostLatestReply | null
+}
+
+export interface FeedPostItem {
+  id: number
+  title: string
+  author: UserSummary
+  forum: { id: number, name: string, slug: string }
+  comment_count: number
+  view_count: number
+  created_at: number
+}
+
+export interface SiteStats {
+  post_count: number
+  comment_count: number
+  view_count: number
+  user_count: number
 }
 
 export interface Attachment {
@@ -82,10 +128,30 @@ export interface Attachment {
   size: number
 }
 
+export interface Carousel {
+  id: number
+  image_url: string
+  caption: string
+  link_url: string
+  sort: number
+  active: boolean
+  updated_at: string
+}
+
+export interface PollOption {
+  id: number
+  label: string
+  sort_order: number
+}
+
+export interface PollOptionCount {
+  option_id: number
+  count: number
+}
+
 export interface VotingSummary {
-  affirmative: number
-  neutral: number
-  negative: number
+  counts: PollOptionCount[]
+  total: number
 }
 
 /** TipTap JSON document — opaque to the API layer; rendered by RichContent. */
@@ -97,6 +163,7 @@ export interface PostDetail {
   content_json: TiptapDoc
   content_text: string
   voting_enabled: boolean
+  poll_options?: PollOption[]
   voting_summary?: VotingSummary
   liked: boolean
   author: UserSummary
@@ -112,15 +179,12 @@ export interface PostDetail {
   attachments: Attachment[]
 }
 
-/** Comment attitude when the parent post has voting enabled: 1=affirm / 2=neutral / 3=negative. */
-export type CommentAttitude = 1 | 2 | 3
-
 export interface CommentItem {
   id: number
   parent_id?: number
   author: UserSummary
   content: string
-  attitude: CommentAttitude
+  poll_option_id?: number
   like_count: number
   created_at: number
 }
@@ -155,13 +219,19 @@ export interface McJavaMeta {
   seed?: string
   whitelist?: boolean
   motd?: string
-  [key: string]: unknown
+  /** BlueMap web viewer URL. When set, the detail page embeds it in an iframe. */
+  bluemap_url?: string
+  /** Open-ended bag for ad-hoc keys the admin may add (e.g. dynmap_url). */
+  extras?: Record<string, unknown>
 }
 export interface McBedrockMeta {
   endpoints?: ServerEndpoint[]
   world_name?: string
   gamemode?: string
-  [key: string]: unknown
+  /** BlueMap web viewer URL. When set, the detail page embeds it in an iframe. */
+  bluemap_url?: string
+  /** Open-ended bag for ad-hoc keys the admin may add (e.g. dynmap_url). */
+  extras?: Record<string, unknown>
 }
 export interface DstMeta {
   /** DST clients join via the in-game browser; show the search name instead of host:port. */
@@ -170,17 +240,20 @@ export interface DstMeta {
   game_mode?: string
   season?: string
   mods?: string[]
-  [key: string]: unknown
+  /** Open-ended bag for ad-hoc keys the admin may add (e.g. dynmap_url). */
+  extras?: Record<string, unknown>
 }
 export interface TerrariaMeta {
   endpoints?: ServerEndpoint[]
   world?: string
   difficulty?: string
-  [key: string]: unknown
+  /** Open-ended bag for ad-hoc keys the admin may add (e.g. dynmap_url). */
+  extras?: Record<string, unknown>
 }
 export interface GenericServerMeta {
   endpoints?: ServerEndpoint[]
-  [key: string]: unknown
+  /** Open-ended bag for ad-hoc keys the admin may add (e.g. dynmap_url). */
+  extras?: Record<string, unknown>
 }
 export type ServerMeta = McJavaMeta | McBedrockMeta | DstMeta | TerrariaMeta | GenericServerMeta
 
@@ -195,9 +268,26 @@ export interface ServerSummary {
   meta?: ServerMeta
 }
 
+/**
+ * Server description is a TipTap-style JSON document (or null when empty).
+ * Rendered via <RichContent>; edited via <RichEditor>. The frontend never
+ * needs to display this as plain text, so no text mirror is stored on
+ * either side.
+ */
+export type ServerDescriptionDoc = Record<string, unknown> | null
+
 export interface ServerDetail extends ServerSummary {
-  description: string
+  description: ServerDescriptionDoc
   players: string[]
+}
+
+/**
+ * Admin-only view: same shape as ServerSummary but always carries description
+ * and full (un-stripped) Meta — including the `_internal` envelope holding
+ * backend-only credentials. Returned by `/api/admin/servers`.
+ */
+export interface AdminServerItem extends ServerSummary {
+  description: ServerDescriptionDoc
 }
 
 export interface OnlineStatPoint {
@@ -246,10 +336,23 @@ export interface BindStatus {
   player?: { name: string, bound_at: number }
 }
 
+/**
+ * One axis of the unified stats radar. Plugins compute `percent` against a
+ * fixed scale baseline they own; the order of the `stats` array is also the
+ * intended display / axis order. The web side never knows the scales, so
+ * tuning the radar is a pure plugin-side change.
+ */
+export interface StatsAxis {
+  key: string
+  unit: string
+  value: number
+  percent: number
+}
+
 export interface PlayerStats {
   name: string
-  stats: Record<string, number>
-  cached_at: number
+  stats: StatsAxis[]
+  source?: string
 }
 
 export interface SearchResults {

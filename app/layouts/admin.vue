@@ -34,6 +34,8 @@
         <AdminNavLink to="/admin/users" :label="$t('admin.users')" :icon="LucideUsers" />
         <AdminNavLink to="/admin/servers" :label="$t('admin.servers')" :icon="LucideServer" />
         <AdminNavLink to="/admin/forums" :label="$t('admin.forums')" :icon="LucideMessageSquare" />
+        <AdminNavLink to="/admin/tags" :label="$t('admin.tags')" :icon="LucideTag" />
+        <AdminNavLink to="/admin/carousels" :label="$t('admin.carousels')" :icon="LucideImages" />
         <AdminNavLink to="/admin/donations" :label="$t('admin.donations')" :icon="LucideHeart" />
         <AdminNavLink to="/admin/logs" :label="$t('admin.logs')" :icon="LucideScroll" />
         <AdminNavLink to="/admin/audit" :label="$t('admin.audit')" :icon="LucideSearchCheck" />
@@ -51,7 +53,8 @@ import { onMounted, ref } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import {
   LucideLayoutDashboard, LucideUsers, LucideServer, LucideMessageSquare,
-  LucideHeart, LucideScroll, LucideSettings, LucideSearchCheck,
+  LucideHeart, LucideScroll, LucideSettings, LucideSearchCheck, LucideImages,
+  LucideTag,
 } from '#components'
 
 const auth = useAuthStore()

@@ -1,5 +1,6 @@
 <template>
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <ServerDescriptionCard class="lg:col-span-3" :server="server" />
     <ServerOnlineTrendCard class="lg:col-span-2" :server-id="server.id" />
     <UiCard padded>
       <h2 class="text-lg font-semibold mb-4">{{ $t('server.dst_world_info') }}</h2>

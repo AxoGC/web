@@ -87,7 +87,7 @@ const footerLinks: FooterGroup[] = [
     links: [
       { label: { 'zh-CN': 'QQ群: 514928673', 'en': 'QQ Group: 514928673' }, url: QQ_GROUP_URL },
       { label: { 'zh-CN': '哔哩哔哩', 'en': 'Bilibili' }, url: 'https://b23.tv/yMqpypq' },
-      { label: { 'zh-CN': 'GitHub', 'en': 'GitHub' }, url: 'https://github.com/McaxDev' },
+      { label: { 'zh-CN': 'GitHub', 'en': 'GitHub' }, url: 'https://github.com/AxoGC' },
     ],
   },
 ]

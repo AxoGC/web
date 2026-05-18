@@ -1,5 +1,8 @@
 <template>
   <div>
+    <!-- @vite-pwa/nuxt doesn't auto-inject the manifest link tag — this
+         component is the official way to add it via useHead. -->
+    <VitePwaManifest />
     <NuxtRouteAnnouncer />
     <NuxtLayout>
       <NuxtPage />

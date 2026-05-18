@@ -2,6 +2,8 @@
   <div
     class="rich-editor border border-border-default rounded-md bg-bg-elevated focus-within:border-brand-400 focus-within:ring-2 focus-within:ring-brand-400/30 transition"
     :class="{ 'opacity-60 pointer-events-none': disabled }"
+    @drop.prevent="onDrop"
+    @dragover.prevent
   >
     <div
       v-if="editor"
@@ -20,6 +22,13 @@
       </button>
       <div class="w-px h-5 bg-border-subtle mx-1" />
       <button type="button" class="h-8 min-w-8 px-2 inline-flex items-center justify-center rounded text-sm hover:bg-bg-hover text-text-secondary"
+        :title="$t('actions.upload') || 'Image'"
+        :disabled="uploading"
+        @click="pickFile">
+        <LucideImage :size="14" />
+      </button>
+      <input ref="fileInput" type="file" accept="image/*" multiple class="hidden" @change="onFileChange">
+      <button type="button" class="h-8 min-w-8 px-2 inline-flex items-center justify-center rounded text-sm hover:bg-bg-hover text-text-secondary"
         title="Undo" @click="editor.chain().focus().undo().run()">
         <LucideUndo2 :size="14" />
       </button>
@@ -27,6 +36,7 @@
         title="Redo" @click="editor.chain().focus().redo().run()">
         <LucideRedo2 :size="14" />
       </button>
+      <span v-if="uploading" class="ml-2 text-xs text-text-tertiary">{{ $t('common.loading') }}</span>
     </div>
     <EditorContent
       :editor="editor"
@@ -36,21 +46,28 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, shallowRef, watch } from 'vue'
+import { onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import { useEditor, EditorContent, type Editor } from '@tiptap/vue-3'
 import {
   LucideBold, LucideItalic, LucideStrikethrough, LucideCode, LucideHeading1, LucideHeading2,
   LucideHeading3, LucideList, LucideListOrdered, LucideQuote, LucideMinus, LucideLink, LucideCode2,
-  LucideUndo2, LucideRedo2,
+  LucideUndo2, LucideRedo2, LucideImage,
 } from '#components'
 import { tiptapExtensions, emptyDoc } from '~/utils/tiptap'
+import { ApiError } from '~/composables/useApi'
+import { useToast } from '~/composables/useToast'
 
 const props = withDefaults(defineProps<{
   modelValue?: object | null  // TipTap JSON doc
+  /** Companion list of attachment ids the editor has uploaded. Kept in
+   *  parallel to the doc (not embedded in it) so submit can stamp post_id
+   *  by id list rather than walking the doc. v-model:attachmentIds. */
+  attachmentIds?: number[]
   placeholder?: string
   disabled?: boolean
 }>(), {
   modelValue: () => emptyDoc(),
+  attachmentIds: () => [],
   placeholder: '',
   disabled: false,
 })
@@ -58,7 +75,10 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   'update:modelValue': [doc: object]
   'update:text': [text: string]
+  'update:attachmentIds': [ids: number[]]
 }>()
+
+const toast = useToast()
 
 const editor = useEditor({
   content: props.modelValue || emptyDoc(),
@@ -118,6 +138,82 @@ function makeToolbar(e: Editor) {
     { key: 'link', title: 'Link', icon: LucideLink, active: () => e.isActive('link'), run: () => toggleLink(e) },
   ]
 }
+
+// ---------- image upload ----------
+//
+// The editor is in charge of POSTing the file to /api/attachments (draft
+// upload), inserting an <img> node with the returned URL, and pushing the
+// returned id onto the attachmentIds model so the parent form can submit it
+// as `attachment_ids[]`. Three entry points: toolbar button, drag-drop, and
+// paste of clipboard images.
+
+const fileInput = ref<HTMLInputElement | null>(null)
+const uploading = ref(false)
+
+function pickFile() { fileInput.value?.click() }
+
+function onFileChange(e: Event) {
+  const input = e.target as HTMLInputElement
+  if (input.files && input.files.length) uploadAll(Array.from(input.files))
+  // Reset so picking the same file again still fires change.
+  input.value = ''
+}
+
+function onDrop(e: DragEvent) {
+  const files = e.dataTransfer?.files
+  if (!files || !files.length) return
+  const images = Array.from(files).filter(f => f.type.startsWith('image/'))
+  if (images.length) uploadAll(images)
+}
+
+async function uploadAll(files: File[]) {
+  uploading.value = true
+  try {
+    for (const f of files) await uploadOne(f)
+  } finally {
+    uploading.value = false
+  }
+}
+
+async function uploadOne(file: File) {
+  const form = new FormData()
+  form.append('file', file)
+  try {
+    const r = await useApi<{ id: number, url: string }>('/api/attachments', { form })
+    if (editor.value && r.url) {
+      // Use the existing chain; insertContent accepts a TipTap node JSON.
+      editor.value.chain().focus().insertContent({
+        type: 'image',
+        attrs: { src: r.url, alt: file.name },
+      }).run()
+    }
+    if (typeof r.id === 'number') {
+      emit('update:attachmentIds', [...props.attachmentIds, r.id])
+    }
+  } catch (e) {
+    if (e instanceof ApiError) toast.fromError(e)
+  }
+}
+
+// Paste handler: ProseMirror exposes pasted clipboard files via `handlePaste`,
+// but using a native DOM listener on the editor container is simpler and the
+// editor still receives the eventual insertContent call.
+watch(editor, (e) => {
+  if (!e) return
+  const dom = e.view?.dom
+  if (!dom) return
+  const onPaste = (ev: ClipboardEvent) => {
+    const files = ev.clipboardData?.files
+    if (!files || !files.length) return
+    const images = Array.from(files).filter(f => f.type.startsWith('image/'))
+    if (!images.length) return
+    ev.preventDefault()
+    uploadAll(images)
+  }
+  dom.addEventListener('paste', onPaste)
+  // Cleanup tied to editor destroy — when the editor is recreated (rare) we
+  // rely on the next watch firing on the fresh dom.
+})
 
 function toggleLink(e: Editor) {
   if (e.isActive('link')) {

@@ -61,7 +61,7 @@
             <NuxtLink :to="`/servers/${s.id}`" class="flex items-center gap-3 p-3 bg-bg-elevated border border-border-subtle rounded-md hover:border-border-default">
               <LucideServer :size="16" class="text-text-tertiary" />
               <span class="flex-1 truncate">{{ s.name }}</span>
-              <span class="text-xs text-text-tertiary">{{ s.type }}</span>
+              <span class="text-xs text-text-tertiary">{{ typeLabel(s.type) }}</span>
             </NuxtLink>
           </li>
         </ul>
@@ -77,6 +77,7 @@ import { LucideSearch } from '#components'
 
 definePageMeta({ layout: 'default', ssr: false })
 const route = useRoute()
+const typeLabel = useServerTypeLabel()
 const router = useRouter()
 
 const qInput = ref(String(route.query.q || ''))

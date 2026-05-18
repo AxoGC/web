@@ -6,6 +6,35 @@
  */
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
+// `@tiptap/vue-3` re-exports the core Node helper. Importing through it
+// avoids declaring @tiptap/core as a direct dep when we already depend on
+// vue-3 — pnpm doesn't hoist transitive packages.
+import { Node } from '@tiptap/vue-3'
+
+/**
+ * Minimal block-level image node. Mirrors the shape `@tiptap/extension-image`
+ * produces, but avoids pulling in a separate package for a ~20-line node.
+ *
+ * Storage: the RichEditor's upload flow sets `attrs.src` (the public URL the
+ * blobstore returned) so the doc renders standalone. The attachment id never
+ * goes into the doc — the editor pushes it to a sibling `attachment_ids[]`
+ * model the post form submits alongside, and core stamps post_id from that
+ * list. Walking the doc to find ids is intentionally not done.
+ */
+const Image = Node.create({
+  name: 'image',
+  group: 'block',
+  draggable: true,
+  atom: true,
+  addAttributes() {
+    return {
+      src: { default: null },
+      alt: { default: null },
+    }
+  },
+  parseHTML() { return [{ tag: 'img[src]' }] },
+  renderHTML({ HTMLAttributes }) { return ['img', HTMLAttributes] },
+})
 
 export const tiptapExtensions = [
   StarterKit.configure({
@@ -16,6 +45,7 @@ export const tiptapExtensions = [
     autolink: true,
     HTMLAttributes: { rel: 'nofollow noopener noreferrer', target: '_blank' },
   }),
+  Image,
 ]
 
 /** Empty doc factory — returns a fresh mutable object each call so callers can mutate freely. */

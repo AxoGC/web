@@ -5,11 +5,17 @@ import { useAuthStore } from '~/stores/auth'
 export interface ChatMessage {
   id: string
   ts: number
+  /** "chat" for player messages, "system" for join/leave-style notices. */
+  kind: 'chat' | 'system'
   channel: string
   source: 'web' | 'game'
   server_id: number | null
+  /** Player name (both for chat and system). */
   sender: string
+  /** Chat: the typed message. System: an event key like "player.join"/"player.leave". */
   content: string
+  /** Optional structured detail for system events (e.g. player.died killer/cause). */
+  meta?: Record<string, unknown>
 }
 
 interface ChatStreamOpts {
