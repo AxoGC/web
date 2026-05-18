@@ -36,6 +36,38 @@
         </div>
       </UiField>
 
+      <UiField :label="$t('me.background')">
+        <div class="flex items-start gap-4">
+          <!-- Wider preview (16:9-ish) — this is the profile-card banner,
+               not a square crop. -->
+          <div class="w-56 shrink-0">
+            <UiImageUpload
+              :file="null"
+              :preview-url="backgroundPreview"
+              :max-size-mb="5"
+              aspect-ratio="16 / 9"
+              :allow-clear="false"
+              :placeholder="$t('me.background_hint')"
+              :alt="auth.user?.username || ''"
+              @update:file="onPickBackground"
+            />
+          </div>
+          <div class="flex flex-col gap-2 pt-1">
+            <p v-if="uploadingBg" class="text-sm text-text-secondary">{{ $t('me.background_uploading') }}</p>
+            <p v-else class="text-sm text-text-tertiary">{{ $t('me.background_hint') }}</p>
+            <UiButton
+              v-if="hasBackground"
+              variant="ghost"
+              size="sm"
+              :disabled="uploadingBg"
+              @click="removeBackground"
+            >
+              {{ $t('me.background_remove') }}
+            </UiButton>
+          </div>
+        </div>
+      </UiField>
+
       <UiField :label="$t('me.bio')" :error="bioErr">
         <UiTextarea v-model="bio" :rows="3" :invalid="!!bioErr" />
       </UiField>
@@ -108,6 +140,12 @@ const hasUploadedAvatar = computed(() => {
 
 const avatarPreview = computed(() => auth.user?.avatar || '')
 
+// Background uses a present/absent string (unlike avatar's "always-a-URL with
+// a namespace default"), so the empty-string check is sufficient.
+const backgroundPreview = computed(() => auth.user?.background || '')
+const hasBackground = computed(() => !!auth.user?.background)
+const uploadingBg = ref(false)
+
 watch(() => auth.user, (u) => {
   if (u) bio.value = u.bio
 })
@@ -125,6 +163,35 @@ async function onPickAvatar(file: File | null) {
     if (e instanceof ApiError) toast.fromError(e)
   } finally {
     uploading.value = false
+  }
+}
+
+async function onPickBackground(file: File | null) {
+  if (!file) return
+  uploadingBg.value = true
+  try {
+    const fd = new FormData()
+    fd.append('image', file)
+    const u = await useApi<MeDTO>('/api/users/me/background', { method: 'POST', form: fd })
+    auth.setUser(u)
+    toast.success(t('actions.save'))
+  } catch (e) {
+    if (e instanceof ApiError) toast.fromError(e)
+  } finally {
+    uploadingBg.value = false
+  }
+}
+
+async function removeBackground() {
+  if (!confirm(t('me.background_remove_confirm'))) return
+  uploadingBg.value = true
+  try {
+    const u = await useApi<MeDTO>('/api/users/me/background', { method: 'DELETE' })
+    auth.setUser(u)
+  } catch (e) {
+    if (e instanceof ApiError) toast.fromError(e)
+  } finally {
+    uploadingBg.value = false
   }
 }
 

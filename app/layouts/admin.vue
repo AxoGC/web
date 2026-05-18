@@ -36,6 +36,7 @@
         <AdminNavLink to="/admin/forums" :label="$t('admin.forums')" :icon="LucideMessageSquare" />
         <AdminNavLink to="/admin/tags" :label="$t('admin.tags')" :icon="LucideTag" />
         <AdminNavLink to="/admin/carousels" :label="$t('admin.carousels')" :icon="LucideImages" />
+        <AdminNavLink to="/admin/oneliners" :label="$t('admin.oneliners')" :icon="LucideQuote" />
         <AdminNavLink to="/admin/donations" :label="$t('admin.donations')" :icon="LucideHeart" />
         <AdminNavLink to="/admin/logs" :label="$t('admin.logs')" :icon="LucideScroll" />
         <AdminNavLink to="/admin/audit" :label="$t('admin.audit')" :icon="LucideSearchCheck" />

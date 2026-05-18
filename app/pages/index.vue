@@ -45,6 +45,9 @@
       </div>
     </section>
 
+    <!-- Curated one-liners carousel -->
+    <HomeOneliners />
+
     <!-- QQ communities -->
     <HomeQqGroups />
 

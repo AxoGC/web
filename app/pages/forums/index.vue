@@ -23,8 +23,11 @@
               class="bg-cover bg-center"
               :style="{ backgroundImage: `url(${f.banner_url})` }"
             >
+              <!-- Uniform darken (no gradient) so the card reads as a single
+                   tonal layer. Hover lifts the overlay slightly to signal
+                   interactivity without changing the visual shape. -->
               <div
-                class="bg-linear-to-t from-black/70 via-black/40 to-black/25 group-hover:from-black/55 group-hover:via-black/25 group-hover:to-black/10 backdrop-blur-[2px] group-hover:backdrop-blur-none transition duration-300 min-h-36 p-5 text-white [text-shadow:0_1px_2px_rgb(0_0_0/55%)]"
+                class="bg-black/40 group-hover:bg-black/25 backdrop-blur-[2px] transition-colors duration-300 min-h-36 p-5 text-white [text-shadow:0_1px_2px_rgb(0_0_0/55%)]"
               >
                 <ForumCardBody :forum="f" inverted />
               </div>

@@ -110,6 +110,17 @@
       "dst": "饥荒"
     }
   },
+  "oneliner": {
+    "submit_cta": "投一句",
+    "submit_title": "投一句话",
+    "submit_hint": "60 字以内。需要管理员审核通过后才会出现在首页。",
+    "submit_success": "已提交，等待审核",
+    "placeholder": "想说点什么…",
+    "status_pending": "你的这句话正在等待管理员审核。",
+    "status_active": "你的这句话已经上墙。",
+    "empty_hint": "暂无一句话——成为第一个投递的人吧",
+    "anon": "匿名"
+  },
   "auth": {
     "login_title": "登录账户",
     "register_title": "注册账户",
@@ -281,6 +292,11 @@
     "avatar_uploading": "上传中…",
     "avatar_remove": "移除头像",
     "avatar_remove_confirm": "确认移除头像？将使用默认头像。",
+    "background": "资料卡背景",
+    "background_hint": "点击或拖入图片设为资料卡背景，会自动变暗使文字清晰",
+    "background_uploading": "上传中…",
+    "background_remove": "移除背景",
+    "background_remove_confirm": "确认移除资料卡背景？",
     "bio": "签名",
     "language": "语言偏好",
     "appearance": "外观偏好",
@@ -299,6 +315,8 @@
     "bindings_empty": "该用户尚未绑定任何游戏号",
     "bindings_playtime": "在线时长 {value}",
     "bindings_bound_at": "绑定于 {date}",
+    "bindings_show_all": "展开全部（{n}）",
+    "bindings_collapse": "收起",
     "forum_title": "论坛活跃度",
     "forum_posts": "发帖",
     "forum_comments": "回复",
@@ -422,7 +440,22 @@
     "carousel_caption": "文案",
     "carousel_link": "链接",
     "carousel_empty": "暂无轮播图，点击右上角添加",
-    "carousel_delete_confirm": "确定删除这条轮播图？文件将立即从磁盘移除。"
+    "carousel_delete_confirm": "确定删除这条轮播图？文件将立即从磁盘移除。",
+    "oneliners": "一句话审核",
+    "oneliner_tab_pending": "待审核",
+    "oneliner_tab_active": "已上墙",
+    "oneliner_tab_all": "全部",
+    "oneliner_text": "内容",
+    "oneliner_author": "投递人",
+    "oneliner_submitted_at": "投递时间",
+    "oneliner_status_pending": "待审核",
+    "oneliner_status_active": "已上墙",
+    "oneliner_approve": "通过",
+    "oneliner_reject": "否决",
+    "oneliner_reject_confirm": "确认否决并删除这条投递？该用户可重新投递。",
+    "oneliner_approved": "已通过",
+    "oneliner_rejected": "已否决",
+    "oneliner_empty": "该状态下暂无投递"
   },
   "chat": {
     "title": "服务器聊天",

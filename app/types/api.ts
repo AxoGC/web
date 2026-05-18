@@ -11,6 +11,9 @@ export interface PublicUser {
   id: number
   username: string
   avatar: string
+  /** Optional profile-page top-card background image. Empty/absent when
+   *  the user hasn't uploaded one — frontend renders the plain card. */
+  background?: string
   bio: string
   role: string
   created_at: number

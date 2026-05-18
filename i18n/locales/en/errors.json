@@ -104,5 +104,14 @@
   "QUERY_TOO_SHORT": "Search query too short (min 2 chars).",
   "QUERY_TOO_LONG": "Search query too long (max 64 chars).",
 
-  "RATE_LIMITED": "Too many requests. Slow down."
+  "RATE_LIMITED": "Too many requests. Slow down.",
+
+  "ONELINER_TEXT_EMPTY": "Quote can't be empty.",
+  "ONELINER_TEXT_TOO_LONG": "60 characters max.",
+  "ONELINER_ALREADY_SUBMITTED": "You already submitted one — wait for moderation or rejection.",
+  "ONELINER_NOT_FOUND": "Quote not found.",
+  "ONELINER_SUBMIT_FAILED": "Submit failed.",
+  "ONELINER_QUERY_FAILED": "Query failed.",
+  "ONELINER_UPDATE_FAILED": "Update failed.",
+  "ONELINER_DELETE_FAILED": "Delete failed."
 }

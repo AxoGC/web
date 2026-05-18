@@ -9,8 +9,9 @@
         class="mb-6 bg-cover bg-center overflow-hidden"
         :style="{ backgroundImage: `url(${forum.banner_url})` }"
       >
+        <!-- Uniform darken: same tone across the whole banner, no gradient. -->
         <div
-          class="bg-linear-to-t from-black/70 via-black/40 to-black/25 backdrop-blur-[2px] p-6 text-white [text-shadow:0_1px_2px_rgb(0_0_0/55%)]"
+          class="bg-black/40 backdrop-blur-[2px] p-6 text-white [text-shadow:0_1px_2px_rgb(0_0_0/55%)]"
         >
           <ForumDetailHeaderContent :forum="forum" inverted :auth="auth" />
         </div>

@@ -4,71 +4,95 @@
       <UiEmpty :message="$t('errors.USER_NOT_FOUND')" />
     </div>
     <div v-else-if="user" class="max-w-2xl mx-auto flex flex-col gap-5">
-      <UiCard padded>
-        <div class="flex items-start gap-5">
-          <UiAvatar :src="user.avatar" :name="user.username" size="xl" clickable />
-          <div class="flex-1 min-w-0">
-            <div class="flex flex-wrap items-center gap-2">
-              <h1 class="text-2xl font-bold leading-none">{{ user.username }}</h1>
-              <UiTag
-                v-if="user.role && user.role !== 'user'"
-                :variant="user.role === 'admin' ? 'brand' : 'info'"
+      <!-- Top card: when the user has uploaded a background image we render
+           it underneath a uniform dark overlay (no gradient, mirrors the
+           forum-banner cards) and flip the text colours. Otherwise we
+           keep the plain themed card. The inverted variant is a single
+           branch on `hasBg` rather than two duplicated <UiCard>s. -->
+      <UiCard
+        :padded="!hasBg"
+        :class="hasBg ? 'bg-cover bg-center overflow-hidden' : ''"
+        :style="hasBg ? { backgroundImage: `url(${user.background})` } : undefined"
+      >
+        <div
+          :class="hasBg
+            ? 'bg-black/40 p-6 text-white [text-shadow:0_1px_2px_rgb(0_0_0/55%)]'
+            : ''"
+        >
+          <div class="flex items-start gap-5">
+            <UiAvatar :src="user.avatar" :name="user.username" size="xl" clickable />
+            <div class="flex-1 min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <h1 class="text-2xl font-bold leading-none">{{ user.username }}</h1>
+                <UiTag
+                  v-if="user.role && user.role !== 'user'"
+                  :variant="user.role === 'admin' ? 'brand' : 'info'"
+                  class="text-shadow-none"
+                >
+                  {{ user.role }}
+                </UiTag>
+              </div>
+              <p
+                v-if="user.bio"
+                :class="['mt-2 text-sm wrap-break-word', hasBg ? 'text-white/85' : 'text-text-secondary']"
               >
-                {{ user.role }}
-              </UiTag>
+                {{ user.bio }}
+              </p>
+              <p :class="['mt-2 text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">
+                {{ $t('profile.joined_at', { date: formatDate(user.created_at) }) }}
+              </p>
             </div>
-            <p v-if="user.bio" class="mt-2 text-text-secondary text-sm break-words">
-              {{ user.bio }}
-            </p>
-            <p class="mt-2 text-xs text-text-tertiary">
-              {{ $t('profile.joined_at', { date: formatDate(user.created_at) }) }}
-            </p>
+            <div class="shrink-0 flex flex-col items-end gap-2">
+              <NuxtLink v-if="isSelf" to="/me/settings">
+                <UiButton size="sm" variant="secondary">{{ $t('me.edit_profile') }}</UiButton>
+              </NuxtLink>
+              <FollowButton
+                v-else
+                :user-id="user.id"
+                :is-following="!!followStats?.is_following"
+                :follower-count="followStats?.follower_count ?? 0"
+                :following-count="followStats?.following_count ?? 0"
+                @change="onFollowChange"
+              />
+            </div>
           </div>
-          <div class="shrink-0 flex flex-col items-end gap-2">
-            <NuxtLink v-if="isSelf" to="/me/settings">
-              <UiButton size="sm" variant="secondary">{{ $t('me.edit_profile') }}</UiButton>
-            </NuxtLink>
-            <FollowButton
-              v-else
-              :user-id="user.id"
-              :is-following="!!followStats?.is_following"
-              :follower-count="followStats?.follower_count ?? 0"
-              :following-count="followStats?.following_count ?? 0"
-              @change="onFollowChange"
-            />
-          </div>
-        </div>
 
-        <!-- Inline stats strip — moved here from a separate card per profile redesign. -->
-        <div class="mt-5 pt-4 border-t border-border-subtle grid grid-cols-2 sm:grid-cols-5 gap-3 text-center">
-          <NuxtLink
-            :to="`/users/${user.id}/followers`"
-            class="hover:bg-bg-hover rounded-md py-1 transition-colors"
+          <!-- Inline stats strip -->
+          <div
+            :class="[
+              'mt-5 pt-4 grid grid-cols-2 sm:grid-cols-5 gap-3 text-center border-t',
+              hasBg ? 'border-white/15' : 'border-border-subtle',
+            ]"
           >
-            <div class="text-xs text-text-tertiary">{{ $t('profile.followers') }}</div>
-            <div class="mt-1 text-sm font-medium">{{ followStats?.follower_count ?? 0 }}</div>
-          </NuxtLink>
-          <NuxtLink
-            :to="`/users/${user.id}/following`"
-            class="hover:bg-bg-hover rounded-md py-1 transition-colors"
-          >
-            <div class="text-xs text-text-tertiary">{{ $t('profile.following') }}</div>
-            <div class="mt-1 text-sm font-medium">{{ followStats?.following_count ?? 0 }}</div>
-          </NuxtLink>
-          <div>
-            <div class="text-xs text-text-tertiary">{{ $t('profile.last_login') }}</div>
-            <div class="mt-1 text-sm font-medium">{{ lastLoginText }}</div>
-          </div>
-          <div>
-            <div class="text-xs text-text-tertiary">{{ $t('profile.checkin_streak') }}</div>
-            <div class="mt-1 text-sm font-medium">
-              {{ $t('profile.checkin_streak_value', { n: stats?.checkin_streak ?? 0 }) }}
+            <NuxtLink
+              :to="`/users/${user.id}/followers`"
+              :class="['rounded-md py-1 transition-colors', hasBg ? 'hover:bg-white/10' : 'hover:bg-bg-hover']"
+            >
+              <div :class="['text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">{{ $t('profile.followers') }}</div>
+              <div class="mt-1 text-sm font-medium">{{ followStats?.follower_count ?? 0 }}</div>
+            </NuxtLink>
+            <NuxtLink
+              :to="`/users/${user.id}/following`"
+              :class="['rounded-md py-1 transition-colors', hasBg ? 'hover:bg-white/10' : 'hover:bg-bg-hover']"
+            >
+              <div :class="['text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">{{ $t('profile.following') }}</div>
+              <div class="mt-1 text-sm font-medium">{{ followStats?.following_count ?? 0 }}</div>
+            </NuxtLink>
+            <div>
+              <div :class="['text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">{{ $t('profile.last_login') }}</div>
+              <div class="mt-1 text-sm font-medium">{{ lastLoginText }}</div>
             </div>
-          </div>
-          <div>
-            <div class="text-xs text-text-tertiary">{{ $t('profile.checkin_total') }}</div>
-            <div class="mt-1 text-sm font-medium">
-              {{ $t('profile.checkin_total_value', { n: stats?.checkin_total ?? 0 }) }}
+            <div>
+              <div :class="['text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">{{ $t('profile.checkin_streak') }}</div>
+              <div class="mt-1 text-sm font-medium">
+                {{ $t('profile.checkin_streak_value', { n: stats?.checkin_streak ?? 0 }) }}
+              </div>
+            </div>
+            <div>
+              <div :class="['text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">{{ $t('profile.checkin_total') }}</div>
+              <div class="mt-1 text-sm font-medium">
+                {{ $t('profile.checkin_total_value', { n: stats?.checkin_total ?? 0 }) }}
+              </div>
             </div>
           </div>
         </div>
@@ -76,10 +100,10 @@
 
       <UiCard padded>
         <h2 class="text-lg font-semibold mb-3">{{ $t('profile.bindings_title') }}</h2>
-        <UiEmpty v-if="bindings.length === 0" :message="$t('profile.bindings_empty')" />
+        <UiEmpty v-if="sortedBindings.length === 0" :message="$t('profile.bindings_empty')" />
         <ul v-else class="divide-y divide-border-subtle">
           <li
-            v-for="b in bindings"
+            v-for="b in visibleBindings"
             :key="b.server_id"
             class="py-3"
           >
@@ -146,6 +170,19 @@
             </div>
           </li>
         </ul>
+        <!-- Collapse-by-default: long binding lists crowd the profile card,
+             so we show the top 2 (sorted by most-recent presence activity)
+             and offer an in-place expand for the rest. -->
+        <div
+          v-if="sortedBindings.length > BINDINGS_PREVIEW"
+          class="mt-3 flex justify-center"
+        >
+          <UiButton variant="ghost" size="sm" @click="bindingsExpanded = !bindingsExpanded">
+            {{ bindingsExpanded
+              ? $t('profile.bindings_collapse')
+              : $t('profile.bindings_show_all', { n: sortedBindings.length }) }}
+          </UiButton>
+        </div>
       </UiCard>
 
       <UiCard padded>
@@ -193,6 +230,20 @@ const { data: bindingsResp } = await useAsyncData(
   () => useApi<{ items: UserBinding[] }>(`/api/users/${id.value}/bindings`).catch(() => ({ items: [] as UserBinding[] })),
 )
 const bindings = computed<UserBinding[]>(() => bindingsResp.value?.items ?? [])
+
+// Sort by "most recent presence activity": prefer joined_at (currently online)
+// over last_seen_at, and rows with neither sink to the bottom. Stable for
+// equal keys so the original API order survives.
+const sortedBindings = computed<UserBinding[]>(() => {
+  const recencyOf = (b: UserBinding) => Math.max(b.joined_at ?? 0, b.last_seen_at ?? 0)
+  return [...bindings.value].sort((a, b) => recencyOf(b) - recencyOf(a))
+})
+
+const BINDINGS_PREVIEW = 2
+const bindingsExpanded = ref(false)
+const visibleBindings = computed<UserBinding[]>(() =>
+  bindingsExpanded.value ? sortedBindings.value : sortedBindings.value.slice(0, BINDINGS_PREVIEW),
+)
 
 const metrics = useGameMetrics()
 const typeLabel = useServerTypeLabel()
@@ -272,6 +323,9 @@ onMounted(() => {
 watch(() => auth.isLoggedIn, (v) => { if (v) refreshFollowStats() })
 
 const isSelf = computed(() => !!auth.user && auth.user.id === user.value?.id)
+// hasBg gates the inverted-tone branch in the top card. Backend omits the
+// `background` field (or sends empty) when no image is uploaded.
+const hasBg = computed(() => !!user.value?.background)
 
 function onFollowChange(v: { is_following: boolean; follower_count: number; following_count: number }) {
   // Replace the whole object so reactivity fires even when `is_following`

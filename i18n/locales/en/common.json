@@ -110,6 +110,17 @@
       "dst": "Don't Starve"
     }
   },
+  "oneliner": {
+    "submit_cta": "Submit",
+    "submit_title": "Share a line",
+    "submit_hint": "60 characters max. An admin needs to approve it before it shows on the homepage.",
+    "submit_success": "Submitted — pending review.",
+    "placeholder": "Say something curated…",
+    "status_pending": "Your line is waiting for review.",
+    "status_active": "Your line is live on the homepage.",
+    "empty_hint": "No lines yet — be the first to submit one.",
+    "anon": "Anonymous"
+  },
   "auth": {
     "login_title": "Sign in",
     "register_title": "Create an account",
@@ -281,6 +292,11 @@
     "avatar_uploading": "Uploading…",
     "avatar_remove": "Remove avatar",
     "avatar_remove_confirm": "Remove your avatar? The default will be shown.",
+    "background": "Profile background",
+    "background_hint": "Click or drop an image. It will be darkened on the profile card so text stays readable.",
+    "background_uploading": "Uploading…",
+    "background_remove": "Remove background",
+    "background_remove_confirm": "Remove your profile background?",
     "bio": "Bio",
     "language": "Language",
     "appearance": "Appearance",
@@ -299,6 +315,8 @@
     "bindings_empty": "This user hasn't linked any game account yet",
     "bindings_playtime": "Play time {value}",
     "bindings_bound_at": "Linked on {date}",
+    "bindings_show_all": "Show all ({n})",
+    "bindings_collapse": "Collapse",
     "forum_title": "Forum activity",
     "forum_posts": "Threads",
     "forum_comments": "Replies",
@@ -422,7 +440,22 @@
     "carousel_caption": "Caption",
     "carousel_link": "Link",
     "carousel_empty": "No carousel slides yet — add one in the top-right.",
-    "carousel_delete_confirm": "Delete this slide? The file will be removed from disk immediately."
+    "carousel_delete_confirm": "Delete this slide? The file will be removed from disk immediately.",
+    "oneliners": "Quote moderation",
+    "oneliner_tab_pending": "Pending",
+    "oneliner_tab_active": "Live",
+    "oneliner_tab_all": "All",
+    "oneliner_text": "Text",
+    "oneliner_author": "Submitter",
+    "oneliner_submitted_at": "Submitted",
+    "oneliner_status_pending": "Pending",
+    "oneliner_status_active": "Live",
+    "oneliner_approve": "Approve",
+    "oneliner_reject": "Reject",
+    "oneliner_reject_confirm": "Reject and delete this submission? The user can submit again.",
+    "oneliner_approved": "Approved",
+    "oneliner_rejected": "Rejected",
+    "oneliner_empty": "Nothing in this status."
   },
   "chat": {
     "title": "Server chat",

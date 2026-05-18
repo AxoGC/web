@@ -104,5 +104,14 @@
   "QUERY_TOO_SHORT": "搜索关键字太短（至少 2 字符）",
   "QUERY_TOO_LONG": "搜索关键字太长（最多 64 字符）",
 
-  "RATE_LIMITED": "操作太频繁，请稍后再试"
+  "RATE_LIMITED": "操作太频繁，请稍后再试",
+
+  "ONELINER_TEXT_EMPTY": "不能投递空内容",
+  "ONELINER_TEXT_TOO_LONG": "最多 60 字",
+  "ONELINER_ALREADY_SUBMITTED": "你已经投过一句啦，等管理员审核或被否决后才能再投",
+  "ONELINER_NOT_FOUND": "未找到该条投递",
+  "ONELINER_SUBMIT_FAILED": "投递失败",
+  "ONELINER_QUERY_FAILED": "查询失败",
+  "ONELINER_UPDATE_FAILED": "操作失败",
+  "ONELINER_DELETE_FAILED": "删除失败"
 }
