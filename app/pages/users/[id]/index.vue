@@ -94,8 +94,22 @@
                   </NuxtLink>
                   <UiTag size="sm">{{ typeLabel(b.server_type) }}</UiTag>
                 </div>
-                <div class="mt-1 text-xs text-text-tertiary">
-                  {{ b.game_name }}
+                <div class="mt-1 text-xs text-text-tertiary flex items-center gap-2 flex-wrap">
+                  <span>{{ b.game_name }}</span>
+                  <span
+                    :class="[
+                      'inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px]',
+                      b.is_online ? 'bg-emerald-500/10 text-emerald-400' : 'bg-bg-overlay text-text-tertiary',
+                    ]"
+                  >
+                    <span
+                      :class="[
+                        'inline-block w-1.5 h-1.5 rounded-full',
+                        b.is_online ? 'bg-emerald-400' : 'bg-text-tertiary',
+                      ]"
+                    />
+                    {{ presence({ isOnline: b.is_online, joinedAt: b.joined_at, lastSeenAt: b.last_seen_at }) }}
+                  </span>
                 </div>
               </div>
               <div class="flex items-center gap-2 shrink-0">
@@ -182,6 +196,7 @@ const bindings = computed<UserBinding[]>(() => bindingsResp.value?.items ?? [])
 
 const metrics = useGameMetrics()
 const typeLabel = useServerTypeLabel()
+const presence = usePresence()
 
 function bindingKey(b: UserBinding) {
   return `${b.server_id}:${b.game_name}`

@@ -25,6 +25,12 @@ export interface UserBinding {
   game_name: string
   play_time_seconds: number
   bound_at: number
+  /** Live online flag from the most recent server heartbeat. */
+  is_online?: boolean
+  /** Unix seconds; 0 means "never". Set when the player is currently online. */
+  joined_at?: number
+  /** Unix seconds; 0 means "never". Set whenever the player was last present. */
+  last_seen_at?: number
 }
 
 export interface UserProfileStats {

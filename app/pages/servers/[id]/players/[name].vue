@@ -34,6 +34,21 @@
     <header class="flex items-center gap-3 mb-6 flex-wrap">
       <UiAvatar :name="name" size="md" />
       <h1 class="text-2xl font-bold">{{ name }}</h1>
+      <span
+        v-if="binding"
+        :class="[
+          'inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs',
+          binding.is_online ? 'bg-emerald-500/10 text-emerald-400' : 'bg-bg-overlay text-text-tertiary',
+        ]"
+      >
+        <span
+          :class="[
+            'inline-block w-1.5 h-1.5 rounded-full',
+            binding.is_online ? 'bg-emerald-400' : 'bg-text-tertiary',
+          ]"
+        />
+        {{ presenceText }}
+      </span>
       <NuxtLink
         v-if="boundUser"
         :to="`/users/${boundUser.id}`"
@@ -119,19 +134,36 @@ const { data, error } = await useAsyncData(
   () => useApi<PlayerStats>(`/api/servers/${id.value}/players/${encodeURIComponent(name.value)}/stats`),
 )
 
-// Reverse-lookup the bound platform user, then fetch their public profile so we
-// can render the "linked user" chip. Both calls tolerate 404 silently — an
-// unbound player just hides the chip.
+// Reverse-lookup the bound platform user + presence info. Both calls
+// tolerate 404 silently — an unbound player just hides the chip and shows
+// no presence badge.
+interface BindingResp {
+  user_id: number
+  is_online: boolean
+  joined_at: number
+  last_seen_at: number
+}
+const { data: binding } = await useAsyncData(
+  () => `srv.player.${id.value}.${name.value}.binding`,
+  () => useApi<BindingResp>(
+    `/api/servers/${id.value}/players/${encodeURIComponent(name.value)}/binding`,
+  ).catch(() => null),
+)
 const { data: boundUser } = await useAsyncData(
   () => `srv.player.${id.value}.${name.value}.user`,
   async () => {
-    const link = await useApi<{ user_id: number }>(
-      `/api/servers/${id.value}/players/${encodeURIComponent(name.value)}/binding`,
-    ).catch(() => null)
-    if (!link?.user_id) return null
-    return useApi<PublicUser>(`/api/users/${link.user_id}`).catch(() => null)
+    const uid = binding.value?.user_id
+    if (!uid) return null
+    return useApi<PublicUser>(`/api/users/${uid}`).catch(() => null)
   },
+  { watch: [binding] },
 )
+const presence = usePresence()
+const presenceText = computed(() => {
+  const b = binding.value
+  if (!b) return ''
+  return presence({ isOnline: b.is_online, joinedAt: b.joined_at, lastSeenAt: b.last_seen_at })
+})
 
 const errorCode = computed(() => {
   const e = error.value as unknown as { code?: string } | null
