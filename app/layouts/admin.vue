@@ -55,7 +55,7 @@ import { useAuthStore } from '~/stores/auth'
 import {
   LucideLayoutDashboard, LucideUsers, LucideServer, LucideMessageSquare,
   LucideHeart, LucideScroll, LucideSettings, LucideSearchCheck, LucideImages,
-  LucideTag,
+  LucideTag, LucideQuote,
 } from '#components'
 
 const auth = useAuthStore()

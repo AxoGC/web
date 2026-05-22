@@ -16,12 +16,13 @@
           <th class="text-left px-4 py-2">{{ $t('admin.server_form_type') }}</th>
           <th class="text-left px-4 py-2">{{ $t('admin.server_form_connect') }}</th>
           <th class="text-left px-4 py-2">{{ $t('admin.status') }}</th>
+          <th class="text-left px-4 py-2 w-24">{{ $t('admin.server_form_visible') }}</th>
           <th class="text-right px-4 py-2">{{ $t('admin.actions') }}</th>
         </tr>
       </template>
       <template v-if="pending">
         <tr v-for="i in 3" :key="i" class="border-t border-border-subtle">
-          <td colspan="6" class="px-4 py-3"><UiSkeleton /></td>
+          <td colspan="7" class="px-4 py-3"><UiSkeleton /></td>
         </tr>
       </template>
       <template v-else>
@@ -34,6 +35,17 @@
             <UiStatusDot :status="s.status">
               <span class="text-text-secondary">{{ s.online }}/{{ s.max }}</span>
             </UiStatusDot>
+          </td>
+          <td class="px-4 py-2">
+            <label class="inline-flex items-center gap-2 text-sm cursor-pointer">
+              <input
+                type="checkbox"
+                :checked="s.visible"
+                :disabled="busyId === s.id"
+                class="accent-brand-500 w-4 h-4"
+                @change="toggleVisible(s, ($event.target as HTMLInputElement).checked)"
+              >
+            </label>
           </td>
           <td class="px-4 py-2 text-right">
             <UiButton size="sm" variant="ghost" @click="openEdit(s)">{{ $t('actions.edit') }}</UiButton>
@@ -60,6 +72,13 @@
           </UiField>
           <UiField :label="$t('admin.server_form_type')" required>
             <UiSelect v-model="form.type" :options="typeOptions" :disabled="!!editing" />
+          </UiField>
+          <UiField :label="$t('admin.server_form_visible')">
+            <label class="inline-flex items-center gap-2 mt-2 cursor-pointer">
+              <input v-model="form.visible" type="checkbox" class="accent-brand-500 w-4 h-4">
+              <span class="text-sm">{{ form.visible ? $t('common.yes') : $t('common.no') }}</span>
+            </label>
+            <p class="text-xs text-text-tertiary mt-1">{{ $t('admin.server_form_visible_hint') }}</p>
           </UiField>
           <UiField class="md:col-span-2" :label="$t('admin.server_form_desc')">
             <RichEditor v-model="form.description" />
@@ -162,11 +181,13 @@ const form = reactive<{
    * merged with `connectPayload` to form the persisted Meta.
    */
   metaExtras: Record<string, unknown>
+  visible: boolean
 }>({
   name: '',
   type: 'mc-java',
   description: emptyDoc(),
   metaExtras: {},
+  visible: true,
 })
 // Connection payload emitted by the subform (endpoints[] or DST fields).
 const connectPayload = ref<Record<string, unknown>>({})
@@ -188,6 +209,8 @@ const deleting = ref(false)
 
 const consoleOpen = ref(false)
 const consoleTarget = ref<AdminServerItem | null>(null)
+
+const busyId = ref<number | null>(null)
 
 const CONSOLE_SUPPORTED: ReadonlySet<string> = new Set(['mc-java', 'mc-bedrock'])
 function supportsConsole(type: string) { return CONSOLE_SUPPORTED.has(type) }
@@ -226,6 +249,7 @@ function openCreate() {
   form.type = 'mc-java'
   form.description = emptyDoc()
   form.metaExtras = {}
+  form.visible = true
   connectInitial.value = null
   connectPayload.value = {}
   formOpen.value = true
@@ -237,6 +261,7 @@ function openEdit(s: AdminServerItem) {
   editing.value = s
   form.name = s.name
   form.type = s.type
+  form.visible = s.visible
   form.description = (s.description && !isEmptyDoc(s.description)) ? s.description : emptyDoc()
   const fullMeta = (s.meta || {}) as Record<string, unknown>
   // Split the persisted meta into "connection" vs "extra" so the connect subform
@@ -267,6 +292,7 @@ async function submitForm() {
     name: form.name,
     description: isEmptyDoc(form.description) ? null : form.description,
     meta,
+    visible: form.visible,
   }
   if (!editing.value) body.type = form.type
 
@@ -312,6 +338,18 @@ async function doResetToken() {
   } finally {
     tokenResetting.value = false
     tokenTarget.value = null
+  }
+}
+
+async function toggleVisible(s: AdminServerItem, next: boolean) {
+  busyId.value = s.id
+  try {
+    await useApi(`/api/admin/servers/${s.id}`, { method: 'PATCH', body: { visible: next } })
+    s.visible = next
+  } catch (e) {
+    if (e instanceof ApiError) toast.fromError(e)
+  } finally {
+    busyId.value = null
   }
 }
 

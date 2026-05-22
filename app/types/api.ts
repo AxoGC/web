@@ -44,6 +44,27 @@ export interface UserProfileStats {
   forum_likes_received: number
 }
 
+/** One entry of GET /api/users/:id/posts — newest-first user posts shown on
+ *  the profile page's "发帖" tab. Excludes body content. */
+export interface UserRecentPost {
+  id: number
+  title: string
+  comment_count: number
+  like_count: number
+  view_count: number
+  created_at: number
+}
+
+/** One entry of GET /api/users/:id/comments — newest-first user comments shown
+ *  on the profile page's "评论" tab. PostTitle is denormalized for linking. */
+export interface UserRecentComment {
+  id: number
+  post_id: number
+  post_title: string
+  content_excerpt: string
+  created_at: number
+}
+
 export interface FollowStats {
   follower_count: number
   following_count: number
@@ -297,6 +318,8 @@ export interface ServerDetail extends ServerSummary {
  */
 export interface AdminServerItem extends ServerSummary {
   description: ServerDescriptionDoc
+  /** When false, the server is hidden from /api/servers and its public detail. */
+  visible: boolean
 }
 
 export interface OnlineStatPoint {

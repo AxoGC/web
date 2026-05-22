@@ -169,13 +169,16 @@ const bStats = ref<StatsAxis[]>([])
 const loaded = ref(false)
 const loading = ref(false)
 
-const metrics = useGameMetrics()
+const metrics = useServerMetrics(serverId)
 const typeLabel = useServerTypeLabel()
 
 async function load() {
   if (!hasQuery.value) return
   loading.value = true
   try {
+    // Metric defs drive axis labels and value formatting; wait for them so
+    // the SSR render is fully populated.
+    await metrics.ready.value
     const [u1, u2, srv, s1, s2] = await Promise.all([
       useApi<PublicUser>(`/api/users/${aUid.value}`).catch(() => null),
       useApi<PublicUser>(`/api/users/${bUid.value}`).catch(() => null),

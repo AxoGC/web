@@ -53,7 +53,7 @@ definePageMeta({ layout: 'detail' })
 const route = useRoute()
 const id = computed(() => String(route.params.id))
 
-const { keys, labelFor, formatScore } = useGameMetrics()
+const { keys, labelFor, formatScore, ready } = useServerMetrics(id)
 
 // Per-axis state. Reactive object keyed by metric key so each card loads
 // independently — one slow / failing axis doesn't block the others.
@@ -75,8 +75,10 @@ async function loadOne(metric: string) {
 }
 
 async function loadAll() {
-  // Prime everything in parallel; useAsyncData with a single key keeps SSR hydration coherent.
-  await Promise.all(keys.map(k => loadOne(k)))
+  // Wait for metric defs (used for axis labels + the grid keys), then prime
+  // every leaderboard card in parallel.
+  await ready.value
+  await Promise.all(keys.value.map(k => loadOne(k)))
 }
 
 await useAsyncData(() => `srv.lb.all.${id.value}`, async () => {

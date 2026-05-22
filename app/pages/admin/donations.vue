@@ -5,8 +5,8 @@
     <UiCard padded class="mb-6">
       <h2 class="text-lg font-semibold mb-4">{{ $t('donation.admin_add') }}</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <UiField :label="$t('donation.admin_user_id')">
-          <UiInput v-model="form.userId" type="number" />
+        <UiField :label="$t('donation.admin_username')">
+          <UiInput v-model="form.username" type="text" autocomplete="off" />
         </UiField>
         <UiField :label="$t('donation.admin_amount')" required>
           <UiInput v-model="form.amount" type="number" inputmode="decimal" />
@@ -55,7 +55,7 @@ const toast = useToast()
 const { t } = useI18n()
 
 const form = reactive({
-  userId: '',
+  username: '',
   amount: '',
   message: '',
   public: true,
@@ -83,14 +83,14 @@ async function submit() {
     public: form.public,
     donated_at: form.donatedAt ? Math.floor(new Date(form.donatedAt).getTime() / 1000) : Math.floor(Date.now() / 1000),
   }
-  if (form.userId.trim()) body.user_id = Number(form.userId)
+  if (form.username.trim()) body.username = form.username.trim()
   saving.value = true
   try {
     await useApi('/api/donations', { method: 'POST', body })
     toast.success(t('actions.save'))
     form.amount = ''
     form.message = ''
-    form.userId = ''
+    form.username = ''
     await load()
   } catch (e) {
     if (e instanceof ApiError) toast.fromError(e)

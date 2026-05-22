@@ -8,12 +8,13 @@ export interface GameAvatar {
 }
 
 /**
- * Avatar source strategy per game. MC (both editions) has the Mojang skin head
- * mirror; other games fall back to the generic initial-letter chip.
+ * Avatar source strategy per game. Only Java edition has a stable name→skin
+ * mirror (mc-heads.net); Bedrock gamertags don't resolve to skins, and other
+ * games have no per-name avatar source.
  */
 export function useGameAvatar(type: ServerType | undefined | null) {
   function avatarFor(name: string, size = 32): GameAvatar {
-    if (type === 'mc-java' || type === 'mc-bedrock') {
+    if (type === 'mc-java') {
       return {
         src: `https://mc-heads.net/avatar/${encodeURIComponent(name)}/${size}`,
         pixelated: true,

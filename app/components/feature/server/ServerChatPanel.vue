@@ -13,33 +13,53 @@
       {{ $t('chat.login_required') }}
     </div>
     <template v-else>
-      <div ref="scroller"
-        class="h-72 overflow-y-auto pr-2 space-y-1.5 text-sm font-mono">
-        <div v-if="!messages.length" class="text-text-tertiary text-center py-6">
-          {{ $t('chat.empty') }}
+      <div class="relative">
+        <div ref="scroller"
+          class="h-72 overflow-y-auto pr-2 space-y-1.5 text-sm font-mono"
+          @scroll.passive="onScroll">
+          <div v-if="!messages.length" class="text-text-tertiary text-center py-6">
+            {{ $t('chat.empty') }}
+          </div>
+          <template v-for="m in messages" :key="m.id">
+            <div
+              v-if="m.kind === 'system'"
+              class="flex items-baseline gap-2 leading-snug text-text-tertiary italic"
+            >
+              <span class="text-xs shrink-0">{{ fmtTime(m.ts) }}</span>
+              <span class="break-words min-w-0">{{ systemLine(m) }}</span>
+            </div>
+            <div
+              v-else
+              class="flex items-baseline gap-2 leading-snug"
+            >
+              <span class="text-text-tertiary text-xs shrink-0">{{ fmtTime(m.ts) }}</span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] uppercase shrink-0 font-semibold"
+                :class="m.source === 'web' ? 'bg-brand-soft text-brand-400' : 'bg-bg-overlay text-text-secondary'">
+                {{ m.source }}
+              </span>
+              <span class="font-semibold shrink-0">{{ m.sender }}</span>
+              <span class="text-text-tertiary shrink-0">:</span>
+              <span class="break-words min-w-0">{{ m.content }}</span>
+            </div>
+          </template>
         </div>
-        <template v-for="m in messages" :key="m.id">
-          <div
-            v-if="m.kind === 'system'"
-            class="flex items-baseline gap-2 leading-snug text-text-tertiary italic"
+        <Transition
+          enter-active-class="transition duration-150 ease-out"
+          enter-from-class="opacity-0 translate-y-1"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition duration-100 ease-in"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 translate-y-1"
+        >
+          <button
+            v-if="hasNewMessages && !isAtBottom"
+            type="button"
+            class="absolute bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-brand-500 hover:bg-brand-600 text-white text-xs font-medium shadow-md"
+            @click="scrollToBottom(true)"
           >
-            <span class="text-xs shrink-0">{{ fmtTime(m.ts) }}</span>
-            <span class="break-words min-w-0">{{ systemLine(m) }}</span>
-          </div>
-          <div
-            v-else
-            class="flex items-baseline gap-2 leading-snug"
-          >
-            <span class="text-text-tertiary text-xs shrink-0">{{ fmtTime(m.ts) }}</span>
-            <span class="px-1.5 py-0.5 rounded text-[10px] uppercase shrink-0 font-semibold"
-              :class="m.source === 'web' ? 'bg-brand-soft text-brand-400' : 'bg-bg-overlay text-text-secondary'">
-              {{ m.source }}
-            </span>
-            <span class="font-semibold shrink-0">{{ m.sender }}</span>
-            <span class="text-text-tertiary shrink-0">:</span>
-            <span class="break-words min-w-0">{{ m.content }}</span>
-          </div>
-        </template>
+            {{ $t('chat.new_messages') }}
+          </button>
+        </Transition>
       </div>
 
       <form class="mt-3 flex gap-2" @submit.prevent="onSend">
@@ -80,11 +100,51 @@ const draft = ref('')
 const sending = ref(false)
 const errorCode = ref<string | null>(null)
 
-watch(messages, async () => {
+// Auto-scroll behavior: only stick to bottom when the user is already there.
+// If they've scrolled up to read history, leave their view alone and surface
+// a "new messages" button instead.
+const BOTTOM_THRESHOLD = 48
+const isAtBottom = ref(true)
+const hasNewMessages = ref(false)
+
+function onScroll() {
+  const el = scroller.value
+  if (!el) return
+  isAtBottom.value = el.scrollHeight - el.scrollTop - el.clientHeight <= BOTTOM_THRESHOLD
+  if (isAtBottom.value) hasNewMessages.value = false
+}
+
+async function scrollToBottom(smooth = false) {
   await nextTick()
   const el = scroller.value
-  if (el) el.scrollTop = el.scrollHeight
-}, { deep: false, flush: 'post' })
+  if (!el) return
+  if (smooth) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
+  else el.scrollTop = el.scrollHeight
+  isAtBottom.value = true
+  hasNewMessages.value = false
+}
+
+// Watch the tail id rather than the array ref: `messages.value.push()` mutates
+// the proxy and does NOT fire a shallow ref watcher, so the original watch
+// only ran on full reassignment (snapshot / channel switch). Tracking the
+// last id reliably fires on every appended message.
+watch(() => messages.value[messages.value.length - 1]?.id, async (newId, oldId) => {
+  if (!newId || newId === oldId) return
+  if (isAtBottom.value) {
+    await scrollToBottom()
+  } else {
+    hasNewMessages.value = true
+  }
+}, { flush: 'post' })
+
+// First time the scroller mounts (login gate flips), snap to bottom so the
+// freshly populated history starts at the latest message.
+watch(scroller, async (el) => {
+  if (!el) return
+  await nextTick()
+  el.scrollTop = el.scrollHeight
+  isAtBottom.value = true
+})
 
 async function onSend() {
   const text = draft.value.trim()
@@ -94,6 +154,7 @@ async function onSend() {
   try {
     await send(text)
     draft.value = ''
+    await scrollToBottom()
   } catch (e: any) {
     errorCode.value = e?.data?.code || e?.code || 'CHAT_SEND_FAILED'
   } finally {

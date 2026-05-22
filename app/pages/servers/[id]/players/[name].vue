@@ -108,7 +108,7 @@ const { t } = useI18n()
 const id = computed(() => String(route.params.id))
 const name = computed(() => decodeURIComponent(String(route.params.name)))
 
-const metrics = useGameMetrics()
+const metrics = useServerMetrics(id)
 const typeLabel = useServerTypeLabel()
 
 const { data: server } = await useAsyncData(
@@ -131,7 +131,12 @@ const statusLabel = computed(() => {
 
 const { data, error } = await useAsyncData(
   () => `srv.player.${id.value}.${name.value}`,
-  () => useApi<PlayerStats>(`/api/servers/${id.value}/players/${encodeURIComponent(name.value)}/stats`),
+  async () => {
+    // Wait for axis defs so SSR markup has labels in place when the radar /
+    // stat grid render.
+    await metrics.ready.value
+    return useApi<PlayerStats>(`/api/servers/${id.value}/players/${encodeURIComponent(name.value)}/stats`)
+  },
 )
 
 // Reverse-lookup the bound platform user + presence info. Both calls

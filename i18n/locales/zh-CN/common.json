@@ -261,7 +261,7 @@
     "donated_at": "捐赠时间",
     "message": "留言",
     "admin_add": "录入捐赠",
-    "admin_user_id": "用户 ID（留空 = 匿名）",
+    "admin_username": "用户名（留空 = 匿名）",
     "admin_amount": "金额",
     "admin_message": "留言（可选）",
     "admin_public": "公开显示",
@@ -321,6 +321,9 @@
     "forum_posts": "发帖",
     "forum_comments": "回复",
     "forum_likes": "收到点赞",
+    "forum_empty_posts": "ta 还没发过帖子",
+    "forum_empty_comments": "ta 还没评论过",
+    "forum_comment_on": "评论于：",
     "follow": "关注",
     "unfollow": "已关注",
     "unfollow_action": "取消关注",
@@ -361,6 +364,8 @@
     "server_form_extra_meta": "其他 Meta",
     "server_form_extra_meta_hint": "连接信息之外的自由字段（motd、mods 等）。",
     "server_form_extra_meta_invalid": "其他 Meta 必须是 JSON 对象",
+    "server_form_visible": "公开显示",
+    "server_form_visible_hint": "关闭后服务器将从公开列表和详情页隐藏，但游戏端连接、心跳和后台操作不受影响。",
     "meta_panel_hint": "按字段填写，或切到 JSON 视图直接编辑底层 Meta。",
     "meta_view_form": "字段",
     "meta_view_json": "JSON",
@@ -478,7 +483,8 @@
     "system_died_blown": "{name} 被炸飞了",
     "system_died_starve": "{name} 饿死了",
     "system_died_arrow": "{name} 中箭身亡",
-    "system_died_generic": "{name} 死了"
+    "system_died_generic": "{name} 死了",
+    "new_messages": "↓ 有新消息"
   },
   "pk": {
     "title": "对战",
@@ -514,12 +520,6 @@
     "bad_type": "不支持的文件类型，只接受图片"
   },
   "metric": {
-    "walk_total_m": "移动距离",
-    "play_time": "在线时长",
-    "survival_index": "存活指数",
-    "blocks_placed": "放置方块",
-    "blocks_broken": "破坏方块",
-    "kills_total": "击杀数",
     "play_time_fmt": "{h}小时{m}分钟",
     "no_data": "暂无统计数据"
   }

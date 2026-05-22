@@ -1,12 +1,12 @@
 <template>
   <section v-if="items.length || isLoggedIn" class="relative">
     <div
-      class="relative overflow-hidden rounded-xl border border-border-subtle bg-bg-elevated p-4 md:p-10 min-h-[10rem]"
+      class="relative overflow-hidden rounded-xl border border-border-subtle bg-bg-elevated p-6 md:p-8"
     >
       <!-- Decorative outsized quote glyph. Behind everything, very faded;
            positioned slightly off the top-left so the curl reads naturally. -->
       <LucideQuote
-        :size="160"
+        :size="100"
         class="absolute -top-4 -left-4 text-text-tertiary/10 pointer-events-none select-none"
         aria-hidden="true"
       />

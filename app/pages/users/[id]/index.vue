@@ -57,10 +57,13 @@
             </div>
           </div>
 
-          <!-- Inline stats strip -->
+          <!-- Inline stats strip. Six cells: follow + presence + check-in + likes
+               received. Likes-received was hoisted up from the bottom card so the
+               passive aggregate sits with the other passive stats and the lower
+               card can focus on active output (posts/comments). -->
           <div
             :class="[
-              'mt-5 pt-4 grid grid-cols-2 sm:grid-cols-5 gap-3 text-center border-t',
+              'mt-5 pt-4 grid grid-cols-2 sm:grid-cols-6 gap-3 text-center border-t',
               hasBg ? 'border-white/15' : 'border-border-subtle',
             ]"
           >
@@ -93,6 +96,10 @@
               <div class="mt-1 text-sm font-medium">
                 {{ $t('profile.checkin_total_value', { n: stats?.checkin_total ?? 0 }) }}
               </div>
+            </div>
+            <div>
+              <div :class="['text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">{{ $t('profile.forum_likes') }}</div>
+              <div class="mt-1 text-sm font-medium">{{ stats?.forum_likes_received ?? 0 }}</div>
             </div>
           </div>
         </div>
@@ -161,10 +168,10 @@
                 class="bg-bg-overlay/40 rounded px-2.5 py-1.5"
               >
                 <p class="text-[10px] text-text-tertiary uppercase tracking-wide">
-                  {{ metrics.labelFor(axis.key) }}
+                  {{ metrics.labelFor(b.server_id, axis.key) }}
                 </p>
                 <p class="text-sm font-medium text-text-primary">
-                  {{ metrics.formatScore(axis.key, axis.value) }}
+                  {{ metrics.formatScore(b.server_id, axis.key, axis.value) }}
                 </p>
               </div>
             </div>
@@ -187,20 +194,39 @@
 
       <UiCard padded>
         <h2 class="text-lg font-semibold mb-3">{{ $t('profile.forum_title') }}</h2>
-        <div class="grid grid-cols-3 gap-4 text-center">
-          <div>
-            <div class="text-2xl font-bold">{{ stats?.forum_post_count ?? 0 }}</div>
-            <div class="text-xs text-text-tertiary mt-1">{{ $t('profile.forum_posts') }}</div>
-          </div>
-          <div>
-            <div class="text-2xl font-bold">{{ stats?.forum_comment_count ?? 0 }}</div>
-            <div class="text-xs text-text-tertiary mt-1">{{ $t('profile.forum_comments') }}</div>
-          </div>
-          <div>
-            <div class="text-2xl font-bold">{{ stats?.forum_likes_received ?? 0 }}</div>
-            <div class="text-xs text-text-tertiary mt-1">{{ $t('profile.forum_likes') }}</div>
-          </div>
-        </div>
+        <UiTabs v-model="activityTab" :tabs="activityTabs">
+          <UiTabPanel value="posts">
+            <UiEmpty v-if="!recentPosts.length" :message="$t('profile.forum_empty_posts')" />
+            <ul v-else class="divide-y divide-border-subtle">
+              <li v-for="p in recentPosts" :key="p.id" class="py-2.5">
+                <NuxtLink :to="`/posts/${p.id}`" class="block group">
+                  <div class="font-medium text-text-primary group-hover:text-brand-400 truncate">{{ p.title }}</div>
+                  <div class="mt-1 flex items-center gap-3 text-xs text-text-tertiary">
+                    <span>{{ formatDate(p.created_at) }}</span>
+                    <span class="inline-flex items-center gap-1"><LucideMessageCircle :size="12" />{{ p.comment_count }}</span>
+                    <span class="inline-flex items-center gap-1"><LucideEye :size="12" />{{ p.view_count }}</span>
+                    <span class="inline-flex items-center gap-1"><LucideHeart :size="12" />{{ p.like_count }}</span>
+                  </div>
+                </NuxtLink>
+              </li>
+            </ul>
+          </UiTabPanel>
+          <UiTabPanel value="comments">
+            <UiEmpty v-if="!recentComments.length" :message="$t('profile.forum_empty_comments')" />
+            <ul v-else class="divide-y divide-border-subtle">
+              <li v-for="c in recentComments" :key="c.id" class="py-2.5">
+                <NuxtLink :to="`/posts/${c.post_id}#comment-${c.id}`" class="block group">
+                  <div class="text-xs text-text-tertiary truncate">
+                    {{ $t('profile.forum_comment_on') }}
+                    <span class="font-medium text-text-secondary group-hover:text-brand-400">{{ c.post_title }}</span>
+                  </div>
+                  <div class="mt-1 text-sm text-text-primary wrap-break-word">{{ c.content_excerpt }}</div>
+                  <div class="mt-1 text-xs text-text-tertiary">{{ formatDate(c.created_at) }}</div>
+                </NuxtLink>
+              </li>
+            </ul>
+          </UiTabPanel>
+        </UiTabs>
       </UiCard>
     </div>
     <UiSkeleton v-else :height="180" />
@@ -211,7 +237,16 @@
 import { computed, onMounted, watch } from 'vue'
 import { formatDate, relativeTime } from '~/utils/format'
 import { useAuthStore } from '~/stores/auth'
-import type { FollowStats, PlayerStats, PublicUser, StatsAxis, UserBinding, UserProfileStats } from '~/types/api'
+import type {
+  FollowStats,
+  PlayerStats,
+  PublicUser,
+  StatsAxis,
+  UserBinding,
+  UserProfileStats,
+  UserRecentComment,
+  UserRecentPost,
+} from '~/types/api'
 
 definePageMeta({ layout: 'detail' })
 
@@ -245,7 +280,7 @@ const visibleBindings = computed<UserBinding[]>(() =>
   bindingsExpanded.value ? sortedBindings.value : sortedBindings.value.slice(0, BINDINGS_PREVIEW),
 )
 
-const metrics = useGameMetrics()
+const metrics = useMetricsRegistry()
 const typeLabel = useServerTypeLabel()
 const presence = usePresence()
 
@@ -255,12 +290,15 @@ function bindingKey(b: UserBinding) {
 
 // One stats fetch per binding; failures (offline server, unknown player) are
 // silently dropped — the binding row still renders, just without the inline
-// numbers.
+// numbers. Each binding's server has its own metric defs (PLAN §10.6), so we
+// also prime the metrics registry for each unique server_id in parallel.
 const { data: bindingStatsResp } = await useAsyncData(
   () => `user.${id.value}.binding-stats`,
   async () => {
     const items = bindingsResp.value?.items ?? []
     if (!items.length) return {} as Record<string, StatsAxis[]>
+    const uniqueServerIds = Array.from(new Set(items.map(b => b.server_id)))
+    await Promise.all(uniqueServerIds.map(sid => metrics.loadFor(sid)))
     const results = await Promise.all(items.map(b =>
       useApi<PlayerStats>(`/api/servers/${b.server_id}/players/${encodeURIComponent(b.game_name)}/stats`)
         .then(r => [bindingKey(b), r.stats ?? []] as const)
@@ -309,6 +347,26 @@ const { data: stats } = await useAsyncData(
   () => `user.${id.value}.stats`,
   () => useApi<UserProfileStats>(`/api/users/${id.value}/profile-stats`).catch(() => null),
 )
+
+// Recent activity (5 newest posts + 5 newest comments). Fetched alongside the
+// page rather than per-tab because the counts already render eagerly in the tab
+// labels — the body just needs to switch.
+const { data: recentPostsResp } = await useAsyncData(
+  () => `user.${id.value}.recent-posts`,
+  () => useApi<{ items: UserRecentPost[] }>(`/api/users/${id.value}/posts`).catch(() => ({ items: [] as UserRecentPost[] })),
+)
+const { data: recentCommentsResp } = await useAsyncData(
+  () => `user.${id.value}.recent-comments`,
+  () => useApi<{ items: UserRecentComment[] }>(`/api/users/${id.value}/comments`).catch(() => ({ items: [] as UserRecentComment[] })),
+)
+const recentPosts = computed<UserRecentPost[]>(() => recentPostsResp.value?.items ?? [])
+const recentComments = computed<UserRecentComment[]>(() => recentCommentsResp.value?.items ?? [])
+
+const activityTab = ref('posts')
+const activityTabs = computed(() => [
+  { value: 'posts', label: `${t('profile.forum_posts')} ${stats.value?.forum_post_count ?? 0}` },
+  { value: 'comments', label: `${t('profile.forum_comments')} ${stats.value?.forum_comment_count ?? 0}` },
+])
 
 const { data: followStats, refresh: refreshFollowStats } = await useAsyncData(
   () => `user.${id.value}.follow-stats`,

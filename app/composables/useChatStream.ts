@@ -40,6 +40,11 @@ export function useChatStream(channel: Ref<string>, opts: ChatStreamOpts = {}) {
   let backoff = 1000
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null
   let stopped = false
+  // Watchdog: server pings every 15s. If we don't see any frame for ~25s the
+  // connection is presumed dead (zombie TCP, suspended laptop, mid-stream
+  // proxy drop) and we force a reconnect.
+  let watchdogTimer: ReturnType<typeof setTimeout> | null = null
+  const watchdogMs = 25_000
 
   function push(m: ChatMessage) {
     const last = messages.value[messages.value.length - 1]
@@ -55,6 +60,23 @@ export function useChatStream(channel: Ref<string>, opts: ChatStreamOpts = {}) {
     messages.value = arr.slice(-limit)
     const last = messages.value[messages.value.length - 1]
     if (last) lastEventId.value = last.id
+  }
+
+  function bumpWatchdog() {
+    if (watchdogTimer) clearTimeout(watchdogTimer)
+    watchdogTimer = setTimeout(() => {
+      // Assume the stream is dead — abort the current reader and reconnect.
+      if (controller) {
+        try { controller.abort() } catch {}
+      }
+    }, watchdogMs)
+  }
+
+  function clearWatchdog() {
+    if (watchdogTimer) {
+      clearTimeout(watchdogTimer)
+      watchdogTimer = null
+    }
   }
 
   async function connect() {
@@ -86,8 +108,10 @@ export function useChatStream(channel: Ref<string>, opts: ChatStreamOpts = {}) {
       if (!res.ok || !res.body) {
         throw new Error(`HTTP ${res.status}`)
       }
-      connected.value = true
-      backoff = 1000
+      // Don't flip connected here — the TCP/HTTP response succeeding doesn't
+      // prove the SSE stream is alive (proxies may buffer, NAT may freeze).
+      // We wait for the first frame to land in handleFrame().
+      bumpWatchdog()
       const reader = res.body.getReader()
       const decoder = new TextDecoder('utf-8')
       let buf = ''
@@ -108,6 +132,7 @@ export function useChatStream(channel: Ref<string>, opts: ChatStreamOpts = {}) {
       throw new Error('stream closed')
     } catch (e) {
       if (stopped) return
+      clearWatchdog()
       connected.value = false
       error.value = (e as Error)?.message || 'stream error'
       scheduleReconnect()
@@ -125,6 +150,22 @@ export function useChatStream(channel: Ref<string>, opts: ChatStreamOpts = {}) {
       else if (line.startsWith('data:')) dataParts.push(line.slice(5).replace(/^ /, ''))
     }
     const dataStr = dataParts.join('\n')
+    // Any received frame proves the pipe is alive — refresh the watchdog and
+    // flip the visible state to connected on the very first one.
+    bumpWatchdog()
+    if (!connected.value) connected.value = true
+    if (event === 'ready') {
+      // Server-confirmed subscription. Safe to reset the backoff window now;
+      // we've crossed from "still waiting on headers" to "stream is live".
+      backoff = 1000
+      try {
+        const r = JSON.parse(dataStr) as { last_id?: string } | null
+        if (r && typeof r.last_id === 'string' && r.last_id) {
+          lastEventId.value = r.last_id
+        }
+      } catch {}
+      return
+    }
     if (event === 'ping') return
     if (event === 'snapshot') {
       try {
@@ -153,6 +194,7 @@ export function useChatStream(channel: Ref<string>, opts: ChatStreamOpts = {}) {
 
   function stop() {
     stopped = true
+    clearWatchdog()
     if (reconnectTimer) {
       clearTimeout(reconnectTimer)
       reconnectTimer = null
@@ -172,6 +214,7 @@ export function useChatStream(channel: Ref<string>, opts: ChatStreamOpts = {}) {
   function onVisibility() {
     if (typeof document === 'undefined') return
     if (document.hidden) {
+      clearWatchdog()
       if (controller) try { controller.abort() } catch {}
       connected.value = false
     } else {

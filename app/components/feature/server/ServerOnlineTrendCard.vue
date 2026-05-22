@@ -23,7 +23,7 @@
         v-if="chartOption"
         :option="chartOption"
         autoresize
-        style="width: 100%; height: 320px;"
+        style="width: 100%; height: 240px;"
       />
     </ClientOnly>
   </UiCard>

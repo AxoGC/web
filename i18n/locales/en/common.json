@@ -261,7 +261,7 @@
     "donated_at": "Date",
     "message": "Message",
     "admin_add": "Add donation",
-    "admin_user_id": "User ID (blank = anonymous)",
+    "admin_username": "Username (blank = anonymous)",
     "admin_amount": "Amount",
     "admin_message": "Message (optional)",
     "admin_public": "Public",
@@ -321,6 +321,9 @@
     "forum_posts": "Threads",
     "forum_comments": "Replies",
     "forum_likes": "Likes received",
+    "forum_empty_posts": "No posts yet.",
+    "forum_empty_comments": "No comments yet.",
+    "forum_comment_on": "Comment on:",
     "follow": "Follow",
     "unfollow": "Following",
     "unfollow_action": "Unfollow",
@@ -361,6 +364,8 @@
     "server_form_extra_meta": "Other meta",
     "server_form_extra_meta_hint": "Free-form fields outside of the connection payload (motd, mods, etc.).",
     "server_form_extra_meta_invalid": "Other meta must be a JSON object",
+    "server_form_visible": "Visible",
+    "server_form_visible_hint": "Hidden servers are removed from the public list and detail page; the plugin link, heartbeat and admin actions are unaffected.",
     "meta_panel_hint": "Fill the fields, or switch to JSON to edit the underlying Meta directly.",
     "meta_view_form": "Fields",
     "meta_view_json": "JSON",
@@ -478,7 +483,8 @@
     "system_died_blown": "{name} was blown up",
     "system_died_starve": "{name} starved to death",
     "system_died_arrow": "{name} was shot",
-    "system_died_generic": "{name} died"
+    "system_died_generic": "{name} died",
+    "new_messages": "↓ New messages"
   },
   "pk": {
     "title": "PK",
@@ -514,12 +520,6 @@
     "copyright": "© {year} Axolotland Gaming Club"
   },
   "metric": {
-    "walk_total_m": "Distance",
-    "play_time": "Play time",
-    "survival_index": "Survival index",
-    "blocks_placed": "Blocks placed",
-    "blocks_broken": "Blocks broken",
-    "kills_total": "Kills",
     "play_time_fmt": "{h}h {m}m",
     "no_data": "No stats yet"
   }

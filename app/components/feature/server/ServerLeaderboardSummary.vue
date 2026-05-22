@@ -34,11 +34,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, toRef } from 'vue'
 import type { MetricChampion } from '~/types/api'
 
 const props = defineProps<{ serverId: string | number }>()
-const metrics = useGameMetrics()
+const metrics = useServerMetrics(toRef(props, 'serverId'))
 
 const { data } = await useAsyncData(
   () => `server.champions.${props.serverId}`,
