@@ -49,6 +49,7 @@
   "PARENT_NOT_FOUND": "Parent comment not found.",
   "POST_CREATE_FAILED": "Failed to publish — try again.",
   "POST_DELETE_FAILED": "Failed to delete post — try again.",
+  "POST_UPDATE_FAILED": "Failed to update post — try again.",
   "COMMENT_CREATE_FAILED": "Failed to post comment — try again.",
   "COMMENT_NOT_FOUND": "Comment not found.",
   "COMMENT_DELETE_FAILED": "Failed to delete comment — try again.",

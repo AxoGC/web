@@ -6,6 +6,7 @@
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 flex-wrap mb-1">
             <UiTag v-if="post.pinned" size="sm" variant="warning">{{ $t('forum.pinned') }}</UiTag>
+            <UiTag v-if="post.locked" size="sm" variant="default">{{ $t('forum.locked') }}</UiTag>
             <h3 class="font-semibold text-text-primary hover:text-brand-400 truncate min-w-0 flex-1">{{ post.title }}</h3>
           </div>
           <div class="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-text-tertiary">

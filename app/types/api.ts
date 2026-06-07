@@ -127,6 +127,7 @@ export interface PostListItem {
   like_count: number
   view_count: number
   pinned: boolean
+  locked: boolean
   last_reply_at: number
   created_at: number
   tags: Tag[]

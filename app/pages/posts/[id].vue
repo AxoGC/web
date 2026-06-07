@@ -50,7 +50,7 @@
         </ul>
       </section>
 
-      <div class="mt-4 flex items-center gap-3">
+      <div class="mt-4 flex items-center gap-3 flex-wrap">
         <UiButton
           :variant="liked ? 'primary' : 'outline'"
           :loading="likeBusy"
@@ -61,6 +61,26 @@
           {{ likeCount }}
         </UiButton>
         <div class="flex-1" />
+        <UiButton
+          v-if="canPin"
+          variant="ghost"
+          size="sm"
+          :loading="pinBusy"
+          @click="togglePin"
+        >
+          <template #leading><LucidePin :size="14" /></template>
+          {{ post.pinned ? $t('forum.unpin_action') : $t('forum.pin_action') }}
+        </UiButton>
+        <UiButton
+          v-if="canLock"
+          variant="ghost"
+          size="sm"
+          :loading="lockBusy"
+          @click="toggleLock"
+        >
+          <template #leading><LucideLock :size="14" /></template>
+          {{ post.locked ? $t('forum.unlock_action') : $t('forum.lock_action') }}
+        </UiButton>
         <UiButton
           v-if="canDelete"
           variant="ghost"
@@ -103,6 +123,11 @@
 
       <section class="mt-10">
         <h2 class="text-lg font-semibold mb-4">{{ $t('forum.comments') }} ({{ post.comment_count }})</h2>
+
+        <div v-if="post.locked" class="mb-6 px-3 py-2 rounded-md border border-border-subtle bg-bg-overlay/40 text-sm text-text-tertiary inline-flex items-center gap-2">
+          <LucideLock :size="14" />
+          <span>{{ $t('forum.locked_hint') }}</span>
+        </div>
 
         <div v-if="auth.isLoggedIn && !post.locked" class="mb-6">
           <UiTextarea v-model="commentDraft" :rows="4" :placeholder="$t('forum.reply_placeholder')" />
@@ -229,6 +254,8 @@ const liked = ref(false)
 const likeCount = ref(0)
 const deleteOpen = ref(false)
 const deleting = ref(false)
+const pinBusy = ref(false)
+const lockBusy = ref(false)
 const commentDeleteOpen = ref(false)
 const commentDeleting = ref(false)
 const commentDeleteId = ref<number | null>(null)
@@ -347,6 +374,50 @@ const canDelete = computed(() => {
   if (!p || !auth.isLoggedIn) return false
   return auth.user?.id === p.author.id || auth.isMod
 })
+
+const canPin = computed(() => !!post.value && auth.isAdmin)
+
+const canLock = computed(() => {
+  const p = post.value
+  if (!p || !auth.isLoggedIn) return false
+  return auth.isAdmin || auth.user?.id === p.author.id
+})
+
+async function togglePin() {
+  const p = post.value
+  if (!p) return
+  const next = !p.pinned
+  if (!confirm(t(next ? 'forum.pin_confirm' : 'forum.unpin_confirm'))) return
+  pinBusy.value = true
+  try {
+    await useApi(`/api/posts/${id.value}/pin`, { method: 'PATCH', body: { pinned: next } })
+    p.pinned = next
+    toast.success(t(next ? 'forum.post_pinned' : 'forum.post_unpinned'))
+  } catch (e) {
+    if (e instanceof ApiError) toast.fromError(e)
+    else toast.error(t('errors.UNKNOWN'))
+  } finally {
+    pinBusy.value = false
+  }
+}
+
+async function toggleLock() {
+  const p = post.value
+  if (!p) return
+  const next = !p.locked
+  if (!confirm(t(next ? 'forum.lock_confirm' : 'forum.unlock_confirm'))) return
+  lockBusy.value = true
+  try {
+    await useApi(`/api/posts/${id.value}/lock`, { method: 'PATCH', body: { locked: next } })
+    p.locked = next
+    toast.success(t(next ? 'forum.post_locked' : 'forum.post_unlocked'))
+  } catch (e) {
+    if (e instanceof ApiError) toast.fromError(e)
+    else toast.error(t('errors.UNKNOWN'))
+  } finally {
+    lockBusy.value = false
+  }
+}
 
 function canDeleteComment(c: CommentItem): boolean {
   if (!auth.isLoggedIn) return false
