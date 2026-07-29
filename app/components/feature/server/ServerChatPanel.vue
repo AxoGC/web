@@ -9,74 +9,76 @@
       </span>
     </div>
 
-    <div v-if="!isLoggedIn" class="text-sm text-text-tertiary text-center py-6">
-      {{ $t('chat.login_required') }}
-    </div>
-    <template v-else>
-      <div class="relative">
-        <div ref="scroller"
-          class="h-72 overflow-y-auto pr-2 space-y-1.5 text-sm font-mono"
-          @scroll.passive="onScroll">
-          <div v-if="!messages.length" class="text-text-tertiary text-center py-6">
-            {{ $t('chat.empty') }}
-          </div>
-          <template v-for="m in messages" :key="m.id">
-            <div
-              v-if="m.kind === 'system'"
-              class="flex items-baseline gap-2 leading-snug text-text-tertiary italic"
-            >
-              <span class="text-xs shrink-0">{{ fmtTime(m.ts) }}</span>
-              <span class="break-words min-w-0">{{ systemLine(m) }}</span>
-            </div>
-            <div
-              v-else
-              class="flex items-baseline gap-2 leading-snug"
-            >
-              <span class="text-text-tertiary text-xs shrink-0">{{ fmtTime(m.ts) }}</span>
-              <span class="px-1.5 py-0.5 rounded text-[10px] uppercase shrink-0 font-semibold"
-                :class="m.source === 'web' ? 'bg-brand-soft text-brand-400' : 'bg-bg-overlay text-text-secondary'">
-                {{ m.source }}
-              </span>
-              <span class="font-semibold shrink-0">{{ m.sender }}</span>
-              <span class="text-text-tertiary shrink-0">:</span>
-              <span class="break-words min-w-0">{{ m.content }}</span>
-            </div>
-          </template>
+    <div class="relative">
+      <div ref="scroller"
+        class="h-72 overflow-y-auto pr-2 space-y-1.5 text-sm font-mono"
+        @scroll.passive="onScroll">
+        <div v-if="!messages.length" class="text-text-tertiary text-center py-6">
+          {{ $t('chat.empty') }}
         </div>
-        <Transition
-          enter-active-class="transition duration-150 ease-out"
-          enter-from-class="opacity-0 translate-y-1"
-          enter-to-class="opacity-100 translate-y-0"
-          leave-active-class="transition duration-100 ease-in"
-          leave-from-class="opacity-100 translate-y-0"
-          leave-to-class="opacity-0 translate-y-1"
-        >
-          <button
-            v-if="hasNewMessages && !isAtBottom"
-            type="button"
-            class="absolute bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-brand-500 hover:bg-brand-600 text-white text-xs font-medium shadow-md"
-            @click="scrollToBottom(true)"
+        <template v-for="m in messages" :key="m.id">
+          <!-- Plain inline flow (not flex) on purpose: when a message wraps,
+               a normal inline run breaks back to the start of the block —
+               i.e. under the timestamp — instead of indenting under the
+               sender column like a flex row would. -->
+          <div
+            v-if="m.kind === 'system'"
+            class="leading-snug text-text-tertiary italic"
           >
-            {{ $t('chat.new_messages') }}
-          </button>
-        </Transition>
+            <span class="text-xs mr-1.5">{{ fmtTime(m.ts) }}</span>
+            <span class="break-words">{{ systemLine(m) }}</span>
+          </div>
+          <div
+            v-else
+            class="leading-snug"
+          >
+            <span class="text-text-tertiary text-xs mr-1.5">{{ fmtTime(m.ts) }}</span>
+            <span class="inline-block px-1.5 py-0.5 rounded text-[10px] uppercase font-semibold mr-1.5"
+              :class="m.source === 'web' ? 'bg-brand-soft text-brand-400' : 'bg-bg-overlay text-text-secondary'">
+              {{ m.source }}
+            </span>
+            <span class="font-semibold">{{ m.sender }}</span>
+            <span class="text-text-tertiary mr-1.5">:</span>
+            <span class="break-words">{{ m.content }}</span>
+          </div>
+        </template>
       </div>
+      <Transition
+        enter-active-class="transition duration-150 ease-out"
+        enter-from-class="opacity-0 translate-y-1"
+        enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition duration-100 ease-in"
+        leave-from-class="opacity-100 translate-y-0"
+        leave-to-class="opacity-0 translate-y-1"
+      >
+        <button
+          v-if="hasNewMessages && !isAtBottom"
+          type="button"
+          class="absolute bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-brand-500 hover:bg-brand-600 text-white text-xs font-medium shadow-md"
+          @click="scrollToBottom(true)"
+        >
+          {{ $t('chat.new_messages') }}
+        </button>
+      </Transition>
+    </div>
 
-      <form class="mt-3 flex gap-2" @submit.prevent="onSend">
-        <UiInput
-          v-model="draft"
-          :placeholder="$t('chat.placeholder')"
-          :disabled="sending"
-          class="flex-1"
-        />
-        <UiButton type="submit" :loading="sending" :disabled="!draft.trim()">
-          {{ $t('actions.send') }}
-        </UiButton>
-      </form>
-      <p v-if="errorCode" class="text-xs text-danger-400 mt-1">
-        {{ errorCode }}
-      </p>
-    </template>
+    <form v-if="isLoggedIn" class="mt-3 flex gap-2" @submit.prevent="onSend">
+      <UiInput
+        v-model="draft"
+        :placeholder="$t('chat.placeholder')"
+        :disabled="sending"
+        class="flex-1"
+      />
+      <UiButton type="submit" :loading="sending" :disabled="!draft.trim()">
+        {{ $t('actions.send') }}
+      </UiButton>
+    </form>
+    <p v-else class="text-xs text-text-tertiary text-center mt-3">
+      {{ $t('chat.login_required') }}
+    </p>
+    <p v-if="errorCode" class="text-xs text-danger-400 mt-1">
+      {{ errorCode }}
+    </p>
   </UiCard>
 </template>
 
@@ -137,8 +139,8 @@ watch(() => messages.value[messages.value.length - 1]?.id, async (newId, oldId) 
   }
 }, { flush: 'post' })
 
-// First time the scroller mounts (login gate flips), snap to bottom so the
-// freshly populated history starts at the latest message.
+// Once the scroller mounts, snap to bottom so the freshly populated history
+// starts at the latest message.
 watch(scroller, async (el) => {
   if (!el) return
   await nextTick()

@@ -419,3 +419,65 @@ export interface AuditLog {
   detail?: unknown
   timestamp: number | string
 }
+
+/**
+ * Behavior-log query requests. One request = one category ("一锤定音" — a
+ * single lookup, not an iterative investigation; repeated verification means
+ * submitting another request). Metadata is always public regardless of
+ * status; `rows` can hold up to 5000 entries, so the backend only ever
+ * attaches it to the single-item GET (never the list) — fetch by id to
+ * populate it, don't expect it on items returned from the list endpoint.
+ */
+export type LogCategory = 'block' | 'kill' | 'player_presence' | 'container' | 'chat'
+export type LogQueryStatus = 'pending' | 'approved' | 'rejected'
+
+/** Category-specific filter keys — see useLogCategories() for the whitelist per category. */
+export interface LogQueryFilters {
+  action?: string
+  block_id?: string
+  world?: string
+  entity_type?: string
+  /** JSON-encoded [[xMin,xMax],[yMin,yMax],[zMin,zMax]] bounding box. */
+  pos_range?: string
+}
+
+export interface LogQueryRequestItem {
+  id: number
+  requester_user_id: number
+  target_server_id: number
+  target_player: string
+  category: LogCategory
+  reason: string
+  /** Unix seconds; 0/absent means unbounded. */
+  from_ts?: number
+  to_ts?: number
+  filters?: LogQueryFilters
+  status: LogQueryStatus
+  /** Present only once rejected — the admin's reason, if they gave one. */
+  reject_reason?: string
+  approved_from_ts?: number
+  approved_to_ts?: number
+  approved_filters?: LogQueryFilters
+  reviewed_by_user_id?: number
+  reviewed_at?: number
+  created_at: number
+  /** Present only once approved — the frozen snapshot, shape depends on category. */
+  rows?: Record<string, unknown>[]
+}
+
+export type PromotionClaimStatus = 'granted' | 'revoked'
+
+export interface PromotionClaimItem {
+  id: number
+  user_id: number
+  description_json: TiptapDoc
+  description_text: string
+  points: number
+  status: PromotionClaimStatus
+  /** Present only once revoked. */
+  revoke_reason?: string
+  revoke_penalty?: number
+  reviewed_by_user_id?: number
+  reviewed_at?: number
+  created_at: number
+}

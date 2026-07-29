@@ -13,6 +13,41 @@ export function relativeTime(unixSeconds: number, nowSeconds = Math.floor(Date.n
   return { kind: 'date', date: `${yyyy}-${mm}-${dd}` }
 }
 
+/**
+ * Calendar-day-bucketed timestamp parts for evidence-review UI: the clock
+ * time is always absolute ("15:04"-style HH:MM, never "5 minutes ago" —
+ * fuzzy relative time undermines auditability), but the date part collapses
+ * when redundant (today: omitted entirely) or scannable as a small day
+ * count (this week: yesterday/day-before-yesterday/N days ago), and drops
+ * the year when it's the current one. Locale only affects month-name
+ * formatting (via Intl) — the day-count wording is translated by the caller
+ * from `kind`/`n`, same split as `relativeTime()` above.
+ */
+export interface AuditTimeParts {
+  kind: 'today' | 'yesterday' | 'day_before_yesterday' | 'days_ago' | 'dated'
+  n?: number
+  datePart?: string
+  time: string
+}
+
+export function auditTimeParts(date: Date, locale: string, now = new Date()): AuditTimeParts {
+  const time = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(date)
+  const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
+  const dayDiff = Math.round((startOfDay(now) - startOfDay(date)) / 86_400_000)
+
+  if (dayDiff === 0) return { kind: 'today', time }
+  if (dayDiff === 1) return { kind: 'yesterday', time }
+  if (dayDiff === 2) return { kind: 'day_before_yesterday', time }
+  if (dayDiff >= 3 && dayDiff <= 6) return { kind: 'days_ago', n: dayDiff, time }
+
+  const sameYear = date.getFullYear() === now.getFullYear()
+  const datePart = new Intl.DateTimeFormat(locale, sameYear
+    ? { month: 'short', day: 'numeric' }
+    : { year: 'numeric', month: 'short', day: 'numeric' },
+  ).format(date)
+  return { kind: 'dated', datePart, time }
+}
+
 export function formatDate(unixSeconds: number) {
   if (!unixSeconds) return ''
   const d = new Date(unixSeconds * 1000)

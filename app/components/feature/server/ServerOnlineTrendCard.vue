@@ -32,6 +32,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import type { OnlineStatPoint } from '~/types/api'
+import { useTheme } from '~/composables/useTheme'
 
 const props = defineProps<{ serverId: string | number }>()
 const range = ref<'24h' | '7d' | '30d'>('24h')
@@ -44,30 +45,41 @@ const { data: stats, refresh } = await useAsyncData(
 
 watch(range, () => void refresh())
 
+// Canvas can't resolve CSS custom properties (var(--foo) silently falls back
+// to black on an invalid color), so echarts needs literal colors here —
+// picked per theme instead of copy-pasting design tokens.
+const { resolved: themeMode } = useTheme()
+const CHART_COLORS = {
+  dark: { axisLine: '#2f343f', splitLine: '#232730', label: '#9199a6', tooltipBg: '#232730', tooltipBorder: '#2f343f', tooltipText: '#e8eaed' },
+  light: { axisLine: '#e1e4e9', splitLine: '#eef0f3', label: '#6b7280', tooltipBg: '#f1f3f5', tooltipBorder: '#e1e4e9', tooltipText: '#1a1d23' },
+} as const
+
 const chartOption = computed(() => {
   const pts = stats.value?.points || []
+  const c = CHART_COLORS[themeMode.value]
   return {
     backgroundColor: 'transparent',
     grid: { left: 36, right: 12, top: 16, bottom: 32 },
     xAxis: {
       type: 'time',
-      axisLine: { lineStyle: { color: 'var(--border-default)' } },
-      axisLabel: { color: 'var(--text-tertiary)', fontSize: 11 },
+      axisLine: { lineStyle: { color: c.axisLine } },
+      axisLabel: { color: c.label, fontSize: 11 },
     },
     yAxis: {
       type: 'value',
-      splitLine: { lineStyle: { color: 'var(--border-subtle)' } },
-      axisLabel: { color: 'var(--text-tertiary)', fontSize: 11 },
+      splitLine: { lineStyle: { color: c.splitLine } },
+      axisLabel: { color: c.label, fontSize: 11 },
     },
     tooltip: {
       trigger: 'axis',
-      backgroundColor: 'var(--bg-overlay)',
-      borderColor: 'var(--border-default)',
-      textStyle: { color: 'var(--text-primary)' },
+      backgroundColor: c.tooltipBg,
+      borderColor: c.tooltipBorder,
+      textStyle: { color: c.tooltipText },
     },
     series: [{
       type: 'line',
-      smooth: true,
+      smooth: 0.5,
+      smoothMonotone: 'x',
       showSymbol: false,
       data: pts.map(p => [p.recorded_at * 1000, p.online]),
       lineStyle: { color: '#28abce', width: 2 },

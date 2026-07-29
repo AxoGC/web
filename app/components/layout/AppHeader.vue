@@ -62,6 +62,9 @@
           <UiDropdownItem @select="navigate('/me/settings')">
             <LucideSettings :size="14" /> {{ $t('nav.settings') }}
           </UiDropdownItem>
+          <UiDropdownItem @select="navigate('/points')">
+            <LucideCoins :size="14" /> {{ $t('nav.points') }}
+          </UiDropdownItem>
           <UiDropdownItem v-if="auth.isAdmin" @select="navigate('/admin')">
             <LucideShieldCheck :size="14" /> {{ $t('nav.admin') }}
           </UiDropdownItem>

@@ -39,6 +39,7 @@
         <AdminNavLink to="/admin/oneliners" :label="$t('admin.oneliners')" :icon="LucideQuote" />
         <AdminNavLink to="/admin/donations" :label="$t('admin.donations')" :icon="LucideHeart" />
         <AdminNavLink to="/admin/logs" :label="$t('admin.logs')" :icon="LucideScroll" />
+        <AdminNavLink to="/admin/query-requests" :label="$t('admin.query_requests')" :icon="LucideShieldQuestionMark" />
         <AdminNavLink to="/admin/audit" :label="$t('admin.audit')" :icon="LucideSearchCheck" />
         <AdminNavLink to="/admin/config" :label="$t('admin.config')" :icon="LucideSettings" />
       </aside>
@@ -55,7 +56,7 @@ import { useAuthStore } from '~/stores/auth'
 import {
   LucideLayoutDashboard, LucideUsers, LucideServer, LucideMessageSquare,
   LucideHeart, LucideScroll, LucideSettings, LucideSearchCheck, LucideImages,
-  LucideTag, LucideQuote,
+  LucideTag, LucideQuote, LucideShieldQuestionMark,
 } from '#components'
 
 const auth = useAuthStore()

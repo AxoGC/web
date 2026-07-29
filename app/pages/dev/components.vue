@@ -41,6 +41,25 @@
         <UiField label="Select">
           <UiSelect v-model="vSelect" :options="selectOpts" />
         </UiField>
+        <UiField label="Select (with placeholder)">
+          <UiSelect v-model="vSelectPlaceholder" :options="selectOpts" placeholder="Pick one" />
+        </UiField>
+        <UiField label="Date &amp; time">
+          <UiDateTimePicker v-model="vDateTime" />
+        </UiField>
+      </div>
+
+      <h3 class="text-sm font-medium text-text-secondary mt-6 mb-2">Horizontal layout (per-field opt-in)</h3>
+      <div class="max-w-md">
+        <UiField label="Select" horizontal>
+          <UiSelect v-model="vSelect" :options="selectOpts" />
+        </UiField>
+        <UiField label="Date &amp; time" horizontal>
+          <UiDateTimePicker v-model="vDateTime" />
+        </UiField>
+        <UiField label="Text (stays vertical)">
+          <UiInput v-model="vText" placeholder="Inputs/textareas ignore horizontal" />
+        </UiField>
       </div>
     </section>
 
@@ -158,11 +177,13 @@ const toast = useToast()
 const vText = ref('')
 const vLong = ref('')
 const vSelect = ref('a')
+const vSelectPlaceholder = ref('')
 const selectOpts = [
   { value: 'a', label: 'Option A' },
   { value: 'b', label: 'Option B' },
   { value: 'c', label: 'Option C' },
 ]
+const vDateTime = ref<number | undefined>(undefined)
 const modalOpen = ref(false)
 const confirmOpen = ref(false)
 const tab = ref('a')

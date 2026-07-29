@@ -27,15 +27,21 @@
         <ServerConnectInfo :server="server" />
       </div>
     </div>
-    <div v-if="auth.isLoggedIn" class="shrink-0">
-      <NuxtLink :to="`/me/bindings?server=${server.id}`">
+    <div class="shrink-0 flex items-center gap-2">
+      <NuxtLink v-if="hasLogCategories" :to="`/servers/${server.id}/logs`">
         <UiButton variant="secondary" size="sm">
-          <template #leading><LucideLink :size="14" /></template>
-          {{ $t('server.bind_title') }}
+          <template #leading><LucideSearch :size="14" /></template>
+          {{ $t('log_query.entry_button') }}
         </UiButton>
       </NuxtLink>
+      <UiButton v-if="auth.isLoggedIn" variant="secondary" size="sm" @click="bindDialogOpen = true">
+        <template #leading><LucideLink :size="14" /></template>
+        {{ $t('server.bind_title') }}
+      </UiButton>
     </div>
   </header>
+
+  <ServerBindDialog v-model:open="bindDialogOpen" :server-id="server.id" />
 </template>
 
 <script setup lang="ts">
@@ -43,11 +49,15 @@ import { computed, ref, watch } from 'vue'
 import type { ServerDetail } from '~/types/api'
 import { useAuthStore } from '~/stores/auth'
 import { gameTypeIcon } from '~/composables/useGameTypeIcon'
+import { logCategoriesForGameType } from '~/composables/useLogCategories'
 
 const props = defineProps<{ server: ServerDetail }>()
 const { t } = useI18n()
 const auth = useAuthStore()
 const typeLabel = useServerTypeLabel()
+const hasLogCategories = computed(() => logCategoriesForGameType(props.server.type).length > 0)
+
+const bindDialogOpen = ref(false)
 
 const iconBroken = ref(false)
 const iconSrc = computed(() => props.server.icon || gameTypeIcon(props.server.type))

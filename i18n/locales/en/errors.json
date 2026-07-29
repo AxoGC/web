@@ -114,5 +114,11 @@
   "ONELINER_SUBMIT_FAILED": "Submit failed.",
   "ONELINER_QUERY_FAILED": "Query failed.",
   "ONELINER_UPDATE_FAILED": "Update failed.",
-  "ONELINER_DELETE_FAILED": "Delete failed."
+  "ONELINER_DELETE_FAILED": "Delete failed.",
+
+  "QUERY_LIST_FAILED": "Failed to load query requests",
+  "QUERY_REQUEST_NOT_FOUND": "Query request not found",
+  "APPROVE_FAILED": "Approve failed",
+  "REJECT_FAILED": "Reject failed",
+  "DELETE_FAILED": "Delete failed"
 }

@@ -28,11 +28,11 @@
         </div>
       </header>
 
-      <article class="bg-bg-elevated border border-border-subtle rounded-lg p-6">
+      <article class="bg-bg-elevated rounded-lg p-6">
         <RichContent :doc="post.content_json" />
       </article>
 
-      <section v-if="post.voting_enabled && post.poll_options?.length" class="mt-4 bg-bg-elevated border border-border-subtle rounded-lg p-4">
+      <section v-if="post.voting_enabled && post.poll_options?.length" class="mt-4 bg-bg-elevated rounded-lg p-4">
         <div class="flex items-center justify-between mb-3">
           <div class="text-sm font-semibold">{{ $t('forum.voting_summary') }}</div>
           <div class="text-xs text-text-tertiary">{{ $t('forum.voting_total', { count: voteTotal }) }}</div>
@@ -112,7 +112,7 @@
             :href="a.url"
             target="_blank"
             rel="noopener noreferrer"
-            class="flex items-center gap-3 px-3 py-2 rounded-md bg-bg-elevated border border-border-subtle hover:bg-bg-overlay text-sm"
+            class="flex items-center gap-3 px-3 py-2 rounded-md bg-bg-elevated hover:bg-bg-overlay text-sm"
           >
             <LucidePaperclip :size="14" class="text-text-tertiary" />
             <span class="flex-1 truncate">{{ a.filename }}</span>
@@ -185,7 +185,7 @@
           <p class="text-sm text-text-tertiary text-center py-6">{{ $t('forum.no_comments') }}</p>
         </div>
         <ul v-else class="space-y-3">
-          <li v-for="c in comments.items" :key="c.id" class="bg-bg-elevated border border-border-subtle rounded-lg p-4">
+          <li v-for="c in comments.items" :key="c.id" class="bg-bg-elevated rounded-lg p-4">
             <div class="flex items-center gap-2 mb-2">
               <UiAvatar :src="c.author.avatar" :name="c.author.username" size="xs" />
               <NuxtLink :to="`/users/${c.author.id}`" class="text-sm font-medium hover:text-brand-400">

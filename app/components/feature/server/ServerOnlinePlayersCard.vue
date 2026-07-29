@@ -7,12 +7,12 @@
     <div v-if="!players.length" class="text-sm text-text-tertiary">
       {{ $t('server.no_online_players') }}
     </div>
-    <div v-else class="max-h-72 overflow-y-auto flex flex-wrap gap-x-3 gap-y-1.5">
+    <div v-else class="max-h-72 overflow-y-auto grid grid-cols-2 gap-x-3 gap-y-1.5">
       <NuxtLink
         v-for="name in players"
         :key="name"
         :to="`/servers/${serverId}/players/${encodeURIComponent(name)}`"
-        class="inline-flex items-center gap-1.5 text-sm text-text-primary hover:text-brand-400 transition-colors"
+        class="flex items-center gap-1.5 min-w-0 text-sm text-text-primary hover:text-brand-400 transition-colors"
       >
         <img
           v-if="avatarFor(name).src"
@@ -22,7 +22,7 @@
           loading="lazy"
           referrerpolicy="no-referrer"
         >
-        <span class="font-medium">{{ name }}</span>
+        <span class="font-medium truncate">{{ name }}</span>
       </NuxtLink>
     </div>
   </UiCard>

@@ -2,6 +2,7 @@
 # ---------- builder ----------
 FROM node:22-alpine AS builder
 RUN corepack enable
+RUN npm config set registry https://registry.npmmirror.com
 WORKDIR /src
 
 # Install deps first (cache friendly).
@@ -9,7 +10,8 @@ WORKDIR /src
 # the source which we haven't copied yet. Also bypasses pnpm 10's
 # "approve-builds" gate for native-binary deps.
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile --ignore-scripts
+RUN pnpm config set registry https://registry.npmmirror.com \
+    && pnpm install --frozen-lockfile --ignore-scripts
 
 # Build (nuxt build runs `nuxt prepare` internally).
 COPY . .
