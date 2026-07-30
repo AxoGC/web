@@ -137,14 +137,52 @@ const provinceRegions = computed(() => {
 })
 
 const PIN_R = 14
+const AVATAR_R = PIN_R - 2
 // Head-center distance of r*sqrt(2) from the tip is what makes the tip a
 // true right angle with both sides tangent to the circle (classic pin
 // construction): tangent points sit at (±r/sqrt(2), -r/sqrt(2)) from the
-// tip regardless of r, so cy falls out of that same relationship.
-const PIN_HEAD_Y = -(PIN_R * Math.SQRT2)
+// tip regardless of r, so head-center-y falls out of that same relationship.
+function pinHeadY(r: number): number {
+  return -(r * Math.SQRT2)
+}
 function pinPathData(r: number): string {
   const t = r / Math.SQRT2
   return `M0,0 L${-t},${-t} A${r},${r} 0 1,1 ${t},${-t} Z`
+}
+
+// Layout for up to 4 avatars sharing one pin head: individual avatar circles
+// stay a fixed size (AVATAR_R) and overlap inside the (larger) head circle,
+// rather than shrinking to fit. Positions are relative to the head center;
+// array order is top-to-bottom z-stacking (index 0 drawn last, on top),
+// matching the order users are returned in. 5+ players falls back to a
+// single avatar + count badge until that population size is worth designing
+// a dedicated layout for.
+function avatarOffsets(n: number): { dx: number, dy: number }[] {
+  switch (n) {
+    case 2: {
+      const off = AVATAR_R * 0.6
+      return [{ dx: -off, dy: 0 }, { dx: off, dy: 0 }]
+    }
+    case 3: {
+      const r = AVATAR_R * 0.62
+      return [
+        { dx: 0, dy: -r },
+        { dx: -r * 0.866, dy: r * 0.5 },
+        { dx: r * 0.866, dy: r * 0.5 },
+      ]
+    }
+    case 4: {
+      const off = AVATAR_R * 0.5
+      return [
+        { dx: -off, dy: -off },
+        { dx: off, dy: -off },
+        { dx: -off, dy: off },
+        { dx: off, dy: off },
+      ]
+    }
+    default:
+      return [{ dx: 0, dy: 0 }]
+  }
 }
 
 const chartOption = computed(() => {
@@ -184,19 +222,29 @@ const chartOption = computed(() => {
         const item = pts[params.dataIndex]
         if (!item) return { type: 'group', children: [] }
         const [x, y] = api.coord([item.coord.lng, item.coord.lat])
-        const first = item.entry.users[0]
-        const imgSize = (PIN_R - 2) * 2
+        const count = item.entry.count
+        const layoutN = Math.min(count, 4)
+        const headR = count <= 4 ? PIN_R * Math.sqrt(count) : PIN_R
+        const headY = pinHeadY(headR)
+        const imgSize = AVATAR_R * 2
 
         const children: Record<string, unknown>[] = [
           {
             type: 'path',
-            shape: { pathData: pinPathData(PIN_R) },
+            shape: { pathData: pinPathData(headR) },
             position: [x, y],
             style: { fill: '#28abce', stroke: '#fff', lineWidth: 1.5 },
             z2: 10,
           },
         ]
-        if (first) {
+
+        const shown = item.entry.users.slice(0, layoutN)
+        const offsets = avatarOffsets(shown.length)
+        shown.forEach((u, i) => {
+          const { dx, dy } = offsets[i]!
+          const cy = headY + dy
+          const layerIndex = shown.length - 1 - i
+          const z2 = 11 + layerIndex * 3
           // Same fallback as UiAvatar: a colored circle + initials, drawn
           // underneath so it still shows if the avatar image never loads
           // (zrender's Image element has no built-in @error swap like the
@@ -204,39 +252,40 @@ const chartOption = computed(() => {
           children.push({
             type: 'circle',
             position: [x, y],
-            shape: { cx: 0, cy: PIN_HEAD_Y, r: PIN_R - 2 },
-            style: { fill: colorForName(first.username) },
-            z2: 11,
+            shape: { cx: dx, cy, r: AVATAR_R },
+            style: { fill: colorForName(u.username) },
+            z2,
           })
           children.push({
             type: 'text',
             position: [x, y],
             style: {
-              text: initials(first.username),
-              x: 0,
-              y: PIN_HEAD_Y,
+              text: initials(u.username),
+              x: dx,
+              y: cy,
               fill: '#fff',
               fontSize: 9,
               fontWeight: 'bold',
               align: 'center',
               verticalAlign: 'middle',
             },
-            z2: 12,
+            z2: z2 + 1,
           })
-          if (first.avatar) {
+          if (u.avatar) {
             children.push({
               type: 'image',
               position: [x, y],
-              style: { image: first.avatar, x: -imgSize / 2, y: PIN_HEAD_Y - imgSize / 2, width: imgSize, height: imgSize },
-              clipPath: { type: 'circle', shape: { cx: 0, cy: PIN_HEAD_Y, r: PIN_R - 2 } },
-              z2: 13,
+              style: { image: u.avatar, x: dx - imgSize / 2, y: cy - imgSize / 2, width: imgSize, height: imgSize },
+              clipPath: { type: 'circle', shape: { cx: dx, cy, r: AVATAR_R } },
+              z2: z2 + 2,
             })
           }
-        }
-        if (item.entry.count > 1) {
+        })
+
+        if (count > 4) {
           const badgeR = PIN_R * 0.65
           const bx = PIN_R * 0.75
-          const by = PIN_HEAD_Y - PIN_R * 0.75
+          const by = headY - PIN_R * 0.75
           children.push({
             type: 'circle',
             position: [x, y],
@@ -248,7 +297,7 @@ const chartOption = computed(() => {
             type: 'text',
             position: [x, y],
             style: {
-              text: item.entry.count > 99 ? '99+' : String(item.entry.count),
+              text: count > 99 ? '99+' : String(count),
               x: bx,
               y: by,
               fill: '#fff',
