@@ -8,7 +8,7 @@
         <UiEmpty :message="$t('home.community_map_empty')" />
       </div>
       <div v-else class="relative">
-        <header class="absolute top-0 left-0 z-10 m-3 px-3 py-2 rounded-md bg-bg-elevated/90 backdrop-blur-sm shadow-sm">
+        <header class="absolute top-0 left-0 z-10 m-3 px-3 py-2">
           <h2 class="text-xl font-semibold">{{ $t('home.community_map_title') }}</h2>
           <p class="mt-1 text-sm text-text-secondary">
             <i18n-t keypath="home.community_map_subtitle" tag="span">
