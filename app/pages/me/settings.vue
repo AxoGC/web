@@ -71,6 +71,11 @@
       <UiField :label="$t('me.bio')" :error="bioErr">
         <UiTextarea v-model="bio" :rows="3" :invalid="!!bioErr" />
       </UiField>
+
+      <UiField :label="$t('me.city')" :help="$t('me.city_hint')">
+        <UiSelect v-model="cityCode" :options="cityOptions" />
+      </UiField>
+
       <div class="flex justify-end">
         <UiButton :loading="saving" @click="save">{{ $t('actions.save') }}</UiButton>
       </div>
@@ -109,11 +114,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { useTheme } from '~/composables/useTheme'
 import { useToast } from '~/composables/useToast'
 import { ApiError } from '~/composables/useApi'
+import { useCityCoords, type CityCoord } from '~/composables/useCityCoords'
 import type { MeDTO } from '~/stores/auth'
 
 definePageMeta({ layout: 'default', middleware: ['auth'], ssr: false })
@@ -146,8 +152,26 @@ const backgroundPreview = computed(() => auth.user?.background || '')
 const hasBackground = computed(() => !!auth.user?.background)
 const uploadingBg = ref(false)
 
+const cityCode = ref(auth.user?.city_code || '')
+const cityCoords = ref<Record<string, CityCoord>>({})
+const cityOptions = computed(() => {
+  const opts = [{ value: '', label: t('me.city_not_public') }]
+  for (const [code, c] of Object.entries(cityCoords.value)) {
+    opts.push({ value: code, label: `${c.province} · ${c.name}` })
+  }
+  opts.sort((a, b) => (a.value === '' ? -1 : b.value === '' ? 1 : a.label.localeCompare(b.label, 'zh')))
+  return opts
+})
+
+onMounted(async () => {
+  cityCoords.value = await useCityCoords().load()
+})
+
 watch(() => auth.user, (u) => {
-  if (u) bio.value = u.bio
+  if (u) {
+    bio.value = u.bio
+    cityCode.value = u.city_code || ''
+  }
 })
 
 async function onPickAvatar(file: File | null) {
@@ -218,7 +242,7 @@ async function save() {
   try {
     const u = await useApi<MeDTO>('/api/users/me', {
       method: 'PATCH',
-      body: { bio: bio.value },
+      body: { bio: bio.value, city_code: cityCode.value },
     })
     auth.setUser(u)
     toast.success(t('actions.save'))

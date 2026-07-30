@@ -45,6 +45,9 @@
       </div>
     </section>
 
+    <!-- Community map -->
+    <HomeCommunityMap />
+
     <!-- Curated one-liners carousel -->
     <HomeOneliners />
 

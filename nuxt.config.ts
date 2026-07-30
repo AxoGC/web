@@ -152,7 +152,7 @@ export default defineNuxtConfig({
 
   echarts: {
     renderer: ['svg', 'canvas'],
-    charts: ['RadarChart', 'LineChart', 'BarChart'],
+    charts: ['RadarChart', 'LineChart', 'BarChart', 'CustomChart'],
     components: [
       'TitleComponent',
       'TooltipComponent',
@@ -160,6 +160,7 @@ export default defineNuxtConfig({
       'LegendComponent',
       'DatasetComponent',
       'TransformComponent',
+      'GeoComponent',
     ],
   },
 

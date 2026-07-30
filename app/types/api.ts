@@ -15,6 +15,9 @@ export interface PublicUser {
    *  the user hasn't uploaded one — frontend renders the plain card. */
   background?: string
   bio: string
+  /** GB/T 2260 prefecture-level code; absent when the user hasn't opted in
+   *  to a public city. Resolve name/coords via /data/city-coords.json. */
+  city_code?: string
   role: string
   created_at: number
   /** Unix seconds; omitted when the user has never logged in. */
@@ -85,6 +88,12 @@ export interface MeDTO extends PublicUser {
   status: string
   /** Site-wide point balance — see promotion claims / VIP debit. */
   point: number
+}
+
+export interface CityMapEntry {
+  city_code: string
+  count: number
+  users: UserSummary[]
 }
 
 export interface ForumLatestPost {

@@ -23,6 +23,7 @@
   "USER_NOT_FOUND": "User not found.",
   "USER_BANNED": "Account is banned.",
   "BIO_TOO_LONG": "Bio is too long.",
+  "CITY_CODE_INVALID": "Invalid city code.",
   "AVATAR_IMAGE_REQUIRED": "Pick an avatar image first.",
   "AVATAR_IMAGE_INVALID": "Unsupported image format.",
   "AVATAR_SAVE_FAILED": "Failed to save avatar.",

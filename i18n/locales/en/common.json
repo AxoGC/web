@@ -110,7 +110,11 @@
       "mcje": "Java",
       "bedrock": "Bedrock",
       "dst": "Don't Starve"
-    }
+    },
+    "community_map_title": "Community Map",
+    "community_map_subtitle": "Meet {players} players from {provinces} provinces and {cities} cities on Axolotland",
+    "community_map_more": "{n} more players",
+    "community_map_empty": "No players have shared their city yet — light up the first pin in your profile settings"
   },
   "oneliner": {
     "submit_cta": "Submit",
@@ -313,6 +317,9 @@
     "background_remove": "Remove background",
     "background_remove_confirm": "Remove your profile background?",
     "bio": "Bio",
+    "city": "City",
+    "city_hint": "Shown on your profile card and the homepage community map once set; you can switch back to private anytime",
+    "city_not_public": "Not shown",
     "language": "Language",
     "appearance": "Appearance",
     "likes_title": "My likes",

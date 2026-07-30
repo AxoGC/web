@@ -8,6 +8,8 @@ export interface MeDTO {
   email_verified: boolean
   avatar: string
   bio: string
+  /** GB/T 2260 prefecture-level code; absent when not opted in to a public city. */
+  city_code?: string
   role: 'user' | 'mod' | 'admin'
   status: 'active' | 'banned'
   point: number
