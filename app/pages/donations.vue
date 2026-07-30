@@ -20,7 +20,10 @@
           <UiAvatar :name="d.display_name" size="sm" />
           <div class="flex-1 min-w-0">
             <p class="truncate">
-              <span class="font-medium">{{ d.display_name || $t('donation.anonymous') }}</span>
+              <NuxtLink v-if="d.user_id" :to="`/users/${d.user_id}`" class="font-medium hover:underline">
+                {{ d.display_name || $t('donation.anonymous') }}
+              </NuxtLink>
+              <span v-else class="font-medium">{{ d.display_name || $t('donation.anonymous') }}</span>
               <span v-if="d.message" class="ml-2 text-xs text-text-tertiary">{{ d.message }}</span>
             </p>
           </div>

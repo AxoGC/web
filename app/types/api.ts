@@ -353,6 +353,7 @@ export interface MetricChampion {
 
 export interface DonationItem {
   display_name: string
+  user_id?: number
   amount: number
   public: boolean
   donated_at: number
