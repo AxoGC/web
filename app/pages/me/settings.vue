@@ -68,6 +68,20 @@
         </div>
       </UiField>
 
+      <UiField :label="$t('me.username')" :help="$t('me.username_hint', { cost: renameUsernameCost, point: auth.user?.point ?? 0 })">
+        <div class="flex gap-2">
+          <UiInput v-model="newUsername" :placeholder="$t('me.username_placeholder')" class="flex-1" />
+          <UiButton
+            variant="secondary"
+            :loading="renaming"
+            :disabled="!newUsername.trim() || newUsername.trim() === auth.user?.username"
+            @click="renameUsername"
+          >
+            {{ $t('me.username_change') }}
+          </UiButton>
+        </div>
+      </UiField>
+
       <UiField :label="$t('me.bio')" :error="bioErr">
         <UiTextarea v-model="bio" :rows="3" :invalid="!!bioErr" />
       </UiField>
@@ -142,6 +156,12 @@ const bio = ref(auth.user?.bio || '')
 const bioErr = ref('')
 const saving = ref(false)
 const uploading = ref(false)
+
+// Mirrors user.RenameUsernameCost (core) — display-only; the backend is the
+// actual authority on cost and re-validates everything server-side.
+const renameUsernameCost = 50
+const newUsername = ref('')
+const renaming = ref(false)
 
 // Avatar URL from backend always points at /media/users/<id>?v=<unix>; when
 // avatar_at is null, ?v=0 → backend serves namespace default. So a non-zero
@@ -269,6 +289,26 @@ async function removeAvatar() {
     if (e instanceof ApiError) toast.fromError(e)
   } finally {
     uploading.value = false
+  }
+}
+
+async function renameUsername() {
+  const name = newUsername.value.trim()
+  if (!name || name === auth.user?.username) return
+  if (!confirm(t('me.username_confirm', { name, cost: renameUsernameCost }))) return
+  renaming.value = true
+  try {
+    const u = await useApi<MeDTO>('/api/users/me/username', {
+      method: 'POST',
+      body: { username: name },
+    })
+    auth.setUser(u)
+    newUsername.value = ''
+    toast.success(t('me.username_changed'))
+  } catch (e) {
+    if (e instanceof ApiError) toast.fromError(e)
+  } finally {
+    renaming.value = false
   }
 }
 
