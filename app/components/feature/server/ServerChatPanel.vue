@@ -64,9 +64,9 @@
 
     <form v-if="isLoggedIn" class="mt-3 flex gap-2" @submit.prevent="onSend">
       <UiInput
+        ref="inputRef"
         v-model="draft"
         :placeholder="$t('chat.placeholder')"
-        :disabled="sending"
         class="flex-1"
       />
       <UiButton type="submit" :loading="sending" :disabled="!draft.trim()">
@@ -98,6 +98,7 @@ const isLoggedIn = computed(() => auth.isLoggedIn)
 const { messages, connected, send } = useChatStream(channel)
 
 const scroller = ref<HTMLElement | null>(null)
+const inputRef = ref<{ focus: () => void } | null>(null)
 const draft = ref('')
 const sending = ref(false)
 const errorCode = ref<string | null>(null)
@@ -161,6 +162,8 @@ async function onSend() {
     errorCode.value = e?.data?.code || e?.code || 'CHAT_SEND_FAILED'
   } finally {
     sending.value = false
+    await nextTick()
+    inputRef.value?.focus()
   }
 }
 

@@ -8,6 +8,7 @@
     />
     <input
       :id="id"
+      ref="inputEl"
       :type="type"
       :value="modelValue"
       :placeholder="placeholder"
@@ -24,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, type Component } from 'vue'
+import { computed, ref, type Component } from 'vue'
 
 const props = withDefaults(defineProps<{
   modelValue?: string | number
@@ -55,6 +56,12 @@ const emit = defineEmits<{
 function onInput(e: Event) {
   emit('update:modelValue', (e.target as HTMLInputElement).value)
 }
+
+const inputEl = ref<HTMLInputElement | null>(null)
+
+defineExpose({
+  focus: () => inputEl.value?.focus(),
+})
 
 const sizeClasses = computed(() => ({
   sm: 'h-8 text-sm',
