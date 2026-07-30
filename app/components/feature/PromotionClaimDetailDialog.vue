@@ -60,11 +60,17 @@
         {{ $t('actions.delete') }}
       </UiButton>
       <UiButton
+        v-if="auth.isAdmin"
+        variant="ghost"
+        @click="pointsDialogOpen = true"
+      >
+        {{ $t('promotion.correct_points_button') }}
+      </UiButton>
+      <UiButton
         v-if="auth.isAdmin && claim?.status === 'granted'"
         variant="ghost"
         class="text-danger"
-        :loading="revoking"
-        @click="doRevoke"
+        @click="confirmRevokeOpen = true"
       >
         {{ $t('promotion.revoke_button') }}
       </UiButton>
@@ -81,10 +87,25 @@
     @update:open="confirmDeleteOpen = $event"
     @confirm="doDelete"
   />
+
+  <UiConfirmModal
+    :open="confirmRevokeOpen"
+    :title="$t('promotion.revoke_confirm_title')"
+    :message="revokeConfirmMessage"
+    variant="danger"
+    :loading="revoking"
+    @update:open="confirmRevokeOpen = $event"
+    @confirm="doRevoke"
+  />
+
+  <AdminPointsCorrectionDialog
+    v-model:open="pointsDialogOpen"
+    :user-id="claim?.user_id ?? null"
+  />
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import type { PromotionClaimItem, PromotionClaimStatus } from '~/types/api'
 import { useAuthStore } from '~/stores/auth'
 import { useAuditTime } from '~/composables/useAuditTime'
@@ -102,14 +123,31 @@ const { formatAuditTimestamp } = useAuditTime()
 const revokeReason = ref('')
 const revokePenalty = ref<number | undefined>(undefined)
 const revoking = ref(false)
+const confirmRevokeOpen = ref(false)
 
 const confirmDeleteOpen = ref(false)
 const deleting = ref(false)
+
+const pointsDialogOpen = ref(false)
 
 watch(() => props.claim?.id, () => {
   revokeReason.value = ''
   revokePenalty.value = undefined
   confirmDeleteOpen.value = false
+  confirmRevokeOpen.value = false
+  pointsDialogOpen.value = false
+})
+
+const revokeConfirmMessage = computed(() => {
+  if (!props.claim) return ''
+  const penalty = revokePenalty.value && revokePenalty.value > 0 ? Math.floor(revokePenalty.value) : 0
+  return t('promotion.revoke_confirm_message', {
+    points: props.claim.points,
+    penalty: penalty > 0
+      ? t('promotion.revoke_confirm_penalty_part', { penalty })
+      : t('promotion.revoke_confirm_no_penalty_part'),
+    reason: revokeReason.value.trim() || t('promotion.revoke_confirm_no_reason'),
+  })
 })
 
 function statusVariant(status: PromotionClaimStatus) {
@@ -133,6 +171,7 @@ async function doRevoke() {
       },
     })
     toast.success(t('promotion.revoked_toast'))
+    confirmRevokeOpen.value = false
     emit('update:open', false)
     emit('revoked', props.claim.id)
   } catch (e) {

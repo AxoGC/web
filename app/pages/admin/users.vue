@@ -25,12 +25,13 @@
           <th class="text-left px-4 py-2">{{ $t('auth.email') }}</th>
           <th class="text-left px-4 py-2">{{ $t('admin.role') }}</th>
           <th class="text-left px-4 py-2">{{ $t('admin.status') }}</th>
+          <th class="text-right px-4 py-2">{{ $t('admin.points') }}</th>
           <th class="text-right px-4 py-2">{{ $t('admin.actions') }}</th>
         </tr>
       </template>
       <template v-if="pending">
         <tr v-for="i in 6" :key="i" class="border-t border-border-subtle">
-          <td colspan="6" class="px-4 py-3">
+          <td colspan="7" class="px-4 py-3">
             <UiSkeleton :height="16" />
           </td>
         </tr>
@@ -56,7 +57,9 @@
               @update:model-value="(v) => patch(u, { status: String(v) })"
             />
           </td>
+          <td class="px-4 py-2 text-right font-mono text-text-secondary">{{ u.point }}</td>
           <td class="px-4 py-2 text-right">
+            <UiButton size="sm" variant="ghost" @click="openPointsDialog(u)">{{ $t('admin.points') }}</UiButton>
             <NuxtLink :to="`/users/${u.id}`">
               <UiButton size="sm" variant="ghost">{{ $t('actions.view') }}</UiButton>
             </NuxtLink>
@@ -68,6 +71,12 @@
     <div class="mt-6 flex justify-center">
       <UiPagination :page="page" :page-size="size" :total="total" @update:page="onPage" />
     </div>
+
+    <AdminPointsCorrectionDialog
+      v-model:open="pointsDialogOpen"
+      :user-id="pointsDialogUserId"
+      @corrected="onCorrected"
+    />
   </div>
 </template>
 
@@ -128,6 +137,19 @@ async function patch(u: MeDTO, patchData: { role?: string, status?: string }) {
   } catch (e) {
     if (e instanceof ApiError) toast.fromError(e)
   }
+}
+
+const pointsDialogOpen = ref(false)
+const pointsDialogUserId = ref<number | null>(null)
+
+function openPointsDialog(u: MeDTO) {
+  pointsDialogUserId.value = u.id
+  pointsDialogOpen.value = true
+}
+
+function onCorrected(updated: MeDTO) {
+  const row = users.value.find(u => u.id === updated.id)
+  if (row) row.point = updated.point
 }
 
 function onPage(p: number) {
