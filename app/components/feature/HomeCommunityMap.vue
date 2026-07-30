@@ -15,15 +15,17 @@
             <template #players><span class="text-2xl font-bold text-brand-400">{{ playerCount }}</span></template>
           </i18n-t>
         </header>
-        <ClientOnly>
-          <VChart
-            v-if="chartOption"
-            :option="chartOption"
-            autoresize
-            class="w-full h-[312px] md:h-[480px]"
-            @click="onChartClick"
-          />
-        </ClientOnly>
+        <div class="h-[312px] md:h-[480px]">
+          <ClientOnly>
+            <VChart
+              v-if="chartOption"
+              :option="chartOption"
+              autoresize
+              class="w-full h-full"
+              @click="onChartClick"
+            />
+          </ClientOnly>
+        </div>
 
         <PopoverRoot v-model:open="popoverOpen">
           <PopoverAnchor as-child>
