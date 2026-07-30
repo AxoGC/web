@@ -102,7 +102,12 @@ export default defineNuxtConfig({
       ],
     },
     workbox: {
-      navigateFallback: '/',
+      // No navigateFallback: this is an SSR app, not a static/SPA build, so
+      // there's no precached index.html for Workbox to fall back to — the
+      // `request.mode === 'navigate'` NetworkFirst rule below already
+      // handles every navigation (including the offline case, via its own
+      // cache), so a navigateFallback pointing at '/' just throws
+      // "non-precached-url" since '/' is never in the precache manifest.
       // Precaching is auto-filled with hashed bundle files; we add explicit
       // runtime caching for navigations and externals below.
       globPatterns: ['**/*.{js,css,html,ico,svg,woff2}'],

@@ -43,9 +43,10 @@ import { relativeTime } from '~/utils/format'
 
 const props = defineProps<{ post: PostListItem }>()
 const { t } = useI18n()
+const now = useNow()
 
 const relative = computed(() => {
-  const r = relativeTime(props.post.last_reply_at || props.post.created_at)
+  const r = relativeTime(props.post.last_reply_at || props.post.created_at, now.value)
   if (r.kind === 'just_now') return t('common.just_now')
   if (r.kind === 'minutes_ago') return t('common.minutes_ago', { n: r.n })
   if (r.kind === 'hours_ago') return t('common.hours_ago', { n: r.n })

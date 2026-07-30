@@ -5,7 +5,6 @@
  * Keep this list stable: changing it changes how stored docs render.
  */
 import StarterKit from '@tiptap/starter-kit'
-import Link from '@tiptap/extension-link'
 // `@tiptap/vue-3` re-exports the core Node helper. Importing through it
 // avoids declaring @tiptap/core as a direct dep when we already depend on
 // vue-3 — pnpm doesn't hoist transitive packages.
@@ -37,13 +36,16 @@ const Image = Node.create({
 })
 
 export const tiptapExtensions = [
+  // StarterKit v3 bundles Link itself — configuring it via `link:` here
+  // (rather than also adding a separate Link extension instance) is what
+  // avoids the "Duplicate extension names found: ['link']" warning.
   StarterKit.configure({
     heading: { levels: [1, 2, 3] },
-  }),
-  Link.configure({
-    openOnClick: false,
-    autolink: true,
-    HTMLAttributes: { rel: 'nofollow noopener noreferrer', target: '_blank' },
+    link: {
+      openOnClick: false,
+      autolink: true,
+      HTMLAttributes: { rel: 'nofollow noopener noreferrer', target: '_blank' },
+    },
   }),
   Image,
 ]

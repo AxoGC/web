@@ -391,10 +391,11 @@ function onFollowChange(v: { is_following: boolean; follower_count: number; foll
   followStats.value = { ...(followStats.value ?? {}), ...v }
 }
 
+const now = useNow()
 const lastLoginText = computed(() => {
   const ts = user.value?.last_login_at
   if (!ts) return t('profile.last_login_never')
-  const r = relativeTime(ts)
+  const r = relativeTime(ts, now.value)
   if (r.kind === 'just_now') return t('common.just_now')
   if (r.kind === 'minutes_ago') return t('common.minutes_ago', { n: r.n })
   if (r.kind === 'hours_ago') return t('common.hours_ago', { n: r.n })
