@@ -9,14 +9,11 @@
       </div>
       <div v-else class="relative">
         <header class="absolute top-0 left-0 z-10 m-3 px-3 py-2">
-          <h2 class="text-xl font-semibold">{{ $t('home.community_map_title') }}</h2>
-          <p class="mt-1 text-sm text-text-secondary">
-            <i18n-t keypath="home.community_map_subtitle" tag="span">
-              <template #provinces><span class="text-lg font-bold text-brand-400">{{ provinceCount }}</span></template>
-              <template #cities><span class="text-lg font-bold text-brand-400">{{ cityCount }}</span></template>
-              <template #players><span class="text-lg font-bold text-brand-400">{{ playerCount }}</span></template>
-            </i18n-t>
-          </p>
+          <i18n-t keypath="home.community_map_subtitle" tag="h2" class="text-lg font-semibold text-text-primary">
+            <template #provinces><span class="text-2xl font-bold text-brand-400">{{ provinceCount }}</span></template>
+            <template #cities><span class="text-2xl font-bold text-brand-400">{{ cityCount }}</span></template>
+            <template #players><span class="text-2xl font-bold text-brand-400">{{ playerCount }}</span></template>
+          </i18n-t>
         </header>
         <ClientOnly>
           <VChart
@@ -161,7 +158,7 @@ const chartOption = computed(() => {
       // anyone actually lives — recenter/zoom on the mainland instead of
       // defaulting to that full, mostly-empty extent.
       center: [104, 36],
-      zoom: 1.3,
+      zoom: 1.7,
       scaleLimit: { min: 1, max: 8 },
       itemStyle: { areaColor: '#ffffff', borderColor: '#d8dce2' },
       emphasis: { itemStyle: { areaColor: '#eef2f5' }, label: { show: false } },
