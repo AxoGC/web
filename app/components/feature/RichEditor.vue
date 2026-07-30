@@ -179,7 +179,7 @@ async function uploadOne(file: File) {
   const form = new FormData()
   form.append('file', file)
   try {
-    const r = await useApi<{ id: number, url: string }>('/api/attachments', { form })
+    const r = await useApi<{ id: number, url: string }>('/api/attachments', { method: 'POST', form })
     if (editor.value && r.url) {
       // Use the existing chain; insertContent accepts a TipTap node JSON.
       editor.value.chain().focus().insertContent({
