@@ -1,21 +1,23 @@
 <template>
   <section>
-    <header class="mb-4">
-      <h2 class="text-xl font-semibold">{{ $t('home.community_map_title') }}</h2>
-      <p v-if="entries.length" class="mt-1 text-sm text-text-secondary">
-        <i18n-t keypath="home.community_map_subtitle" tag="span">
-          <template #provinces><span class="text-lg font-bold text-brand-400">{{ provinceCount }}</span></template>
-          <template #cities><span class="text-lg font-bold text-brand-400">{{ cityCount }}</span></template>
-          <template #players><span class="text-lg font-bold text-brand-400">{{ playerCount }}</span></template>
-        </i18n-t>
-      </p>
-    </header>
-
     <UiCard class="overflow-hidden">
       <div v-if="!entries.length" class="p-8">
+        <header class="mb-4">
+          <h2 class="text-xl font-semibold">{{ $t('home.community_map_title') }}</h2>
+        </header>
         <UiEmpty :message="$t('home.community_map_empty')" />
       </div>
       <div v-else class="relative">
+        <header class="absolute top-0 left-0 z-10 m-3 px-3 py-2 rounded-md bg-bg-elevated/90 backdrop-blur-sm shadow-sm">
+          <h2 class="text-xl font-semibold">{{ $t('home.community_map_title') }}</h2>
+          <p class="mt-1 text-sm text-text-secondary">
+            <i18n-t keypath="home.community_map_subtitle" tag="span">
+              <template #provinces><span class="text-lg font-bold text-brand-400">{{ provinceCount }}</span></template>
+              <template #cities><span class="text-lg font-bold text-brand-400">{{ cityCount }}</span></template>
+              <template #players><span class="text-lg font-bold text-brand-400">{{ playerCount }}</span></template>
+            </i18n-t>
+          </p>
+        </header>
         <ClientOnly>
           <VChart
             v-if="chartOption"
@@ -62,7 +64,7 @@ import { ref, computed, onMounted } from 'vue'
 import { PopoverRoot, PopoverAnchor, PopoverPortal, PopoverContent } from 'reka-ui'
 import type { CityMapEntry } from '~/types/api'
 import { useCityCoords, type CityCoord } from '~/composables/useCityCoords'
-import { useTheme } from '~/composables/useTheme'
+import { initials, colorForName } from '~/utils/format'
 
 const { data } = await useAsyncData('home.city_map', () =>
   useApi<{ items: CityMapEntry[] }>('/api/users/by-city').catch(() => ({ items: [] as CityMapEntry[] })),
@@ -102,25 +104,44 @@ const provinceCount = computed(() => new Set(points.value.map(p => p.coord.provi
 const cityCount = computed(() => points.value.length)
 const playerCount = computed(() => points.value.reduce((sum, p) => sum + p.entry.count, 0))
 
-// Canvas can't resolve CSS custom properties, so literal colors per theme —
-// same reasoning as ServerOnlineTrendCard's chart.
-const { resolved: themeMode } = useTheme()
-const MAP_COLORS = {
-  dark: { area: '#1c1f26', border: '#2f343f', hoverArea: '#232730' },
-  light: { area: '#f4f6f8', border: '#e1e4e9', hoverArea: '#eef0f3' },
-} as const
+// Choropleth: empty province stays plain white, populated provinces wash
+// toward the brand color proportional to their player share. Capped well
+// short of full saturation (BLEND_MAX) so even the busiest province stays a
+// light tint — the pins are solid brand blue and need to read clearly
+// against the fill, not blend into it.
+const BLEND_MIN = 0.12
+const BLEND_MAX = 0.45
+const BRAND_RGB = [0x28, 0xab, 0xce]
+function blendWithBrand(t: number): string {
+  const rgb = BRAND_RGB.map(to => Math.round(255 + (to - 255) * t))
+  return `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`
+}
 
-const PIN_R = 10
-const PIN_HEAD_Y = -(PIN_R * 2.2)
-function pinPathData(r: number, cy: number): string {
-  const tx = r * 0.55
-  const ty = cy + r * 0.75
-  return `M0,0 L${-tx},${ty} A${r},${r} 0 1,1 ${tx},${ty} Z`
+const provinceRegions = computed(() => {
+  const counts = new Map<string, number>()
+  for (const p of points.value) {
+    counts.set(p.coord.province, (counts.get(p.coord.province) || 0) + p.entry.count)
+  }
+  const max = Math.max(1, ...counts.values())
+  return [...counts.entries()].map(([name, count]) => ({
+    name,
+    itemStyle: { areaColor: blendWithBrand(BLEND_MIN + (BLEND_MAX - BLEND_MIN) * (count / max)) },
+  }))
+})
+
+const PIN_R = 14
+// Head-center distance of r*sqrt(2) from the tip is what makes the tip a
+// true right angle with both sides tangent to the circle (classic pin
+// construction): tangent points sit at (±r/sqrt(2), -r/sqrt(2)) from the
+// tip regardless of r, so cy falls out of that same relationship.
+const PIN_HEAD_Y = -(PIN_R * Math.SQRT2)
+function pinPathData(r: number): string {
+  const t = r / Math.SQRT2
+  return `M0,0 L${-t},${-t} A${r},${r} 0 1,1 ${t},${-t} Z`
 }
 
 const chartOption = computed(() => {
   if (!mapRegistered.value) return null
-  const c = MAP_COLORS[themeMode.value]
   const pts = points.value
 
   return {
@@ -135,9 +156,16 @@ const chartOption = computed(() => {
     geo: {
       map: 'china',
       roam: true,
+      // The bundled boundary includes the South China Sea islands inset,
+      // which stretches the auto-fit bounding box far south of anywhere
+      // anyone actually lives — recenter/zoom on the mainland instead of
+      // defaulting to that full, mostly-empty extent.
+      center: [104, 36],
+      zoom: 1.3,
       scaleLimit: { min: 1, max: 8 },
-      itemStyle: { areaColor: c.area, borderColor: c.border },
-      emphasis: { itemStyle: { areaColor: c.hoverArea }, label: { show: false } },
+      itemStyle: { areaColor: '#ffffff', borderColor: '#d8dce2' },
+      emphasis: { itemStyle: { areaColor: '#eef2f5' }, label: { show: false } },
+      regions: provinceRegions.value,
       label: { show: false },
     },
     series: [{
@@ -154,30 +182,59 @@ const chartOption = computed(() => {
         const children: Record<string, unknown>[] = [
           {
             type: 'path',
-            shape: { pathData: pinPathData(PIN_R, PIN_HEAD_Y) },
+            shape: { pathData: pinPathData(PIN_R) },
             position: [x, y],
             style: { fill: '#28abce', stroke: '#fff', lineWidth: 1.5 },
             z2: 10,
           },
         ]
-        if (first?.avatar) {
+        if (first) {
+          // Same fallback as UiAvatar: a colored circle + initials, drawn
+          // underneath so it still shows if the avatar image never loads
+          // (zrender's Image element has no built-in @error swap like the
+          // DOM <img> UiAvatar itself uses).
           children.push({
-            type: 'image',
+            type: 'circle',
             position: [x, y],
-            style: { image: first.avatar, x: -imgSize / 2, y: PIN_HEAD_Y - imgSize / 2, width: imgSize, height: imgSize },
-            clipPath: { type: 'circle', shape: { cx: 0, cy: PIN_HEAD_Y, r: PIN_R - 2 } },
+            shape: { cx: 0, cy: PIN_HEAD_Y, r: PIN_R - 2 },
+            style: { fill: colorForName(first.username) },
             z2: 11,
           })
+          children.push({
+            type: 'text',
+            position: [x, y],
+            style: {
+              text: initials(first.username),
+              x: 0,
+              y: PIN_HEAD_Y,
+              fill: '#fff',
+              fontSize: 9,
+              fontWeight: 'bold',
+              align: 'center',
+              verticalAlign: 'middle',
+            },
+            z2: 12,
+          })
+          if (first.avatar) {
+            children.push({
+              type: 'image',
+              position: [x, y],
+              style: { image: first.avatar, x: -imgSize / 2, y: PIN_HEAD_Y - imgSize / 2, width: imgSize, height: imgSize },
+              clipPath: { type: 'circle', shape: { cx: 0, cy: PIN_HEAD_Y, r: PIN_R - 2 } },
+              z2: 13,
+            })
+          }
         }
         if (item.entry.count > 1) {
+          const badgeR = PIN_R * 0.65
           const bx = PIN_R * 0.75
           const by = PIN_HEAD_Y - PIN_R * 0.75
           children.push({
             type: 'circle',
             position: [x, y],
-            shape: { cx: bx, cy: by, r: 7 },
+            shape: { cx: bx, cy: by, r: badgeR },
             style: { fill: '#ef4444', stroke: '#fff', lineWidth: 1 },
-            z2: 12,
+            z2: 14,
           })
           children.push({
             type: 'text',
@@ -187,12 +244,12 @@ const chartOption = computed(() => {
               x: bx,
               y: by,
               fill: '#fff',
-              fontSize: 9,
+              fontSize: 10,
               fontWeight: 'bold',
               align: 'center',
               verticalAlign: 'middle',
             },
-            z2: 13,
+            z2: 15,
           })
         }
         return { type: 'group', children }

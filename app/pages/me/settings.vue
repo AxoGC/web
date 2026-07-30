@@ -73,7 +73,15 @@
       </UiField>
 
       <UiField :label="$t('me.city')" :help="$t('me.city_hint')">
-        <UiSelect v-model="cityCode" :options="cityOptions" />
+        <div class="flex flex-col sm:flex-row gap-2">
+          <UiSelect v-model="selectedProvince" :options="provinceOptions" class="sm:w-44" />
+          <UiSelect
+            v-if="selectedProvince"
+            v-model="selectedCityCode"
+            :options="citiesInProvince"
+            class="flex-1"
+          />
+        </div>
       </UiField>
 
       <div class="flex justify-end">
@@ -152,25 +160,57 @@ const backgroundPreview = computed(() => auth.user?.background || '')
 const hasBackground = computed(() => !!auth.user?.background)
 const uploadingBg = ref(false)
 
-const cityCode = ref(auth.user?.city_code || '')
+// Two-level province -> city cascade. city-coords.json already carries each
+// city's province, so the province grouping is derived here rather than
+// maintained as a second static file.
 const cityCoords = ref<Record<string, CityCoord>>({})
-const cityOptions = computed(() => {
+const selectedProvince = ref('')
+const selectedCityCode = ref('')
+
+const provinceOptions = computed(() => {
+  const provinces = new Set(Object.values(cityCoords.value).map(c => c.province))
   const opts = [{ value: '', label: t('me.city_not_public') }]
-  for (const [code, c] of Object.entries(cityCoords.value)) {
-    opts.push({ value: code, label: `${c.province} · ${c.name}` })
+  for (const p of [...provinces].sort((a, b) => a.localeCompare(b, 'zh'))) {
+    opts.push({ value: p, label: p })
   }
-  opts.sort((a, b) => (a.value === '' ? -1 : b.value === '' ? 1 : a.label.localeCompare(b.label, 'zh')))
   return opts
 })
 
+const citiesInProvince = computed(() => {
+  if (!selectedProvince.value) return []
+  return Object.entries(cityCoords.value)
+    .filter(([, c]) => c.province === selectedProvince.value)
+    .map(([code, c]) => ({ value: code, label: c.name }))
+    .sort((a, b) => a.label.localeCompare(b.label, 'zh'))
+})
+
+// Changing province invalidates a city that belonged to the old one — fall
+// back to the first city in the new province so the fields never disagree.
+watch(selectedProvince, () => {
+  if (!selectedProvince.value) {
+    selectedCityCode.value = ''
+    return
+  }
+  if (!citiesInProvince.value.some(o => o.value === selectedCityCode.value)) {
+    selectedCityCode.value = citiesInProvince.value[0]?.value || ''
+  }
+})
+
+function applyCityCode(code: string | undefined) {
+  const c = code ? cityCoords.value[code] : undefined
+  selectedProvince.value = c?.province || ''
+  selectedCityCode.value = c ? code! : ''
+}
+
 onMounted(async () => {
   cityCoords.value = await useCityCoords().load()
+  applyCityCode(auth.user?.city_code)
 })
 
 watch(() => auth.user, (u) => {
   if (u) {
     bio.value = u.bio
-    cityCode.value = u.city_code || ''
+    applyCityCode(u.city_code)
   }
 })
 
@@ -242,7 +282,7 @@ async function save() {
   try {
     const u = await useApi<MeDTO>('/api/users/me', {
       method: 'PATCH',
-      body: { bio: bio.value, city_code: cityCode.value },
+      body: { bio: bio.value, city_code: selectedCityCode.value },
     })
     auth.setUser(u)
     toast.success(t('actions.save'))
