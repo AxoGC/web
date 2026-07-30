@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-2xl">
+  <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12 max-w-2xl">
     <h1 class="text-2xl font-bold mb-6">{{ $t('nav.settings') }}</h1>
 
     <UiCard padded class="mb-6">

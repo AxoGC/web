@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12">
     <h1 class="text-2xl font-bold mb-6">{{ $t('me.likes_title') }}</h1>
 
     <div v-if="pending && !items.length" class="space-y-3">

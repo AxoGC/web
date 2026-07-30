@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12">
     <h1 class="text-2xl font-bold mb-6">{{ $t('server.list_title') }}</h1>
     <div v-if="pending" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <UiSkeleton v-for="i in 6" :key="i" variant="card" :height="120" />

@@ -348,7 +348,9 @@
     "following_title": "{name} 关注的人",
     "followers_empty": "还没有人关注 ta",
     "following_empty": "ta 还没关注任何人",
-    "follow_required_login": "请先登录后再关注"
+    "follow_required_login": "请先登录后再关注",
+    "more_actions": "更多操作",
+    "copy_link": "复制主页链接"
   },
   "admin": {
     "dashboard": "数据概览",

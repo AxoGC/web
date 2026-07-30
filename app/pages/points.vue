@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12">
     <header class="flex items-center justify-between gap-3 mb-6 flex-wrap">
       <h1 class="text-2xl font-bold">{{ $t('promotion.title') }}</h1>
       <div class="flex items-center gap-3">

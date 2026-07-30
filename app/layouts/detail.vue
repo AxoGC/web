@@ -9,7 +9,7 @@
       <div class="flex-1" />
       <slot name="header-trailing" />
     </header>
-    <main class="flex-1 mx-auto w-full max-w-[1080px] px-4 lg:px-6 py-6 pb-20 md:pb-12">
+    <main class="flex-1 mx-auto w-full max-w-[1080px]">
       <slot />
     </main>
     <!-- detail layout hides tab bar on mobile for immersion (plan §5.5.1 C) -->

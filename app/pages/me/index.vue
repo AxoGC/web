@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12">
     <div v-if="auth.user" class="space-y-6">
       <UiCard padded>
         <div class="flex flex-col md:flex-row items-start gap-6">

@@ -348,7 +348,9 @@
     "following_title": "People {name} follows",
     "followers_empty": "No followers yet",
     "following_empty": "Not following anyone yet",
-    "follow_required_login": "Sign in to follow"
+    "follow_required_login": "Sign in to follow",
+    "more_actions": "More actions",
+    "copy_link": "Copy profile link"
   },
   "admin": {
     "dashboard": "Overview",

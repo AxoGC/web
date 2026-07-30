@@ -3,231 +3,255 @@
     <div v-if="error">
       <UiEmpty :message="$t('errors.USER_NOT_FOUND')" />
     </div>
-    <div v-else-if="user" class="max-w-2xl mx-auto flex flex-col gap-5">
-      <!-- Top card: when the user has uploaded a background image we render
-           it underneath a uniform dark overlay (no gradient, mirrors the
-           forum-banner cards) and flip the text colours. Otherwise we
-           keep the plain themed card. The inverted variant is a single
-           branch on `hasBg` rather than two duplicated <UiCard>s. -->
-      <UiCard
-        :padded="!hasBg"
-        :class="hasBg ? 'bg-cover bg-center overflow-hidden' : ''"
+    <div v-else-if="user" class="max-w-2xl mx-auto bg-bg-elevated">
+      <!-- Top hero: no rounding, no bounding card — when the user has an
+           uploaded background image it fills the whole hero under a flat
+           dark overlay (mirrors the forum-banner treatment) and flips text
+           to white; otherwise it just inherits the container's background.
+           Row 1 (back / more) sits above row 2 (identity + stats), both
+           inside the same overlay so the icon buttons stay legible over
+           the photo. -->
+      <div
+        :class="hasBg ? 'bg-cover bg-center' : ''"
         :style="hasBg ? { backgroundImage: `url(${user.background})` } : undefined"
       >
-        <div
-          :class="hasBg
-            ? 'bg-black/40 p-6 text-white [text-shadow:0_1px_2px_rgb(0_0_0/55%)]'
-            : ''"
-        >
-          <div class="flex items-start gap-5">
-            <UiAvatar :src="user.avatar" :name="user.username" size="xl" clickable />
-            <div class="flex-1 min-w-0">
-              <div class="flex flex-wrap items-center gap-2">
-                <h1 class="text-2xl font-bold leading-none">{{ user.username }}</h1>
-                <UiTag
-                  v-if="user.role && user.role !== 'user'"
-                  :variant="user.role === 'admin' ? 'brand' : 'info'"
-                  class="text-shadow-none"
+        <div :class="hasBg ? 'bg-black/40 text-white [text-shadow:0_1px_2px_rgb(0_0_0/55%)]' : ''">
+          <div class="flex items-center justify-between p-3">
+            <button
+              type="button"
+              class="w-9 h-9 rounded-full bg-gray-800/40 text-white backdrop-blur-sm grid place-items-center hover:bg-gray-800/60 focus:outline-none"
+              :aria-label="$t('actions.back')"
+              @click="goBack"
+            >
+              <LucideChevronLeft :size="18" />
+            </button>
+            <UiDropdown align="end">
+              <template #trigger>
+                <button
+                  type="button"
+                  class="w-9 h-9 rounded-full bg-gray-800/40 text-white backdrop-blur-sm grid place-items-center hover:bg-gray-800/60 focus:outline-none"
+                  :aria-label="$t('profile.more_actions')"
                 >
-                  {{ user.role }}
-                </UiTag>
-              </div>
-              <p
-                v-if="user.bio"
-                :class="['mt-2 text-sm wrap-break-word', hasBg ? 'text-white/85' : 'text-text-secondary']"
-              >
-                {{ user.bio }}
-              </p>
-              <p :class="['mt-2 text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">
-                {{ $t('profile.joined_at', { date: formatDate(user.created_at) }) }}
-              </p>
-            </div>
-            <div class="shrink-0 flex flex-col items-end gap-2">
-              <NuxtLink v-if="isSelf" to="/me/settings">
-                <UiButton size="sm" variant="secondary">{{ $t('me.edit_profile') }}</UiButton>
-              </NuxtLink>
-              <FollowButton
-                v-else
-                :user-id="user.id"
-                :is-following="!!followStats?.is_following"
-                :follower-count="followStats?.follower_count ?? 0"
-                :following-count="followStats?.following_count ?? 0"
-                @change="onFollowChange"
-              />
-            </div>
+                  <LucideEllipsis :size="18" />
+                </button>
+              </template>
+              <UiDropdownItem v-if="isSelf" @select="router.push('/me/settings')">
+                <LucideSettings :size="14" /> {{ $t('me.edit_profile') }}
+              </UiDropdownItem>
+              <UiDropdownItem @select="copyLink">
+                <LucideLink :size="14" /> {{ $t('profile.copy_link') }}
+              </UiDropdownItem>
+            </UiDropdown>
           </div>
 
-          <!-- Inline stats strip. Six cells: follow + presence + check-in + likes
-               received. Likes-received was hoisted up from the bottom card so the
-               passive aggregate sits with the other passive stats and the lower
-               card can focus on active output (posts/comments). -->
-          <div
-            :class="[
-              'mt-5 pt-4 grid grid-cols-2 sm:grid-cols-6 gap-3 text-center border-t',
-              hasBg ? 'border-white/15' : 'border-border-subtle',
-            ]"
-          >
-            <NuxtLink
-              :to="`/users/${user.id}/followers`"
-              :class="['rounded-md py-1 transition-colors', hasBg ? 'hover:bg-white/10' : 'hover:bg-bg-hover']"
-            >
-              <div :class="['text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">{{ $t('profile.followers') }}</div>
-              <div class="mt-1 text-sm font-medium">{{ followStats?.follower_count ?? 0 }}</div>
-            </NuxtLink>
-            <NuxtLink
-              :to="`/users/${user.id}/following`"
-              :class="['rounded-md py-1 transition-colors', hasBg ? 'hover:bg-white/10' : 'hover:bg-bg-hover']"
-            >
-              <div :class="['text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">{{ $t('profile.following') }}</div>
-              <div class="mt-1 text-sm font-medium">{{ followStats?.following_count ?? 0 }}</div>
-            </NuxtLink>
-            <div>
-              <div :class="['text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">{{ $t('profile.last_login') }}</div>
-              <div class="mt-1 text-sm font-medium">{{ lastLoginText }}</div>
-            </div>
-            <div>
-              <div :class="['text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">{{ $t('profile.checkin_streak') }}</div>
-              <div class="mt-1 text-sm font-medium">
-                {{ $t('profile.checkin_streak_value', { n: stats?.checkin_streak ?? 0 }) }}
-              </div>
-            </div>
-            <div>
-              <div :class="['text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">{{ $t('profile.checkin_total') }}</div>
-              <div class="mt-1 text-sm font-medium">
-                {{ $t('profile.checkin_total_value', { n: stats?.checkin_total ?? 0 }) }}
-              </div>
-            </div>
-            <div>
-              <div :class="['text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">{{ $t('profile.forum_likes') }}</div>
-              <div class="mt-1 text-sm font-medium">{{ stats?.forum_likes_received ?? 0 }}</div>
-            </div>
-          </div>
-        </div>
-      </UiCard>
-
-      <UiCard padded>
-        <h2 class="text-lg font-semibold mb-3">{{ $t('profile.bindings_title') }}</h2>
-        <UiEmpty v-if="sortedBindings.length === 0" :message="$t('profile.bindings_empty')" />
-        <ul v-else class="divide-y divide-border-subtle">
-          <li
-            v-for="b in visibleBindings"
-            :key="b.server_id"
-            class="py-3"
-          >
-            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+          <div class="px-6 pb-6">
+            <div class="flex items-start gap-5">
+              <UiAvatar :src="user.avatar" :name="user.username" size="xl" clickable />
               <div class="flex-1 min-w-0">
                 <div class="flex flex-wrap items-center gap-2">
-                  <NuxtLink
-                    :to="`/servers/${b.server_id}/players/${encodeURIComponent(b.game_name)}`"
-                    class="font-medium hover:text-brand-400 truncate"
+                  <h1 class="text-2xl font-bold leading-none">{{ user.username }}</h1>
+                  <UiTag
+                    v-if="user.role && user.role !== 'user'"
+                    :variant="user.role === 'admin' ? 'brand' : 'info'"
+                    class="text-shadow-none"
                   >
-                    {{ b.server_name }}
-                  </NuxtLink>
-                  <UiTag size="sm">{{ typeLabel(b.server_type) }}</UiTag>
+                    {{ user.role }}
+                  </UiTag>
                 </div>
-                <div class="mt-1 text-xs text-text-tertiary flex items-center gap-2 flex-wrap">
-                  <span>{{ b.game_name }}</span>
-                  <span
-                    :class="[
-                      'inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px]',
-                      b.is_online ? 'bg-emerald-500/10 text-emerald-400' : 'bg-bg-overlay text-text-tertiary',
-                    ]"
-                  >
+                <p
+                  v-if="user.bio"
+                  :class="['mt-2 text-sm wrap-break-word', hasBg ? 'text-white/85' : 'text-text-secondary']"
+                >
+                  {{ user.bio }}
+                </p>
+                <p :class="['mt-2 text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">
+                  {{ $t('profile.joined_at', { date: formatDate(user.created_at) }) }}
+                </p>
+              </div>
+              <div v-if="!isSelf" class="shrink-0">
+                <FollowButton
+                  :user-id="user.id"
+                  :is-following="!!followStats?.is_following"
+                  :follower-count="followStats?.follower_count ?? 0"
+                  :following-count="followStats?.following_count ?? 0"
+                  @change="onFollowChange"
+                />
+              </div>
+            </div>
+
+            <!-- Inline stats strip. Six cells: follow + presence + check-in + likes
+                 received. Likes-received was hoisted up from the bottom card so the
+                 passive aggregate sits with the other passive stats and the lower
+                 card can focus on active output (posts/comments). -->
+            <div class="mt-5 grid grid-cols-3 sm:grid-cols-6 gap-3 text-center">
+              <NuxtLink
+                :to="`/users/${user.id}/followers`"
+                :class="['rounded-md py-1 transition-colors', hasBg ? 'hover:bg-white/10' : 'hover:bg-bg-hover']"
+              >
+                <div :class="['text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">{{ $t('profile.followers') }}</div>
+                <div class="mt-1 text-sm font-medium">{{ followStats?.follower_count ?? 0 }}</div>
+              </NuxtLink>
+              <NuxtLink
+                :to="`/users/${user.id}/following`"
+                :class="['rounded-md py-1 transition-colors', hasBg ? 'hover:bg-white/10' : 'hover:bg-bg-hover']"
+              >
+                <div :class="['text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">{{ $t('profile.following') }}</div>
+                <div class="mt-1 text-sm font-medium">{{ followStats?.following_count ?? 0 }}</div>
+              </NuxtLink>
+              <div>
+                <div :class="['text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">{{ $t('profile.last_login') }}</div>
+                <div class="mt-1 text-sm font-medium">{{ lastLoginText }}</div>
+              </div>
+              <div>
+                <div :class="['text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">{{ $t('profile.checkin_streak') }}</div>
+                <div class="mt-1 text-sm font-medium">
+                  {{ $t('profile.checkin_streak_value', { n: stats?.checkin_streak ?? 0 }) }}
+                </div>
+              </div>
+              <div>
+                <div :class="['text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">{{ $t('profile.checkin_total') }}</div>
+                <div class="mt-1 text-sm font-medium">
+                  {{ $t('profile.checkin_total_value', { n: stats?.checkin_total ?? 0 }) }}
+                </div>
+              </div>
+              <div>
+                <div :class="['text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">{{ $t('profile.forum_likes') }}</div>
+                <div class="mt-1 text-sm font-medium">{{ stats?.forum_likes_received ?? 0 }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rest of the content: a single flex column with its own padding —
+           the two sections below no longer carry their own background or
+           padding, so the boundary between them reads purely from heading
+           weight and spacing rather than a card edge. -->
+      <div class="flex flex-col gap-4 p-4">
+        <UiCard flat>
+          <h2 class="text-lg font-semibold mb-2">{{ $t('profile.bindings_title') }}</h2>
+          <UiEmpty v-if="sortedBindings.length === 0" :message="$t('profile.bindings_empty')" />
+          <ul v-else class="divide-y divide-border-subtle">
+            <li
+              v-for="b in visibleBindings"
+              :key="b.server_id"
+              class="py-3"
+            >
+              <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                <div class="flex-1 min-w-0">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <NuxtLink
+                      :to="`/servers/${b.server_id}/players/${encodeURIComponent(b.game_name)}`"
+                      class="font-medium hover:text-brand-400 truncate"
+                    >
+                      {{ b.server_name }}
+                    </NuxtLink>
+                    <UiTag size="sm">{{ typeLabel(b.server_type) }}</UiTag>
+                  </div>
+                  <div class="mt-1 text-xs text-text-tertiary flex items-center gap-2 flex-wrap">
+                    <span>{{ b.game_name }}</span>
                     <span
                       :class="[
-                        'inline-block w-1.5 h-1.5 rounded-full',
-                        b.is_online ? 'bg-emerald-400' : 'bg-text-tertiary',
+                        'inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px]',
+                        b.is_online ? 'bg-emerald-500/10 text-emerald-400' : 'bg-bg-overlay text-text-tertiary',
                       ]"
-                    />
-                    {{ presence({ isOnline: b.is_online, joinedAt: b.joined_at, lastSeenAt: b.last_seen_at }) }}
-                  </span>
+                    >
+                      <span
+                        :class="[
+                          'inline-block w-1.5 h-1.5 rounded-full',
+                          b.is_online ? 'bg-emerald-400' : 'bg-text-tertiary',
+                        ]"
+                      />
+                      {{ presence({ isOnline: b.is_online, joinedAt: b.joined_at, lastSeenAt: b.last_seen_at }) }}
+                    </span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <NuxtLink
+                    v-if="viewerBindingsByServer[b.server_id] && user"
+                    :to="pkLink(b)"
+                  >
+                    <UiButton size="sm" variant="primary">
+                      {{ $t('pk.cta') }}
+                    </UiButton>
+                  </NuxtLink>
+                  <div v-if="b.bound_at" class="text-xs text-text-tertiary">
+                    {{ $t('profile.bindings_bound_at', { date: formatDate(b.bound_at) }) }}
+                  </div>
                 </div>
               </div>
-              <div class="flex items-center gap-2 shrink-0">
-                <NuxtLink
-                  v-if="viewerBindingsByServer[b.server_id] && user"
-                  :to="pkLink(b)"
-                >
-                  <UiButton size="sm" variant="primary">
-                    {{ $t('pk.cta') }}
-                  </UiButton>
-                </NuxtLink>
-                <div v-if="b.bound_at" class="text-xs text-text-tertiary">
-                  {{ $t('profile.bindings_bound_at', { date: formatDate(b.bound_at) }) }}
-                </div>
-              </div>
-            </div>
 
-            <div
-              v-if="bindingStats[bindingKey(b)]?.length"
-              class="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2"
-            >
               <div
-                v-for="axis in bindingStats[bindingKey(b)]"
-                :key="axis.key"
-                class="bg-bg-overlay/40 rounded px-2.5 py-1.5"
+                v-if="bindingStats[bindingKey(b)]?.length"
+                class="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2"
               >
-                <p class="text-[10px] text-text-tertiary uppercase tracking-wide">
-                  {{ metrics.labelFor(b.server_id, axis.key) }}
-                </p>
-                <p class="text-sm font-medium text-text-primary">
-                  {{ metrics.formatScore(b.server_id, axis.key, axis.value) }}
-                </p>
+                <div
+                  v-for="axis in bindingStats[bindingKey(b)]"
+                  :key="axis.key"
+                  class="bg-bg-overlay/40 rounded px-2.5 py-1.5"
+                >
+                  <p class="text-[10px] text-text-tertiary uppercase tracking-wide">
+                    {{ metrics.labelFor(b.server_id, axis.key) }}
+                  </p>
+                  <p class="text-sm font-medium text-text-primary">
+                    {{ metrics.formatScore(b.server_id, axis.key, axis.value) }}
+                  </p>
+                </div>
               </div>
-            </div>
-          </li>
-        </ul>
-        <!-- Collapse-by-default: long binding lists crowd the profile card,
-             so we show the top 2 (sorted by most-recent presence activity)
-             and offer an in-place expand for the rest. -->
-        <div
-          v-if="sortedBindings.length > BINDINGS_PREVIEW"
-          class="mt-3 flex justify-center"
-        >
-          <UiButton variant="ghost" size="sm" @click="bindingsExpanded = !bindingsExpanded">
-            {{ bindingsExpanded
-              ? $t('profile.bindings_collapse')
-              : $t('profile.bindings_show_all', { n: sortedBindings.length }) }}
-          </UiButton>
-        </div>
-      </UiCard>
+            </li>
+          </ul>
+          <!-- Collapse-by-default: long binding lists crowd the profile card,
+               so we show the top 2 (sorted by most-recent presence activity)
+               and offer an in-place expand for the rest. -->
+          <div
+            v-if="sortedBindings.length > BINDINGS_PREVIEW"
+            class="mt-3 flex justify-center"
+          >
+            <UiButton variant="ghost" size="sm" @click="bindingsExpanded = !bindingsExpanded">
+              {{ bindingsExpanded
+                ? $t('profile.bindings_collapse')
+                : $t('profile.bindings_show_all', { n: sortedBindings.length }) }}
+            </UiButton>
+          </div>
+        </UiCard>
 
-      <UiCard padded>
-        <h2 class="text-lg font-semibold mb-3">{{ $t('profile.forum_title') }}</h2>
-        <UiTabs v-model="activityTab" :tabs="activityTabs">
-          <UiTabPanel value="posts">
-            <UiEmpty v-if="!recentPosts.length" :message="$t('profile.forum_empty_posts')" />
-            <ul v-else class="divide-y divide-border-subtle">
-              <li v-for="p in recentPosts" :key="p.id" class="py-2.5">
-                <NuxtLink :to="`/posts/${p.id}`" class="block group">
-                  <div class="font-medium text-text-primary group-hover:text-brand-400 truncate">{{ p.title }}</div>
-                  <div class="mt-1 flex items-center gap-3 text-xs text-text-tertiary">
-                    <span>{{ formatDate(p.created_at) }}</span>
-                    <span class="inline-flex items-center gap-1"><LucideMessageCircle :size="12" />{{ p.comment_count }}</span>
-                    <span class="inline-flex items-center gap-1"><LucideEye :size="12" />{{ p.view_count }}</span>
-                    <span class="inline-flex items-center gap-1"><LucideHeart :size="12" />{{ p.like_count }}</span>
-                  </div>
-                </NuxtLink>
-              </li>
-            </ul>
-          </UiTabPanel>
-          <UiTabPanel value="comments">
-            <UiEmpty v-if="!recentComments.length" :message="$t('profile.forum_empty_comments')" />
-            <ul v-else class="divide-y divide-border-subtle">
-              <li v-for="c in recentComments" :key="c.id" class="py-2.5">
-                <NuxtLink :to="`/posts/${c.post_id}#comment-${c.id}`" class="block group">
-                  <div class="text-xs text-text-tertiary truncate">
-                    {{ $t('profile.forum_comment_on') }}
-                    <span class="font-medium text-text-secondary group-hover:text-brand-400">{{ c.post_title }}</span>
-                  </div>
-                  <div class="mt-1 text-sm text-text-primary wrap-break-word">{{ c.content_excerpt }}</div>
-                  <div class="mt-1 text-xs text-text-tertiary">{{ formatDate(c.created_at) }}</div>
-                </NuxtLink>
-              </li>
-            </ul>
-          </UiTabPanel>
-        </UiTabs>
-      </UiCard>
+        <UiCard flat>
+          <h2 class="text-lg font-semibold mb-2">{{ $t('profile.forum_title') }}</h2>
+          <UiTabs v-model="activityTab" :tabs="activityTabs">
+            <UiTabPanel value="posts">
+              <UiEmpty v-if="!recentPosts.length" :message="$t('profile.forum_empty_posts')" />
+              <ul v-else class="divide-y divide-border-subtle">
+                <li v-for="p in recentPosts" :key="p.id" class="py-2.5">
+                  <NuxtLink :to="`/posts/${p.id}`" class="block group">
+                    <div class="font-medium text-text-primary group-hover:text-brand-400 truncate">{{ p.title }}</div>
+                    <div class="mt-1 flex items-center gap-3 text-xs text-text-tertiary">
+                      <span>{{ formatDate(p.created_at) }}</span>
+                      <span class="inline-flex items-center gap-1"><LucideMessageCircle :size="12" />{{ p.comment_count }}</span>
+                      <span class="inline-flex items-center gap-1"><LucideEye :size="12" />{{ p.view_count }}</span>
+                      <span class="inline-flex items-center gap-1"><LucideHeart :size="12" />{{ p.like_count }}</span>
+                    </div>
+                  </NuxtLink>
+                </li>
+              </ul>
+            </UiTabPanel>
+            <UiTabPanel value="comments">
+              <UiEmpty v-if="!recentComments.length" :message="$t('profile.forum_empty_comments')" />
+              <ul v-else class="divide-y divide-border-subtle">
+                <li v-for="c in recentComments" :key="c.id" class="py-2.5">
+                  <NuxtLink :to="`/posts/${c.post_id}#comment-${c.id}`" class="block group">
+                    <div class="text-xs text-text-tertiary truncate">
+                      {{ $t('profile.forum_comment_on') }}
+                      <span class="font-medium text-text-secondary group-hover:text-brand-400">{{ c.post_title }}</span>
+                    </div>
+                    <div class="mt-1 text-sm text-text-primary wrap-break-word">{{ c.content_excerpt }}</div>
+                    <div class="mt-1 text-xs text-text-tertiary">{{ formatDate(c.created_at) }}</div>
+                  </NuxtLink>
+                </li>
+              </ul>
+            </UiTabPanel>
+          </UiTabs>
+        </UiCard>
+      </div>
     </div>
     <UiSkeleton v-else :height="180" />
   </div>
@@ -251,9 +275,23 @@ import type {
 definePageMeta({ layout: 'detail' })
 
 const route = useRoute()
+const router = useRouter()
 const { t } = useI18n()
 const auth = useAuthStore()
+const toast = useToast()
 const id = computed(() => String(route.params.id))
+
+function goBack() {
+  if (history.length > 1) router.back()
+  else router.push('/')
+}
+
+async function copyLink() {
+  try {
+    await navigator.clipboard.writeText(location.href)
+    toast.success(t('actions.copied'))
+  } catch { /* ignore */ }
+}
 
 const { data: user, error } = await useAsyncData(
   () => `user.${id.value}`,

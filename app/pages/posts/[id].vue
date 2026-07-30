@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12">
     <template v-if="post">
       <header class="mb-6">
         <div class="flex items-center gap-2 text-sm text-text-tertiary mb-3">

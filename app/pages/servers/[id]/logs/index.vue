@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12">
     <NuxtLink
       :to="`/servers/${id}`"
       class="hidden md:inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary mb-4"

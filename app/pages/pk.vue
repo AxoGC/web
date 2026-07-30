@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12">
     <header class="mb-6">
       <h1 class="text-2xl font-bold">{{ $t('pk.title') }}</h1>
       <p v-if="server" class="mt-1 text-sm text-text-tertiary flex flex-wrap items-center gap-2">

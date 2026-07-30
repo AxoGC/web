@@ -1,8 +1,19 @@
 <template>
   <header class="sticky top-0 z-30 border-b border-border-subtle bg-bg-base/90 backdrop-blur supports-backdrop-filter:bg-bg-base/75">
     <div class="mx-auto max-w-7xl h-16 px-4 lg:px-6 flex items-center gap-4">
-      <NuxtLink to="/" class="flex items-center gap-2 font-bold text-lg shrink-0 text-text-primary">
-        <img src="/logo.webp" alt="logo" class="block h-8 w-auto object-contain" />
+      <NuxtLink to="/" class="flex items-center gap-2 shrink-0 text-text-primary">
+        <img src="/logo.webp" alt="logo" class="block h-8 w-auto object-contain md:hidden" />
+        <span
+          class="hidden md:inline-flex items-center italic font-bold text-lg text-[#28abce] whitespace-nowrap select-none"
+          aria-label="Axolotland Gaming Club"
+        >
+          <span>Axo</span>
+          <span class="logo-collapse" :class="{ 'is-collapsed': scrolled }" style="--logo-w: 6rem">lotland&nbsp;</span>
+          <span>G</span>
+          <span class="logo-collapse" :class="{ 'is-collapsed': scrolled }" style="--logo-w: 4.5rem">aming&nbsp;</span>
+          <span>C</span>
+          <span class="logo-collapse" :class="{ 'is-collapsed': scrolled }" style="--logo-w: 2.5rem">lub</span>
+        </span>
       </NuxtLink>
 
       <nav class="hidden md:flex items-center gap-1 text-sm">
@@ -121,6 +132,19 @@ const toast = useToast()
 
 const searchQ = ref('')
 
+// Drives the AxoGC letter-collapse animation on the desktop text logo.
+const scrolled = ref(false)
+function updateScrolled() {
+  scrolled.value = window.scrollY > 4
+}
+onMounted(() => {
+  updateScrolled()
+  window.addEventListener('scroll', updateScrolled, { passive: true })
+})
+onUnmounted(() => {
+  window.removeEventListener('scroll', updateScrolled)
+})
+
 function onSearch() {
   const q = searchQ.value.trim()
   if (q.length < 2) return
@@ -151,3 +175,18 @@ async function switchLocale(code: string) {
   await setLocale(code as never)
 }
 </script>
+
+<style scoped>
+.logo-collapse {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: var(--logo-w);
+  opacity: 1;
+  transition: max-width 0.35s ease, opacity 0.3s ease;
+}
+.logo-collapse.is-collapsed {
+  max-width: 0;
+  opacity: 0;
+}
+</style>

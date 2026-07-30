@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-2xl mx-auto flex flex-col gap-4">
+  <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12 max-w-2xl mx-auto flex flex-col gap-4">
     <header class="flex items-center gap-3">
       <NuxtLink :to="`/users/${id}`" class="text-text-tertiary hover:text-text-primary">
         <LucideChevronLeft :size="18" />

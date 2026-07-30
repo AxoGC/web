@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12">
     <div v-if="!forum && !pendingForum">
       <UiEmpty :message="$t('errors.FORUM_NOT_FOUND')" />
     </div>

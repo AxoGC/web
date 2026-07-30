@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-10">
+  <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12 space-y-10">
     <!-- Hero / Carousel -->
     <HomeCarousel v-if="slides.length > 0" :slides="slides" />
     <section
