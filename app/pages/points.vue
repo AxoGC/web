@@ -8,40 +8,12 @@
       </UiButton>
     </header>
 
-    <UiTable v-if="pending || items.length > 0">
-      <template #head>
-        <tr>
-          <th class="text-left px-4 py-2">{{ $t('promotion.col_user') }}</th>
-          <th class="text-left px-4 py-2">{{ $t('promotion.field_description') }}</th>
-          <th class="text-left px-4 py-2 w-24">{{ $t('promotion.col_points') }}</th>
-          <th class="text-left px-4 py-2 w-28">{{ $t('promotion.col_status') }}</th>
-          <th class="text-left px-4 py-2 w-40">{{ $t('promotion.col_created_at') }}</th>
-        </tr>
-      </template>
-      <template v-if="pending">
-        <tr v-for="i in 5" :key="i" class="border-t border-border-subtle">
-          <td colspan="5" class="px-4 py-3"><UiSkeleton /></td>
-        </tr>
-      </template>
-      <template v-else>
-        <tr
-          v-for="item in items"
-          :key="item.id"
-          class="border-t border-border-subtle cursor-pointer hover:bg-bg-hover"
-          @click="openDetail(item)"
-        >
-          <td class="px-4 py-2 font-medium">#{{ item.user_id }}</td>
-          <td class="px-4 py-2 text-text-secondary truncate max-w-xs">{{ item.description_text }}</td>
-          <td class="px-4 py-2 font-medium">+{{ item.points }}</td>
-          <td class="px-4 py-2">
-            <UiTag :variant="statusVariant(item.status)" size="sm">
-              {{ $t(`promotion.status_${item.status}`) }}
-            </UiTag>
-          </td>
-          <td class="px-4 py-2 text-xs text-text-tertiary">{{ formatAuditTimestamp(new Date(item.created_at * 1000)) }}</td>
-        </tr>
-      </template>
-    </UiTable>
+    <div v-if="pending" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <UiSkeleton v-for="i in 6" :key="i" variant="card" :height="120" />
+    </div>
+    <div v-else-if="items.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <PromotionClaimCard v-for="item in items" :key="item.id" :claim="item" @click="openDetail(item)" />
+    </div>
     <UiEmpty v-else :message="$t('promotion.list_empty')" />
 
     <div class="mt-6 flex justify-center">
@@ -55,18 +27,16 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import type { PromotionClaimItem, PromotionClaimStatus } from '~/types/api'
+import type { PromotionClaimItem } from '~/types/api'
 import { ApiError } from '~/composables/useApi'
 import { useToast } from '~/composables/useToast'
 import { useAuthStore } from '~/stores/auth'
-import { useAuditTime } from '~/composables/useAuditTime'
 
 definePageMeta({ layout: 'default' })
 
 const auth = useAuthStore()
 const toast = useToast()
 const { t } = useI18n()
-const { formatAuditTimestamp } = useAuditTime()
 
 const items = ref<PromotionClaimItem[]>([])
 const total = ref(0)
@@ -109,10 +79,6 @@ function openDetail(item: PromotionClaimItem) {
 
 function onRevoked() {
   void load()
-}
-
-function statusVariant(status: PromotionClaimStatus) {
-  return status === 'granted' ? 'success' : 'danger'
 }
 
 onMounted(load)

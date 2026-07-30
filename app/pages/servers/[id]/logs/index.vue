@@ -16,42 +16,12 @@
       </UiButton>
     </header>
 
-    <UiTable v-if="pending || items.length > 0">
-      <template #head>
-        <tr>
-          <th class="text-left px-4 py-2">{{ $t('log_query.col_category') }}</th>
-          <th class="text-left px-4 py-2">{{ $t('log_query.col_target') }}</th>
-          <th class="text-left px-4 py-2">{{ $t('log_query.field_reason') }}</th>
-          <th class="text-left px-4 py-2">{{ $t('log_query.col_status') }}</th>
-          <th class="text-left px-4 py-2 w-40">{{ $t('log_query.col_created_at') }}</th>
-        </tr>
-      </template>
-      <template v-if="pending">
-        <tr v-for="i in 5" :key="i" class="border-t border-border-subtle">
-          <td colspan="5" class="px-4 py-3"><UiSkeleton /></td>
-        </tr>
-      </template>
-      <template v-else>
-        <tr
-          v-for="item in items"
-          :key="item.id"
-          class="border-t border-border-subtle cursor-pointer hover:bg-bg-hover"
-          @click="openDetail(item)"
-        >
-          <td class="px-4 py-2">
-            <UiTag variant="brand" size="sm">{{ $t(`log_query.category_${item.category}`) }}</UiTag>
-          </td>
-          <td class="px-4 py-2 font-medium">{{ item.target_player || '—' }}</td>
-          <td class="px-4 py-2 text-text-secondary truncate max-w-xs" :title="item.reason">{{ item.reason }}</td>
-          <td class="px-4 py-2">
-            <UiTag :variant="statusVariant(item.status)" size="sm">
-              {{ $t(`log_query.status_${item.status}`) }}
-            </UiTag>
-          </td>
-          <td class="px-4 py-2 text-xs text-text-tertiary">{{ formatAuditTimestamp(new Date(item.created_at * 1000)) }}</td>
-        </tr>
-      </template>
-    </UiTable>
+    <div v-if="pending" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <UiSkeleton v-for="i in 6" :key="i" variant="card" :height="120" />
+    </div>
+    <div v-else-if="items.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <ServerLogQueryCard v-for="item in items" :key="item.id" :request="item" @click="openDetail(item)" />
+    </div>
     <UiEmpty v-else :message="$t('log_query.list_empty')" />
 
     <div class="mt-6 flex justify-center">
@@ -71,12 +41,10 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
-import type { LogQueryRequestItem, LogQueryStatus, ServerSummary } from '~/types/api'
+import type { LogQueryRequestItem, ServerSummary } from '~/types/api'
 import { ApiError } from '~/composables/useApi'
 import { useToast } from '~/composables/useToast'
 import { useAuthStore } from '~/stores/auth'
-import { logQueryStatusVariant } from '~/composables/useLogCategories'
-import { useAuditTime } from '~/composables/useAuditTime'
 
 definePageMeta({ layout: 'detail' })
 
@@ -85,7 +53,6 @@ const id = computed(() => String(route.params.id))
 const auth = useAuthStore()
 const toast = useToast()
 const { t } = useI18n()
-const { formatAuditTimestamp } = useAuditTime()
 
 const { data: server } = await useAsyncData(
   () => `server.head.${id.value}`,
@@ -137,10 +104,6 @@ function openDetail(item: LogQueryRequestItem) {
 
 function onDeleted() {
   void load()
-}
-
-function statusVariant(status: LogQueryStatus) {
-  return logQueryStatusVariant(status)
 }
 
 onMounted(load)

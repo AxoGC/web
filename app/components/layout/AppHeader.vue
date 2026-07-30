@@ -45,42 +45,62 @@
         </UiDropdownItem>
       </UiDropdown>
 
-      <template v-if="auth.isLoggedIn">
-        <UiDropdown align="end">
-          <template #trigger>
-            <button class="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60">
-              <UiAvatar :src="auth.user?.avatar" :name="auth.user?.username" size="sm" />
-            </button>
-          </template>
-          <div class="px-2.5 py-2 text-xs text-text-tertiary border-b border-border-subtle mb-1">
-            <div class="text-sm text-text-primary font-medium">{{ auth.user?.username }}</div>
-            <div>{{ auth.user?.email }}</div>
-          </div>
-          <UiDropdownItem @select="navigate('/me')">
-            <LucideUser :size="14" /> {{ $t('nav.me') }}
-          </UiDropdownItem>
-          <UiDropdownItem @select="navigate('/me/settings')">
-            <LucideSettings :size="14" /> {{ $t('nav.settings') }}
-          </UiDropdownItem>
-          <UiDropdownItem @select="navigate('/points')">
-            <LucideCoins :size="14" /> {{ $t('nav.points') }}
-          </UiDropdownItem>
-          <UiDropdownItem v-if="auth.isAdmin" @select="navigate('/admin')">
-            <LucideShieldCheck :size="14" /> {{ $t('nav.admin') }}
-          </UiDropdownItem>
-          <UiDropdownItem danger @select="doLogout">
-            <LucideLogOut :size="14" /> {{ $t('nav.logout') }}
-          </UiDropdownItem>
-        </UiDropdown>
-      </template>
-      <template v-else>
-        <NuxtLink to="/login" class="hidden sm:inline-flex">
-          <UiButton variant="ghost" size="sm">{{ $t('nav.login') }}</UiButton>
-        </NuxtLink>
-        <NuxtLink to="/register" class="inline-flex">
-          <UiButton variant="primary" size="sm">{{ $t('nav.register') }}</UiButton>
-        </NuxtLink>
-      </template>
+      <!-- ClientOnly: SSR always runs anonymous (no cookies forwarded, see
+           useApi's rawFetch), so the server can never know the real auth
+           state. Letting the v-if/v-else below hydrate against a
+           server-rendered "logged out" DOM while the client's auth store is
+           already populated by plugins/auth.client.ts's awaited bootstrap()
+           produced a hydration mismatch severe enough that Vue left BOTH
+           branches mounted (avatar dropdown AND the login/register links,
+           at once) instead of cleanly swapping. ClientOnly sidesteps that by
+           not hydrating this block at all — it discards the fallback and
+           mounts fresh on the client, where auth state is already correct. -->
+      <ClientOnly>
+        <template v-if="auth.isLoggedIn">
+          <UiDropdown align="end">
+            <template #trigger>
+              <button class="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60">
+                <UiAvatar :src="auth.user?.avatar" :name="auth.user?.username" size="sm" />
+              </button>
+            </template>
+            <div class="px-2.5 py-2 text-xs text-text-tertiary border-b border-border-subtle mb-1">
+              <div class="text-sm text-text-primary font-medium">{{ auth.user?.username }}</div>
+              <div>{{ auth.user?.email }}</div>
+            </div>
+            <UiDropdownItem @select="navigate('/me')">
+              <LucideUser :size="14" /> {{ $t('nav.me') }}
+            </UiDropdownItem>
+            <UiDropdownItem @select="navigate('/me/settings')">
+              <LucideSettings :size="14" /> {{ $t('nav.settings') }}
+            </UiDropdownItem>
+            <UiDropdownItem @select="navigate('/points')">
+              <LucideCoins :size="14" /> {{ $t('nav.points') }}
+            </UiDropdownItem>
+            <UiDropdownItem v-if="auth.isAdmin" @select="navigate('/admin')">
+              <LucideShieldCheck :size="14" /> {{ $t('nav.admin') }}
+            </UiDropdownItem>
+            <UiDropdownItem danger @select="doLogout">
+              <LucideLogOut :size="14" /> {{ $t('nav.logout') }}
+            </UiDropdownItem>
+          </UiDropdown>
+        </template>
+        <template v-else>
+          <NuxtLink to="/login" class="hidden sm:inline-flex">
+            <UiButton variant="ghost" size="sm">{{ $t('nav.login') }}</UiButton>
+          </NuxtLink>
+          <NuxtLink to="/register" class="inline-flex">
+            <UiButton variant="primary" size="sm">{{ $t('nav.register') }}</UiButton>
+          </NuxtLink>
+        </template>
+        <template #fallback>
+          <NuxtLink to="/login" class="hidden sm:inline-flex">
+            <UiButton variant="ghost" size="sm">{{ $t('nav.login') }}</UiButton>
+          </NuxtLink>
+          <NuxtLink to="/register" class="inline-flex">
+            <UiButton variant="primary" size="sm">{{ $t('nav.register') }}</UiButton>
+          </NuxtLink>
+        </template>
+      </ClientOnly>
     </div>
   </header>
 </template>

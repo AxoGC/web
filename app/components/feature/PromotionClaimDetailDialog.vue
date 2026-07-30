@@ -3,7 +3,7 @@
     <div v-if="claim" class="space-y-4">
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
         <PromotionClaimInfoRow :label="$t('promotion.col_user')">
-          <span class="font-medium">#{{ claim.user_id }}</span>
+          <span class="font-medium">{{ claim.username || `#${claim.user_id}` }}</span>
         </PromotionClaimInfoRow>
         <PromotionClaimInfoRow :label="$t('promotion.col_status')">
           <UiTag :variant="statusVariant(claim.status)" size="sm">
@@ -18,7 +18,7 @@
         </PromotionClaimInfoRow>
       </div>
 
-      <PromotionClaimInfoRow :label="$t('promotion.field_description')">
+      <PromotionClaimInfoRow :label="$t('promotion.field_description')" vertical>
         <RichContent :doc="claim.description_json" />
       </PromotionClaimInfoRow>
 

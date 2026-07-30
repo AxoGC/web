@@ -9,7 +9,7 @@
           <UiTag variant="brand" size="sm">{{ $t(`log_query.category_${request.category}`) }}</UiTag>
         </ServerLogQueryInfoRow>
         <ServerLogQueryInfoRow :label="$t('admin.qr_col_requester')">
-          <span class="font-medium">#{{ request.requester_user_id }}</span>
+          <span class="font-medium">{{ request.requester_username || `#${request.requester_user_id}` }}</span>
         </ServerLogQueryInfoRow>
         <ServerLogQueryInfoRow :label="$t('admin.qr_col_status')">
           <UiTag :variant="logQueryStatusVariant(request.status)" size="sm">

@@ -46,7 +46,7 @@
           <td class="px-4 py-2">
             <UiTag variant="brand" size="sm">{{ $t(`log_query.category_${item.category}`) }}</UiTag>
           </td>
-          <td class="px-4 py-2 text-text-secondary">#{{ item.requester_user_id }}</td>
+          <td class="px-4 py-2 text-text-secondary">{{ item.requester_username || `#${item.requester_user_id}` }}</td>
           <td class="px-4 py-2 text-text-secondary truncate max-w-xs" :title="item.reason">{{ item.reason }}</td>
           <td class="px-4 py-2">
             <UiTag :variant="logQueryStatusVariant(item.status)" size="sm">

@@ -444,6 +444,7 @@ export interface LogQueryFilters {
 export interface LogQueryRequestItem {
   id: number
   requester_user_id: number
+  requester_username?: string
   target_server_id: number
   target_player: string
   category: LogCategory
@@ -470,6 +471,7 @@ export type PromotionClaimStatus = 'granted' | 'revoked'
 export interface PromotionClaimItem {
   id: number
   user_id: number
+  username?: string
   description_json: TiptapDoc
   description_text: string
   points: number
