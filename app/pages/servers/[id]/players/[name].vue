@@ -189,10 +189,31 @@ const chartOption = computed(() => {
     radar: {
       indicator: list.map(a => ({ name: metrics.labelFor(a.key), max: 100 })),
       shape: 'polygon',
-      axisName: { color: 'var(--text-secondary)', fontSize: 12 },
-      splitLine: { lineStyle: { color: 'var(--border-default)' } },
-      axisLine: { lineStyle: { color: 'var(--border-default)' } },
-      splitArea: { areaStyle: { color: ['rgba(40,171,206,0.04)', 'rgba(40,171,206,0.08)'] } },
+      splitNumber: 4,
+      // Shrink the web so axis labels have room inside the 360px box.
+      center: ['50%', '54%'],
+      radius: '62%',
+      // Keep labels clear of the outer ring.
+      axisName: {
+        color: '#4dc0df',
+        fontSize: 12,
+        fontWeight: 600,
+      },
+      // Faint brand-tinted grid so the web reads as part of the chart,
+      // brightening slightly toward the outer rings.
+      splitLine: {
+        lineStyle: {
+          color: [
+            'rgba(40,171,206,0.15)',
+            'rgba(40,171,206,0.22)',
+            'rgba(40,171,206,0.30)',
+            'rgba(40,171,206,0.40)',
+          ],
+          width: 1,
+        },
+      },
+      axisLine: { lineStyle: { color: 'rgba(40,171,206,0.35)' } },
+      splitArea: { areaStyle: { color: ['rgba(40,171,206,0.03)', 'rgba(40,171,206,0.08)'] } },
     },
     tooltip: {
       backgroundColor: 'var(--bg-overlay)',
@@ -207,14 +228,30 @@ const chartOption = computed(() => {
     },
     series: [{
       type: 'radar',
+      symbol: 'circle',
+      symbolSize: 5,
       data: [{
         value: list.map(a => clamp(a.percent)),
         name: name.value,
-        areaStyle: { color: 'rgba(40,171,206,0.25)' },
-        lineStyle: { color: '#28abce', width: 2 },
-        symbol: 'circle',
-        symbolSize: 6,
-        itemStyle: { color: '#28abce' },
+        // Radial gradient: brighter core fading out toward the rim gives the
+        // plot presence even when scores are low.
+        areaStyle: {
+          color: {
+            type: 'radial',
+            x: 0.5, y: 0.5, r: 0.5,
+            colorStops: [
+              { offset: 0, color: 'rgba(77,192,223,0.45)' },
+              { offset: 1, color: 'rgba(40,171,206,0.12)' },
+            ],
+          },
+        },
+        lineStyle: {
+          color: '#4dc0df',
+          width: 2.5,
+        },
+        itemStyle: {
+          color: '#4dc0df',
+        },
       }],
     }],
   }
