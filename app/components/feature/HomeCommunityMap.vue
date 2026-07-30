@@ -62,6 +62,7 @@ import { PopoverRoot, PopoverAnchor, PopoverPortal, PopoverContent } from 'reka-
 import type { CityMapEntry } from '~/types/api'
 import { useCityCoords, type CityCoord } from '~/composables/useCityCoords'
 import { initials, colorForName } from '~/utils/format'
+import { useTheme } from '~/composables/useTheme'
 
 const { data } = await useAsyncData('home.city_map', () =>
   useApi<{ items: CityMapEntry[] }>('/api/users/by-city').catch(() => ({ items: [] as CityMapEntry[] })),
@@ -101,20 +102,29 @@ const provinceCount = computed(() => new Set(points.value.map(p => p.coord.provi
 const cityCount = computed(() => points.value.length)
 const playerCount = computed(() => points.value.reduce((sum, p) => sum + p.entry.count, 0))
 
-// Choropleth: empty province stays plain white, populated provinces wash
-// toward the brand color proportional to their player share. Capped well
-// short of full saturation (BLEND_MAX) so even the busiest province stays a
-// light tint — the pins are solid brand blue and need to read clearly
-// against the fill, not blend into it.
+// Choropleth: empty province stays the map's blank base color, populated
+// provinces wash toward the brand color proportional to their player share.
+// Capped well short of full saturation (BLEND_MAX) so even the busiest
+// province stays a light tint — the pins are solid brand blue and need to
+// read clearly against the fill, not blend into it. Canvas can't resolve
+// CSS custom properties, so literal per-theme colors — pure white reads
+// fine as "blank" in light mode but is jarringly bright in dark mode.
+const { resolved: themeMode } = useTheme()
+const MAP_BASE = {
+  light: { area: [255, 255, 255], border: '#d8dce2', hoverArea: '#eef2f5' },
+  dark: { area: [28, 31, 38], border: '#2f343f', hoverArea: '#232730' },
+} as const
+
 const BLEND_MIN = 0.12
 const BLEND_MAX = 0.45
 const BRAND_RGB = [0x28, 0xab, 0xce]
-function blendWithBrand(t: number): string {
-  const rgb = BRAND_RGB.map(to => Math.round(255 + (to - 255) * t))
+function blendWithBrand(t: number, base: readonly number[]): string {
+  const rgb = BRAND_RGB.map((to, i) => Math.round(base[i]! + (to - base[i]!) * t))
   return `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`
 }
 
 const provinceRegions = computed(() => {
+  const base = MAP_BASE[themeMode.value].area
   const counts = new Map<string, number>()
   for (const p of points.value) {
     counts.set(p.coord.province, (counts.get(p.coord.province) || 0) + p.entry.count)
@@ -122,7 +132,7 @@ const provinceRegions = computed(() => {
   const max = Math.max(1, ...counts.values())
   return [...counts.entries()].map(([name, count]) => ({
     name,
-    itemStyle: { areaColor: blendWithBrand(BLEND_MIN + (BLEND_MAX - BLEND_MIN) * (count / max)) },
+    itemStyle: { areaColor: blendWithBrand(BLEND_MIN + (BLEND_MAX - BLEND_MIN) * (count / max), base) },
   }))
 })
 
@@ -140,6 +150,7 @@ function pinPathData(r: number): string {
 const chartOption = computed(() => {
   if (!mapRegistered.value) return null
   const pts = points.value
+  const base = MAP_BASE[themeMode.value]
 
   return {
     backgroundColor: 'transparent',
@@ -160,8 +171,8 @@ const chartOption = computed(() => {
       center: [104, 36],
       zoom: 1.7,
       scaleLimit: { min: 1, max: 8 },
-      itemStyle: { areaColor: '#ffffff', borderColor: '#d8dce2' },
-      emphasis: { itemStyle: { areaColor: '#eef2f5' }, label: { show: false } },
+      itemStyle: { areaColor: `rgb(${base.area.join(',')})`, borderColor: base.border },
+      emphasis: { itemStyle: { areaColor: base.hoverArea }, label: { show: false } },
       regions: provinceRegions.value,
       label: { show: false },
     },
