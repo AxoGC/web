@@ -10,6 +10,7 @@ export interface MeDTO {
   bio: string
   role: 'user' | 'mod' | 'admin'
   status: 'active' | 'banned'
+  point: number
   created_at: number
 }
 

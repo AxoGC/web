@@ -52,6 +52,14 @@
 
     <template #footer>
       <UiButton
+        v-if="auth.isAdmin"
+        variant="ghost"
+        class="text-danger"
+        @click="confirmDeleteOpen = true"
+      >
+        {{ $t('actions.delete') }}
+      </UiButton>
+      <UiButton
         v-if="auth.isAdmin && claim?.status === 'granted'"
         variant="ghost"
         class="text-danger"
@@ -63,6 +71,16 @@
       <UiButton variant="ghost" @click="onUpdateOpen(false)">{{ $t('actions.close') }}</UiButton>
     </template>
   </UiModal>
+
+  <UiConfirmModal
+    :open="confirmDeleteOpen"
+    :title="$t('actions.delete')"
+    :message="$t('promotion.delete_confirm')"
+    variant="danger"
+    :loading="deleting"
+    @update:open="confirmDeleteOpen = $event"
+    @confirm="doDelete"
+  />
 </template>
 
 <script setup lang="ts">
@@ -74,7 +92,7 @@ import { ApiError } from '~/composables/useApi'
 import { useToast } from '~/composables/useToast'
 
 const props = defineProps<{ open: boolean, claim: PromotionClaimItem | null }>()
-const emit = defineEmits<{ 'update:open': [value: boolean], 'revoked': [id: number] }>()
+const emit = defineEmits<{ 'update:open': [value: boolean], 'revoked': [id: number], 'deleted': [id: number] }>()
 
 const auth = useAuthStore()
 const toast = useToast()
@@ -85,9 +103,13 @@ const revokeReason = ref('')
 const revokePenalty = ref<number | undefined>(undefined)
 const revoking = ref(false)
 
+const confirmDeleteOpen = ref(false)
+const deleting = ref(false)
+
 watch(() => props.claim?.id, () => {
   revokeReason.value = ''
   revokePenalty.value = undefined
+  confirmDeleteOpen.value = false
 })
 
 function statusVariant(status: PromotionClaimStatus) {
@@ -117,6 +139,22 @@ async function doRevoke() {
     if (e instanceof ApiError) toast.fromError(e)
   } finally {
     revoking.value = false
+  }
+}
+
+async function doDelete() {
+  if (!props.claim) return
+  deleting.value = true
+  try {
+    await useApi(`/api/admin/promotion-claims/${props.claim.id}`, { method: 'DELETE' })
+    toast.success(t('promotion.deleted_toast'))
+    confirmDeleteOpen.value = false
+    emit('update:open', false)
+    emit('deleted', props.claim.id)
+  } catch (e) {
+    if (e instanceof ApiError) toast.fromError(e)
+  } finally {
+    deleting.value = false
   }
 }
 </script>

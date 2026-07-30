@@ -2,10 +2,17 @@
   <div>
     <header class="flex items-center justify-between gap-3 mb-6 flex-wrap">
       <h1 class="text-2xl font-bold">{{ $t('promotion.title') }}</h1>
-      <UiButton v-if="auth.isLoggedIn" size="sm" @click="dialogOpen = true">
-        <template #leading><LucideSparkles :size="14" /></template>
-        {{ $t('promotion.submit_button') }}
-      </UiButton>
+      <div class="flex items-center gap-3">
+        <div v-if="auth.isLoggedIn" class="flex items-center gap-1.5 rounded-full bg-bg-subtle px-3 py-1.5 text-sm">
+          <LucideCoins :size="14" class="text-brand-500" />
+          <span class="text-text-tertiary">{{ $t('promotion.current_points') }}</span>
+          <span class="font-semibold text-text-primary">{{ auth.user?.point ?? 0 }}</span>
+        </div>
+        <UiButton v-if="auth.isLoggedIn" size="sm" @click="dialogOpen = true">
+          <template #leading><LucideSparkles :size="14" /></template>
+          {{ $t('promotion.submit_button') }}
+        </UiButton>
+      </div>
     </header>
 
     <div v-if="pending" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -21,7 +28,7 @@
     </div>
 
     <PromotionClaimSubmitDialog v-model:open="dialogOpen" @submitted="onSubmitted" />
-    <PromotionClaimDetailDialog v-model:open="detailOpen" :claim="detailTarget" @revoked="onRevoked" />
+    <PromotionClaimDetailDialog v-model:open="detailOpen" :claim="detailTarget" @revoked="onRevoked" @deleted="onRevoked" />
   </div>
 </template>
 

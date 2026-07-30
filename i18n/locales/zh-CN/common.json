@@ -632,6 +632,7 @@
   },
   "promotion": {
     "title": "点数申领",
+    "current_points": "当前点数",
     "list_empty": "暂无申领记录",
     "submit_button": "我要申领",
     "dialog_title": "提交推广证明",
@@ -657,6 +658,8 @@
     "revoke_penalty_placeholder": "额外扣除点数（可选，默认 0）",
     "revoke_button": "撤销并追回点数",
     "revoke_confirm_hint": "将追回 {points} 点数",
-    "revoked_toast": "已撤销该申领"
+    "revoked_toast": "已撤销该申领",
+    "delete_confirm": "确定要删除这条申领记录吗？此操作不会追回点数，仅删除记录本身，且无法撤销。",
+    "deleted_toast": "已删除该申领记录"
   }
 }

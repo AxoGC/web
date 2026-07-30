@@ -632,6 +632,7 @@
   },
   "promotion": {
     "title": "Points Claims",
+    "current_points": "Current points",
     "list_empty": "No claims yet",
     "submit_button": "Submit a Claim",
     "dialog_title": "Submit Promotion Evidence",
@@ -657,6 +658,8 @@
     "revoke_penalty_placeholder": "Extra points to deduct (optional, default 0)",
     "revoke_button": "Revoke & Claw Back",
     "revoke_confirm_hint": "Will claw back {points} points",
-    "revoked_toast": "Claim revoked"
+    "revoked_toast": "Claim revoked",
+    "delete_confirm": "Delete this claim record? This does not claw back points — it only removes the record, and cannot be undone.",
+    "deleted_toast": "Claim record deleted"
   }
 }

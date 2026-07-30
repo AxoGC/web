@@ -83,6 +83,8 @@ export interface MeDTO extends PublicUser {
   email: string
   email_verified: boolean
   status: string
+  /** Site-wide point balance — see promotion claims / VIP debit. */
+  point: number
 }
 
 export interface ForumLatestPost {
