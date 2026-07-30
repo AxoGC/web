@@ -1,6 +1,21 @@
 <template>
   <UiModal :open="open" :title="$t('promotion.dialog_title')" size="xl" @update:open="onUpdateOpen">
     <UiField
+      :label="$t('promotion.field_points')"
+      :help="$t('promotion.field_points_help')"
+      required
+      :error="pointsErr"
+    >
+      <UiInput
+        v-model.number="points"
+        type="number"
+        min="1"
+        step="1"
+        :placeholder="$t('promotion.field_points_placeholder')"
+      />
+    </UiField>
+
+    <UiField
       :label="$t('promotion.field_description')"
       :help="$t('promotion.field_description_placeholder')"
       required
@@ -8,6 +23,7 @@
     >
       <RichEditor
         v-model="descDoc"
+        v-model:attachment-ids="attachmentIds"
         @update:text="descText = $event"
       />
     </UiField>
@@ -39,17 +55,27 @@ const toast = useToast()
 
 const descDoc = ref(emptyDoc())
 const descText = ref('')
+// Draft-upload ids the editor collected; stamped to claim_id on submit so
+// they don't get orphan-GC'd the way a bare embedded URL would be.
+const attachmentIds = ref<number[]>([])
+const points = ref<number | undefined>(undefined)
 const submitting = ref(false)
 const descErr = ref('')
+const pointsErr = ref('')
 
-const canSubmit = computed(() => !isEmptyDoc(descDoc.value) && !submitting.value)
+const canSubmit = computed(() =>
+  !isEmptyDoc(descDoc.value) && !!points.value && points.value >= 1 && !submitting.value,
+)
 
 // Reset on every open so a cancelled draft never lingers into the next submission.
 watch(() => props.open, (isOpen) => {
   if (!isOpen) return
   descDoc.value = emptyDoc()
   descText.value = ''
+  attachmentIds.value = []
+  points.value = undefined
   descErr.value = ''
+  pointsErr.value = ''
 })
 
 function onUpdateOpen(value: boolean) {
@@ -59,8 +85,13 @@ function onUpdateOpen(value: boolean) {
 
 async function submit() {
   descErr.value = ''
+  pointsErr.value = ''
   if (isEmptyDoc(descDoc.value)) {
     descErr.value = t('promotion.error_description_required')
+    return
+  }
+  if (!points.value || points.value < 1) {
+    pointsErr.value = t('promotion.error_points_required')
     return
   }
   submitting.value = true
@@ -70,6 +101,8 @@ async function submit() {
       body: {
         description_json: descDoc.value,
         description_text: descText.value,
+        points: Math.floor(points.value),
+        attachment_ids: attachmentIds.value,
       },
     })
     toast.success(t('promotion.submit_success'))

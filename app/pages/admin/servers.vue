@@ -81,7 +81,7 @@
             <p class="text-xs text-text-tertiary mt-1">{{ $t('admin.server_form_visible_hint') }}</p>
           </UiField>
           <UiField class="md:col-span-2" :label="$t('admin.server_form_desc')">
-            <RichEditor v-model="form.description" />
+            <RichEditor v-model="form.description" v-model:attachment-ids="attachmentIds" />
           </UiField>
         </div>
 
@@ -189,6 +189,11 @@ const form = reactive<{
   metaExtras: {},
   visible: true,
 })
+// Draft-upload ids the description editor collected this session; stamped
+// to server_id on submit so they don't get orphan-GC'd the way a bare
+// embedded URL would be. Reset on every open — ids already attached from a
+// prior save don't need resubmitting.
+const attachmentIds = ref<number[]>([])
 // Connection payload emitted by the subform (endpoints[] or DST fields).
 const connectPayload = ref<Record<string, unknown>>({})
 // Initial meta passed into the subform (only its connection keys are read).
@@ -252,6 +257,7 @@ function openCreate() {
   form.visible = true
   connectInitial.value = null
   connectPayload.value = {}
+  attachmentIds.value = []
   formOpen.value = true
 }
 
@@ -273,6 +279,7 @@ function openEdit(s: AdminServerItem) {
   }
   connectInitial.value = connect
   form.metaExtras = extra
+  attachmentIds.value = []
   formOpen.value = true
 }
 
@@ -293,6 +300,7 @@ async function submitForm() {
     description: isEmptyDoc(form.description) ? null : form.description,
     meta,
     visible: form.visible,
+    attachment_ids: attachmentIds.value,
   }
   if (!editing.value) body.type = form.type
 
