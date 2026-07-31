@@ -1,32 +1,52 @@
-import type { ServerDetail, ServerEndpoint, ServerSummary, ServerType } from '~/types/api'
+import type { ServerDetail, ServerJoinMethod, ServerSummary } from '~/types/api'
 
-// Vanilla default ports — omitted in copy strings when the endpoint's port matches.
-const DEFAULT_PORT: Partial<Record<ServerType, number>> = {
-  'mc-java': 25565,
-  'mc-bedrock': 19132,
-  'terraria': 7777,
+// Used only to pre-fill a sensible default when an admin adds a new mcbe/terraria row.
+const DEFAULT_PORT_BY_METHOD: Record<'mcbe' | 'terraria', number> = {
+  mcbe: 19132,
+  terraria: 7777,
 }
 
-export function defaultPortFor(type: ServerType): number | undefined {
-  return DEFAULT_PORT[type]
+export function defaultPortForMethod(type: 'mcbe' | 'terraria'): number {
+  return DEFAULT_PORT_BY_METHOD[type]
 }
 
-/** Format one endpoint into the canonical "ip[:port]" copy string for its game. */
-export function formatEndpoint(type: ServerType, ep: ServerEndpoint): string {
-  if (!ep.host) return ''
-  const def = DEFAULT_PORT[type]
-  if (ep.port && ep.port !== def) return `${ep.host}:${ep.port}`
-  return ep.host
+/**
+ * Bedrock client URI handler (Win10 / iOS / Android, since 1.14). Format:
+ *   minecraft://?addExternalServer=<DisplayName>|<host>:<port>
+ * The display name surfaces inside the "External servers" list. URI-encode
+ * the params so `|`, `:`, CJK, spaces survive transit — the client decodes
+ * before showing the confirm dialog.
+ */
+export function buildMcbeDeepLink(serverName: string, host: string, port: number, label?: string): string {
+  const display = label ? `${serverName} · ${label}` : serverName
+  const payload = `${display}|${host}:${port}`
+  return `minecraft://?addExternalServer=${encodeURIComponent(payload)}`
 }
 
-/** Extract endpoints[] from server.meta in a type-safe way; returns [] when absent. */
-export function extractEndpoints(server: ServerSummary | ServerDetail | null | undefined): ServerEndpoint[] {
-  const meta = server?.meta as { endpoints?: unknown } | undefined
-  if (!meta || !Array.isArray(meta.endpoints)) return []
-  return meta.endpoints.filter((e): e is ServerEndpoint => !!e && typeof (e as ServerEndpoint).host === 'string')
+/** Extract join_methods[] from server.meta in a type-safe way; returns [] when absent. */
+export function extractJoinMethods(server: ServerSummary | ServerDetail | null | undefined): ServerJoinMethod[] {
+  const meta = server?.meta as { join_methods?: unknown } | undefined
+  if (!meta || !Array.isArray(meta.join_methods)) return []
+  return meta.join_methods.filter((m): m is ServerJoinMethod => !!m && typeof (m as ServerJoinMethod).type === 'string')
 }
 
-export function useServerConnect(server: () => ServerSummary | ServerDetail | null | undefined) {
+/** Compact single-line preview for list/table rows — one representative string per method. */
+export function formatJoinMethodHint(m: ServerJoinMethod): string {
+  switch (m.type) {
+    case 'mcje':
+    case 'sv':
+      return m.address
+    case 'mcbe':
+    case 'terraria':
+      return `${m.host}:${m.port}`
+    case 'dst':
+      return m.name
+    default:
+      return ''
+  }
+}
+
+export function useCopy() {
   const toast = useToast()
   const { t } = useI18n()
 
@@ -38,11 +58,5 @@ export function useServerConnect(server: () => ServerSummary | ServerDetail | nu
     } catch { /* ignore */ }
   }
 
-  async function copyEndpoint(ep: ServerEndpoint) {
-    const s = server()
-    if (!s) return
-    await copy(formatEndpoint(s.type, ep))
-  }
-
-  return { copy, copyEndpoint, formatEndpoint, extractEndpoints }
+  return { copy }
 }

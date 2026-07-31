@@ -66,11 +66,10 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
-import type { DstMeta, ServerSummary, BindStatus, BindCode } from '~/types/api'
+import type { ServerSummary, BindStatus, BindCode } from '~/types/api'
 import { ApiError } from '~/composables/useApi'
 import { useToast } from '~/composables/useToast'
-import { extractEndpoints, formatEndpoint } from '~/composables/useServerConnect'
-import { primaryServerType } from '~/composables/useServerTypes'
+import { extractJoinMethods, formatJoinMethodHint } from '~/composables/useServerConnect'
 
 definePageMeta({ layout: 'default', middleware: ['auth'], ssr: false })
 const toast = useToast()
@@ -134,13 +133,10 @@ async function requestCode(sid: number) {
 }
 
 function connectHint(s: ServerSummary): string {
-  const primary = primaryServerType(s.type)
-  if (primary === 'dst') {
-    const name = (s.meta as DstMeta | undefined)?.find_by_name
-    return name ? t('server.dst_search_name_short', { name }) : ''
-  }
-  const eps = extractEndpoints(s)
-  return eps.length ? formatEndpoint(primary, eps[0]!) : ''
+  const m = extractJoinMethods(s)[0]
+  if (!m) return ''
+  if (m.type === 'dst') return t('server.dst_search_name_short', { name: m.name })
+  return formatJoinMethodHint(m)
 }
 
 function askUnbind(sid: number) {

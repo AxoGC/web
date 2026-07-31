@@ -35,8 +35,8 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import type { DstMeta, ServerSummary } from '~/types/api'
-import { extractEndpoints, formatEndpoint } from '~/composables/useServerConnect'
+import type { ServerSummary } from '~/types/api'
+import { extractJoinMethods, formatJoinMethodHint } from '~/composables/useServerConnect'
 import { gameTypeIcon } from '~/composables/useGameTypeIcon'
 import { primaryServerType } from '~/composables/useServerTypes'
 
@@ -59,13 +59,12 @@ const statusLabel = computed(() => {
   }[props.server.status] || props.server.status
 })
 
-// One-line connect hint for the list view. DST has no host:port so show its search name.
+// One-line connect hint for the list view, from the first configured join
+// method. DST has no host:port so show its search name instead.
 const connectHint = computed(() => {
-  if (primaryType.value === 'dst') {
-    const name = (props.server.meta as DstMeta | undefined)?.find_by_name
-    return name ? t('server.dst_search_name_short', { name }) : ''
-  }
-  const eps = extractEndpoints(props.server)
-  return eps.length ? formatEndpoint(primaryType.value, eps[0]!) : ''
+  const m = extractJoinMethods(props.server)[0]
+  if (!m) return ''
+  if (m.type === 'dst') return t('server.dst_search_name_short', { name: m.name })
+  return formatJoinMethodHint(m)
 })
 </script>

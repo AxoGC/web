@@ -247,26 +247,56 @@ export interface LikedPostItem {
 
 export type ServerType = 'mc-java' | 'mc-bedrock' | 'dst' | 'terraria' | string
 
-export interface ServerEndpoint {
-  /** Optional human label for multi-endpoint setups (国内高防 / 海外直连 / IPv6 …). */
+/**
+ * How a player actually connects, as a discriminated union keyed by `type`.
+ * Independent of `ServerType`/`server.type` (which just says what game(s)
+ * the server *is*) — a server lists one join method per way to reach it, and
+ * nothing here is filtered or tagged against server.type. Rendering just
+ * iterates this array and switches on `type`.
+ */
+export type ServerJoinMethod = McjeJoinMethod | McbeJoinMethod | DstJoinMethod | TerrariaJoinMethod | SvJoinMethod
+
+export interface McjeJoinMethod {
+  type: 'mcje'
+  /** Optional human label for multi-entry setups (国内高防 / 海外直连 / IPv6 …). */
   label?: string
-  /** Hostname or IP. Always present for endpoint-based games (JE / BE / Terraria). */
+  /** Verbatim `host` or `host:port`, exactly as a player pastes it into the Java client. */
+  address: string
+}
+export interface McbeJoinMethod {
+  type: 'mcbe'
+  label?: string
   host: string
-  /** Optional port. Omit when it equals the game's default (JE 25565 / BE 19132 / Terraria 7777). */
-  port?: number
-  /**
-   * Which client this endpoint is for, on a multi-type server (e.g. a
-   * mc-java server also reachable via mc-bedrock) where Java and Bedrock
-   * connect through genuinely different addresses, not just different
-   * ports on the same host. Omitted (or on a single-type server) means the
-   * endpoint is shown under every connect card that's rendered.
-   */
-  type?: 'mc-java' | 'mc-bedrock'
+  port: number
+  /** `minecraft://` deep link (Win10/mobile "add external server"). Computed from host/port/label — not hand-authored. */
+  url: string
+}
+export interface DstJoinMethod {
+  type: 'dst'
+  label?: string
+  /** In-game server-browser search name — DST has no ip:port to paste. */
+  name: string
+  /** Console join command (e.g. `c_connect(...)`), shown as a copyable alternative to browsing. */
+  command: string
+  /** The actual join password, if the server requires one — shown with its own copy button. */
+  password?: string
+}
+export interface TerrariaJoinMethod {
+  type: 'terraria'
+  label?: string
+  host: string
+  port: number
+}
+/** Generic fallback for games without a dedicated variant — same shape as MCJE. */
+export interface SvJoinMethod {
+  type: 'sv'
+  label?: string
+  address: string
 }
 
 /** Polymorphic per-game meta payload. Backend stores this as opaque JSONB. */
 export interface McJavaMeta {
-  endpoints?: ServerEndpoint[]
+  join_methods?: ServerJoinMethod[]
   mode?: string
   seed?: string
   whitelist?: boolean
@@ -277,7 +307,7 @@ export interface McJavaMeta {
   extras?: Record<string, unknown>
 }
 export interface McBedrockMeta {
-  endpoints?: ServerEndpoint[]
+  join_methods?: ServerJoinMethod[]
   world_name?: string
   gamemode?: string
   /** BlueMap web viewer URL. When set, the detail page embeds it in an iframe. */
@@ -286,9 +316,7 @@ export interface McBedrockMeta {
   extras?: Record<string, unknown>
 }
 export interface DstMeta {
-  /** DST clients join via the in-game browser; show the search name instead of host:port. */
-  find_by_name?: string
-  password_hint?: string
+  join_methods?: ServerJoinMethod[]
   game_mode?: string
   season?: string
   mods?: string[]
@@ -296,14 +324,14 @@ export interface DstMeta {
   extras?: Record<string, unknown>
 }
 export interface TerrariaMeta {
-  endpoints?: ServerEndpoint[]
+  join_methods?: ServerJoinMethod[]
   world?: string
   difficulty?: string
   /** Open-ended bag for ad-hoc keys the admin may add (e.g. dynmap_url). */
   extras?: Record<string, unknown>
 }
 export interface GenericServerMeta {
-  endpoints?: ServerEndpoint[]
+  join_methods?: ServerJoinMethod[]
   /** Open-ended bag for ad-hoc keys the admin may add (e.g. dynmap_url). */
   extras?: Record<string, unknown>
 }

@@ -1,37 +1,33 @@
 <template>
-  <div class="space-y-3">
-    <component :is="v" v-for="(v, i) in variants" :key="i" :server="server" />
+  <div v-if="methods.length" class="space-y-1.5">
+    <component :is="COMPONENTS[m.type]" v-for="(m, i) in methods" :key="i" :method="m" />
   </div>
+  <div v-else class="text-xs text-text-tertiary">{{ $t('server.connect_missing') }}</div>
 </template>
 
 <script setup lang="ts">
 import { computed, type Component } from 'vue'
-import type { ServerDetail } from '~/types/api'
-import { parseServerTypes } from '~/composables/useServerTypes'
-import ServerConnectMcJava from './ServerConnectMcJava.vue'
-import ServerConnectMcBedrock from './ServerConnectMcBedrock.vue'
-import ServerConnectDst from './ServerConnectDst.vue'
-import ServerConnectTerraria from './ServerConnectTerraria.vue'
-import ServerConnectGeneric from './ServerConnectGeneric.vue'
+import type { ServerDetail, ServerJoinMethod } from '~/types/api'
+import { extractJoinMethods } from '~/composables/useServerConnect'
+import ServerJoinMethodMcje from './join-methods/ServerJoinMethodMcje.vue'
+import ServerJoinMethodMcbe from './join-methods/ServerJoinMethodMcbe.vue'
+import ServerJoinMethodDst from './join-methods/ServerJoinMethodDst.vue'
+import ServerJoinMethodTerraria from './join-methods/ServerJoinMethodTerraria.vue'
+import ServerJoinMethodSv from './join-methods/ServerJoinMethodSv.vue'
 
 const props = defineProps<{ server: ServerDetail }>()
 
-// Static imports — see comment in pages/servers/[id]/index.vue. `mc-be` is the
-// legacy DB value kept here as an alias during the rename to `mc-bedrock`.
-const VARIANTS: Record<string, Component> = {
-  'mc-java': ServerConnectMcJava,
-  'mc-bedrock': ServerConnectMcBedrock,
-  'mc-be': ServerConnectMcBedrock,
-  'dst': ServerConnectDst,
-  'terraria': ServerConnectTerraria,
+// One component per join-method discriminant. Each server just lists its
+// join_methods[] — rendering is a single loop keyed off each entry's own
+// `type`, independent of server.type, so there's exactly one source of
+// truth per row (no more per-server-type filtering/duplication).
+const COMPONENTS: Record<ServerJoinMethod['type'], Component> = {
+  mcje: ServerJoinMethodMcje,
+  mcbe: ServerJoinMethodMcbe,
+  dst: ServerJoinMethodDst,
+  terraria: ServerJoinMethodTerraria,
+  sv: ServerJoinMethodSv,
 }
 
-// server.type may list more than one client type (e.g. a mc-java server
-// that's also reachable by mc-bedrock clients) — render one connect card
-// per type instead of picking a single variant.
-const variants = computed<Component[]>(() => {
-  const types = parseServerTypes(props.server.type)
-  const picked = types.map(t => VARIANTS[t] || ServerConnectGeneric)
-  return picked.length ? [...new Set(picked)] : [ServerConnectGeneric]
-})
+const methods = computed(() => extractJoinMethods(props.server))
 </script>

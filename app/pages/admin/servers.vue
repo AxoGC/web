@@ -94,7 +94,7 @@
           <ServerAdminConnectForm
             :type="form.type"
             :initial="connectInitial"
-            :also-bedrock="alsoBedrock"
+            :server-name="form.name"
             @update:connect="onConnectChange"
           />
         </fieldset>
@@ -152,10 +152,10 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
-import type { AdminServerItem, DstMeta, ServerType } from '~/types/api'
+import type { AdminServerItem, ServerType } from '~/types/api'
 import { ApiError } from '~/composables/useApi'
 import { useToast } from '~/composables/useToast'
-import { extractEndpoints, formatEndpoint } from '~/composables/useServerConnect'
+import { extractJoinMethods, formatJoinMethodHint } from '~/composables/useServerConnect'
 import { parseServerTypes, primaryServerType } from '~/composables/useServerTypes'
 import { emptyDoc, isEmptyDoc } from '~/utils/tiptap'
 
@@ -249,15 +249,11 @@ async function load() {
 
 /** Human summary of how to connect, shown in the table. */
 function connectHint(s: AdminServerItem): string {
-  const primary = primaryServerType(s.type)
-  if (primary === 'dst') {
-    const n = (s.meta as DstMeta | undefined)?.find_by_name
-    return n ? `🔎 ${n}` : '—'
-  }
-  const eps = extractEndpoints(s)
-  if (!eps.length) return '—'
-  const first = formatEndpoint(primary, eps[0]!)
-  return eps.length > 1 ? `${first} (+${eps.length - 1})` : first
+  const methods = extractJoinMethods(s)
+  if (!methods.length) return '—'
+  const m0 = methods[0]!
+  const first = m0.type === 'dst' ? `🔎 ${m0.name}` : formatJoinMethodHint(m0)
+  return methods.length > 1 ? `${first} (+${methods.length - 1})` : first
 }
 
 function openCreate() {
@@ -274,7 +270,7 @@ function openCreate() {
   formOpen.value = true
 }
 
-const CONNECT_KEYS = new Set(['endpoints', 'find_by_name', 'password_hint'])
+const CONNECT_KEYS = new Set(['join_methods'])
 
 function openEdit(s: AdminServerItem) {
   editing.value = s
