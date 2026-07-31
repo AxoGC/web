@@ -1,11 +1,16 @@
 <template>
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-    <ServerDescriptionConnectRow :server="server" />
-    <ServerOnlineTrendCard class="lg:col-span-2" :server-id="server.id" />
-    <ServerOnlinePlayersCard :server-id="server.id" :type="server.type" :players="server.players" :max="server.max" />
-    <ServerChatPanel class="lg:col-span-2" :server-id="server.id" />
-    <ServerLeaderboardSummary :server-id="server.id" />
-    <ServerBluemapPanel class="lg:col-span-3" :server="server" />
+  <div class="flex flex-col lg:flex-row gap-4">
+    <div class="flex flex-col gap-4 lg:w-2/3">
+      <ServerDescriptionCard :server="server" />
+      <ServerOnlineTrendCard :server-id="server.id" />
+      <ServerChatPanel :server-id="server.id" />
+      <ServerBluemapPanel :server="server" />
+    </div>
+    <div class="flex flex-col gap-4 lg:w-1/3">
+      <ServerConnectCard :server="server" />
+      <ServerOnlinePlayersCard :server-id="server.id" :type="server.type" :players="server.players" :max="server.max" />
+      <ServerLeaderboardSummary :server-id="server.id" />
+    </div>
   </div>
 </template>
 
