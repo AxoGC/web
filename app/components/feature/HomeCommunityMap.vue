@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <section ref="sectionEl">
     <UiCard class="overflow-hidden">
       <div v-if="!entries.length" class="p-8">
         <header class="mb-4">
@@ -8,7 +8,10 @@
         <UiEmpty :message="$t('home.community_map_empty')" />
       </div>
       <div v-else class="relative">
-        <header class="absolute top-0 left-0 z-10 m-3 px-3 py-2">
+        <header
+          class="absolute top-0 left-0 z-10 m-3 px-3 py-2 transition-all duration-700 ease-out motion-reduce:transition-none"
+          :class="revealed ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'"
+        >
           <i18n-t keypath="home.community_map_subtitle" tag="h2" class="text-base md:text-lg text-text-primary">
             <template #provinces><span class="text-xl md:text-2xl text-brand-400">{{ provinceCount }}</span></template>
             <template #cities><span class="text-xl md:text-2xl text-brand-400">{{ cityCount }}</span></template>
@@ -60,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { PopoverRoot, PopoverAnchor, PopoverPortal, PopoverContent } from 'reka-ui'
 import type { CityMapEntry } from '~/types/api'
 import { useCityCoords, type CityCoord } from '~/composables/useCityCoords'
@@ -88,7 +91,22 @@ const cityHintText = computed(() => {
 const cityCoords = ref<Record<string, CityCoord>>({})
 const mapRegistered = ref(false)
 
+// Reveal choreography: header fades/slides in immediately once the section
+// scrolls into view (from either direction — IntersectionObserver doesn't
+// care which way you crossed the threshold), pins start dropping a beat
+// later so it reads as "text, then pins" rather than everything at once.
+// Plays once per page load — once `revealed` flips the observer disconnects,
+// so scrolling away and back doesn't replay it.
+const sectionEl = ref<HTMLElement | null>(null)
+const revealed = ref(false)
+const pinsRevealed = ref(false)
+const motionOk = ref(true)
+let observer: IntersectionObserver | null = null
+const PINS_AFTER_TEXT_MS = 200
+
 onMounted(async () => {
+  motionOk.value = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
   const [coords, geoJson] = await Promise.all([
     useCityCoords().load(),
     $fetch<object>('/data/china-provinces.geo.json'),
@@ -97,7 +115,28 @@ onMounted(async () => {
   const echarts = await import('echarts/core')
   echarts.registerMap('china', geoJson as never)
   mapRegistered.value = true
+
+  if (sectionEl.value && typeof IntersectionObserver !== 'undefined') {
+    observer = new IntersectionObserver(([entry]) => {
+      if (!entry?.isIntersecting) return
+      revealed.value = true
+      if (motionOk.value) {
+        setTimeout(() => { pinsRevealed.value = true }, PINS_AFTER_TEXT_MS)
+      } else {
+        pinsRevealed.value = true
+      }
+      observer?.disconnect()
+      observer = null
+    }, { threshold: 0.2 })
+    observer.observe(sectionEl.value)
+  } else {
+    // No IntersectionObserver (very old browser) — just show everything.
+    revealed.value = true
+    pinsRevealed.value = true
+  }
 })
+
+onBeforeUnmount(() => observer?.disconnect())
 
 interface MapPoint {
   cityCode: string
@@ -207,19 +246,34 @@ function avatarOffsets(n: number): { dx: number, dy: number }[] {
 // properties the way regular DOM text can.
 const MY_PIN_LABEL_COLOR = { light: '#6b7280', dark: '#9199a6' } as const
 
+// Pin "drop" entrance: rendered via ECharts custom series' declarative
+// enter animation (enterFrom + enterAnimation on the group returned by
+// renderItem) rather than hand-rolled keyframes — it's the documented way
+// to animate elements newly added to a custom series, and it only fires
+// once per element's actual first appearance (later re-renders from theme
+// toggles/resizes just update the already-mounted element, no replay).
+// Gating series `data` on `pinsRevealed` (empty → full) is what makes every
+// pin "newly added" the moment they're allowed to appear.
+const PIN_DROP_OFFSET = 36
+const PIN_DROP_DURATION = 550
+const PIN_DROP_STAGGER_MS = 50
+const PIN_DROP_STAGGER_MAX = 600
+
 const chartOption = computed(() => {
   if (!mapRegistered.value) return null
   const pts = points.value
+  const seriesData = pinsRevealed.value ? pts : []
   const base = MAP_BASE[themeMode.value]
   const myCity = myCityCode.value
   const myLabelColor = MY_PIN_LABEL_COLOR[themeMode.value]
+  const animatePins = motionOk.value
 
   return {
     backgroundColor: 'transparent',
     tooltip: {
       trigger: 'item',
       formatter: (params: { dataIndex: number }) => {
-        const item = pts[params.dataIndex]
+        const item = seriesData[params.dataIndex]
         return item ? `${item.coord.name} · ${item.entry.count}` : ''
       },
     },
@@ -241,9 +295,9 @@ const chartOption = computed(() => {
     series: [{
       type: 'custom',
       coordinateSystem: 'geo',
-      data: pts,
+      data: seriesData,
       renderItem: (params: { dataIndex: number }, api: { coord: (v: [number, number]) => number[] }) => {
-        const item = pts[params.dataIndex]
+        const item = seriesData[params.dataIndex]
         if (!item) return { type: 'group', children: [] }
         const [x, y] = api.coord([item.coord.lng, item.coord.lat])
         const count = item.entry.count
@@ -357,7 +411,17 @@ const chartOption = computed(() => {
             z2: zBase + 20,
           })
         }
-        return { type: 'group', children }
+        const dropAnim = animatePins
+          ? {
+              enterFrom: { style: { opacity: 0 }, position: [0, -PIN_DROP_OFFSET] },
+              enterAnimation: {
+                duration: PIN_DROP_DURATION,
+                delay: Math.min(params.dataIndex * PIN_DROP_STAGGER_MS, PIN_DROP_STAGGER_MAX),
+                easing: 'bounceOut' as const,
+              },
+            }
+          : {}
+        return { type: 'group', children, ...dropAnim }
       },
     }],
   }
