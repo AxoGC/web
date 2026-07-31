@@ -23,9 +23,6 @@
           {{ server.online }}/{{ server.max }}
         </span>
       </div>
-      <div class="mt-3">
-        <ServerConnectInfo :server="server" />
-      </div>
     </div>
     <div class="shrink-0 flex items-center gap-2">
       <NuxtLink v-if="hasLogCategories" :to="`/servers/${server.id}/logs`">

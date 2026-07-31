@@ -1,5 +1,5 @@
 <template>
-  <div v-if="methods.length" class="space-y-1.5">
+  <div v-if="methods.length" class="space-y-2">
     <component :is="COMPONENTS[m.type]" v-for="(m, i) in methods" :key="i" :method="m" :server-name="server.name" />
   </div>
   <div v-else class="text-xs text-text-tertiary">{{ $t('server.connect_missing') }}</div>
