@@ -15,7 +15,7 @@
         <div class="flex-1 min-w-0">
           <NuxtLink
             :to="`/servers/${id}`"
-            class="font-semibold hover:text-brand-400 inline-flex items-center gap-1"
+            class="hover:text-brand-400 inline-flex items-center gap-1"
           >
             <span>{{ server.name }}</span>
             <LucideExternalLink :size="14" class="text-text-tertiary" />
@@ -33,7 +33,7 @@
 
     <header class="flex items-center gap-3 mb-6 flex-wrap">
       <UiAvatar :name="name" size="md" />
-      <h1 class="text-2xl font-bold">{{ name }}</h1>
+      <h1 class="text-2xl">{{ name }}</h1>
       <span
         v-if="binding"
         :class="[
@@ -89,7 +89,7 @@
             <p class="text-xs text-text-tertiary uppercase tracking-wide">
               {{ metrics.labelFor(axis.key) }}
             </p>
-            <p class="font-semibold text-text-primary">{{ metrics.formatScore(axis.key, axis.value) }}</p>
+            <p class="text-text-primary">{{ metrics.formatScore(axis.key, axis.value) }}</p>
           </div>
         </div>
       </UiCard>

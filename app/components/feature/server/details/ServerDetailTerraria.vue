@@ -3,7 +3,7 @@
     <ServerOverviewRow :server="server" />
     <ServerOnlineTrendCard class="lg:col-span-2" :server-id="server.id" />
     <UiCard padded>
-      <h2 class="text-lg font-semibold mb-4">{{ $t('server.terraria_world_info') }}</h2>
+      <h2 class="text-lg mb-4">{{ $t('server.terraria_world_info') }}</h2>
       <dl class="space-y-2 text-sm">
         <div v-if="meta.world" class="flex justify-between gap-3">
           <dt class="text-text-tertiary">{{ $t('server.terraria_world') }}</dt>

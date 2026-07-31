@@ -4,7 +4,7 @@
       <NuxtLink :to="`/users/${id}`" class="text-text-tertiary hover:text-text-primary">
         <LucideChevronLeft :size="18" />
       </NuxtLink>
-      <h1 class="text-xl font-semibold">
+      <h1 class="text-xl">
         {{ user ? $t('profile.following_title', { name: user.username }) : '…' }}
       </h1>
     </header>

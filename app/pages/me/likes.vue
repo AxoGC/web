@@ -1,6 +1,6 @@
 <template>
   <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12">
-    <h1 class="text-2xl font-bold mb-6">{{ $t('me.likes_title') }}</h1>
+    <h1 class="text-2xl mb-6">{{ $t('me.likes_title') }}</h1>
 
     <div v-if="pending && !items.length" class="space-y-3">
       <UiSkeleton v-for="i in 5" :key="i" :height="72" />
@@ -17,7 +17,7 @@
                 <span>·</span>
                 <span>{{ formatDate(p.liked_at) }}</span>
               </div>
-              <h3 class="font-semibold truncate">{{ p.title }}</h3>
+              <h3 class="truncate">{{ p.title }}</h3>
               <div class="mt-2 flex items-center gap-3 text-xs text-text-tertiary">
                 <span class="flex items-center gap-1"><UiAvatar :src="p.author.avatar" :name="p.author.username" size="xs" /> {{ p.author.username }}</span>
                 <span class="flex items-center gap-1"><LucideEye :size="12" />{{ p.view_count }}</span>

@@ -1,6 +1,6 @@
 <template>
   <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12">
-    <h1 class="text-2xl font-bold mb-6">{{ $t('nav.bindings') }}</h1>
+    <h1 class="text-2xl mb-6">{{ $t('nav.bindings') }}</h1>
 
     <div v-if="loading" class="space-y-3">
       <UiSkeleton v-for="i in 3" :key="i" :height="80" />
@@ -16,7 +16,7 @@
             <LucideServer v-else :size="20" class="text-text-tertiary" />
           </div>
           <div class="flex-1 min-w-0">
-            <h3 class="font-semibold">{{ s.name }}</h3>
+            <h3>{{ s.name }}</h3>
             <p v-if="connectHint(s)" class="text-xs text-text-tertiary">{{ connectHint(s) }}</p>
             <p v-if="statusMap[s.id]?.bound" class="mt-2 text-sm text-success">
               {{ $t('server.bind_status_bound', { name: statusMap[s.id]?.player?.name }) }}

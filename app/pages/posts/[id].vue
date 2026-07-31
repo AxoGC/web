@@ -8,7 +8,7 @@
           </NuxtLink>
         </div>
         <div class="flex items-start gap-3 flex-wrap mb-2">
-          <h1 class="text-2xl md:text-3xl font-bold flex-1">{{ post.title }}</h1>
+          <h1 class="text-2xl md:text-3xl flex-1">{{ post.title }}</h1>
           <UiTag v-if="post.pinned" variant="warning">{{ $t('forum.pinned') }}</UiTag>
           <UiTag v-if="post.locked" variant="default">{{ $t('forum.locked') }}</UiTag>
           <UiTag v-if="post.voting_enabled" variant="info">{{ $t('forum.voting_tag') }}</UiTag>
@@ -34,7 +34,7 @@
 
       <section v-if="post.voting_enabled && post.poll_options?.length" class="mt-4 bg-bg-elevated rounded-lg p-4">
         <div class="flex items-center justify-between mb-3">
-          <div class="text-sm font-semibold">{{ $t('forum.voting_summary') }}</div>
+          <div class="text-sm">{{ $t('forum.voting_summary') }}</div>
           <div class="text-xs text-text-tertiary">{{ $t('forum.voting_total', { count: voteTotal }) }}</div>
         </div>
         <ul class="space-y-2">
@@ -104,7 +104,7 @@
       />
 
       <section v-if="post.attachments?.length" class="mt-4">
-        <h3 class="text-sm font-semibold text-text-secondary mb-2">Attachments</h3>
+        <h3 class="text-sm text-text-secondary mb-2">Attachments</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <a
             v-for="a in post.attachments"
@@ -122,7 +122,7 @@
       </section>
 
       <section class="mt-10">
-        <h2 class="text-lg font-semibold mb-4">{{ $t('forum.comments') }} ({{ post.comment_count }})</h2>
+        <h2 class="text-lg mb-4">{{ $t('forum.comments') }} ({{ post.comment_count }})</h2>
 
         <div v-if="post.locked" class="mb-6 px-3 py-2 rounded-md border border-border-subtle bg-bg-overlay/40 text-sm text-text-tertiary inline-flex items-center gap-2">
           <LucideLock :size="14" />

@@ -1,6 +1,6 @@
 <template>
   <UiCard v-if="hasContent" padded>
-    <h2 class="text-lg font-semibold mb-3">{{ $t('server.description_title') }}</h2>
+    <h2 class="text-lg mb-3">{{ $t('server.description_title') }}</h2>
     <RichContent :doc="server.description" />
   </UiCard>
 </template>

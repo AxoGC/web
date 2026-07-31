@@ -49,7 +49,7 @@
               <UiAvatar :src="user.avatar" :name="user.username" size="xl" clickable />
               <div class="flex-1 min-w-0">
                 <div class="flex flex-wrap items-center gap-2">
-                  <h1 class="text-2xl font-bold leading-none">{{ user.username }}</h1>
+                  <h1 class="text-2xl leading-none">{{ user.username }}</h1>
                   <UiTag
                     v-if="user.role && user.role !== 'user'"
                     :variant="user.role === 'admin' ? 'brand' : 'info'"
@@ -129,7 +129,7 @@
            weight and spacing rather than a card edge. -->
       <div class="flex flex-col gap-4 p-4">
         <UiCard flat>
-          <h2 class="text-lg font-semibold mb-2">{{ $t('profile.bindings_title') }}</h2>
+          <h2 class="text-lg mb-2">{{ $t('profile.bindings_title') }}</h2>
           <UiEmpty v-if="sortedBindings.length === 0" :message="$t('profile.bindings_empty')" />
           <ul v-else class="divide-y divide-border-subtle">
             <li
@@ -216,7 +216,7 @@
         </UiCard>
 
         <UiCard flat>
-          <h2 class="text-lg font-semibold mb-2">{{ $t('profile.forum_title') }}</h2>
+          <h2 class="text-lg mb-2">{{ $t('profile.forum_title') }}</h2>
           <UiTabs v-model="activityTab" :tabs="activityTabs">
             <UiTabPanel value="posts">
               <UiEmpty v-if="!recentPosts.length" :message="$t('profile.forum_empty_posts')" />

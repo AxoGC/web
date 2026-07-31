@@ -9,7 +9,7 @@
       <LucideHash :size="20" />
     </div>
     <div class="flex-1 min-w-0">
-      <h3 :class="['font-semibold truncate', inverted ? 'text-white' : 'text-text-primary group-hover:text-brand-400']">
+      <h3 :class="['truncate', inverted ? 'text-white' : 'text-text-primary group-hover:text-brand-400']">
         {{ forum.name }}
       </h3>
       <p

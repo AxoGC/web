@@ -1,7 +1,7 @@
 <template>
   <UiCard padded>
     <div class="flex items-center justify-between mb-4 gap-2">
-      <h2 class="text-lg font-semibold">{{ $t('server.leaderboard') }}</h2>
+      <h2 class="text-lg">{{ $t('server.leaderboard') }}</h2>
       <NuxtLink :to="`/servers/${serverId}/leaderboard`">
         <UiButton variant="ghost" size="sm">
           {{ $t('actions.open') }}

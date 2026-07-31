@@ -1,12 +1,12 @@
 <template>
   <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12">
     <header class="flex items-center justify-between gap-3 mb-6 flex-wrap">
-      <h1 class="text-2xl font-bold">{{ $t('promotion.title') }}</h1>
+      <h1 class="text-2xl">{{ $t('promotion.title') }}</h1>
       <div class="flex items-center gap-3">
         <div v-if="auth.isLoggedIn" class="flex items-center gap-1.5 rounded-full bg-bg-subtle px-3 py-1.5 text-sm">
           <LucideCoins :size="14" class="text-brand-500" />
           <span class="text-text-tertiary">{{ $t('promotion.current_points') }}</span>
-          <span class="font-semibold text-text-primary">{{ auth.user?.point ?? 0 }}</span>
+          <span class="text-text-primary">{{ auth.user?.point ?? 0 }}</span>
         </div>
         <UiButton v-if="auth.isLoggedIn" size="sm" @click="dialogOpen = true">
           <template #leading><LucideSparkles :size="14" /></template>

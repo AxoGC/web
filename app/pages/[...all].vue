@@ -1,7 +1,7 @@
 <template>
   <div class="text-center py-12">
-    <div class="text-7xl font-black text-text-tertiary select-none mb-6">404</div>
-    <h1 class="text-2xl font-bold mb-2">{{ $t('page.not_found_title') }}</h1>
+    <div class="text-7xl text-text-tertiary select-none mb-6">404</div>
+    <h1 class="text-2xl mb-2">{{ $t('page.not_found_title') }}</h1>
     <p class="text-text-secondary max-w-md mx-auto">{{ $t('page.not_found_subtitle') }}</p>
     <NuxtLink to="/" class="inline-block mt-6">
       <UiButton variant="primary">

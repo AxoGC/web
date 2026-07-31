@@ -1,7 +1,7 @@
 <template>
   <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12">
     <header class="mb-6">
-      <h1 class="text-2xl font-bold">{{ $t('server.leaderboard') }}</h1>
+      <h1 class="text-2xl">{{ $t('server.leaderboard') }}</h1>
     </header>
 
     <div class="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
@@ -10,7 +10,7 @@
         :key="key"
         padded
       >
-        <h2 class="text-sm font-semibold text-text-secondary mb-3 uppercase tracking-wide">
+        <h2 class="text-sm text-text-secondary mb-3 uppercase tracking-wide">
           {{ labelFor(key) }}
         </h2>
 
@@ -25,7 +25,7 @@
             :key="item.rank"
             class="flex items-center gap-3 py-2"
           >
-            <span :class="['w-7 h-7 grid place-items-center rounded-full font-bold text-xs shrink-0', rankClass(item.rank)]">
+            <span :class="['w-7 h-7 grid place-items-center rounded-full text-xs shrink-0', rankClass(item.rank)]">
               {{ item.rank }}
             </span>
             <UiAvatar :name="item.name" size="xs" />

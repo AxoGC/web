@@ -1,7 +1,7 @@
 <template>
   <UiCard padded>
     <div class="flex items-center justify-between mb-3">
-      <h2 class="text-lg font-semibold">{{ $t('server.online_players') }}</h2>
+      <h2 class="text-lg">{{ $t('server.online_players') }}</h2>
       <span class="text-sm text-text-tertiary">{{ players.length }}/{{ max }}</span>
     </div>
     <div v-if="!players.length" class="text-sm text-text-tertiary">

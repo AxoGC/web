@@ -1,7 +1,7 @@
 <template>
   <section>
     <header class="flex items-end justify-between mb-4">
-      <h2 class="text-xl font-semibold">{{ $t('home.community') }}</h2>
+      <h2 class="text-xl">{{ $t('home.community') }}</h2>
     </header>
 
     <div class="flex flex-col gap-3">

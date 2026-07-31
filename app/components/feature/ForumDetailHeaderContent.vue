@@ -12,7 +12,7 @@
     <div class="flex-1 min-w-0">
       <h1
         :class="[
-          'text-2xl font-bold truncate',
+          'text-2xl truncate',
           inverted ? 'text-white' : 'text-text-primary',
         ]"
       >

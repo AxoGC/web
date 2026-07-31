@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-10">
     <header>
-      <h1 class="text-2xl font-bold">/dev/components</h1>
+      <h1 class="text-2xl">/dev/components</h1>
       <p class="text-text-secondary">Living gallery of the UI primitive set.</p>
     </header>
 

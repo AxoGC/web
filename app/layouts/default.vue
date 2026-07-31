@@ -9,7 +9,7 @@
       <div class="mx-auto max-w-[1280px] px-4 lg:px-6">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-8">
           <section v-for="g in footerLinks" :key="g.title['zh-CN']">
-            <h3 class="text-sm font-semibold text-text-secondary mb-3">{{ pickLocalized(g.title) }}</h3>
+            <h3 class="text-sm text-text-secondary mb-3">{{ pickLocalized(g.title) }}</h3>
             <ul class="space-y-2">
               <li v-for="l in g.links" :key="l.url">
                 <a

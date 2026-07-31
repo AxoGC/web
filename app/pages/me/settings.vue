@@ -1,9 +1,9 @@
 <template>
   <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12 max-w-2xl">
-    <h1 class="text-2xl font-bold mb-6">{{ $t('nav.settings') }}</h1>
+    <h1 class="text-2xl mb-6">{{ $t('nav.settings') }}</h1>
 
     <UiCard padded class="mb-6">
-      <h2 class="text-lg font-semibold mb-4">{{ $t('me.edit_profile') }}</h2>
+      <h2 class="text-lg mb-4">{{ $t('me.edit_profile') }}</h2>
 
       <UiField :label="$t('me.avatar')">
         <!-- Square preview; instant upload on file select. -->
@@ -101,7 +101,7 @@
     </UiCard>
 
     <UiCard padded class="mb-6">
-      <h2 class="text-lg font-semibold mb-4">{{ $t('me.appearance') }}</h2>
+      <h2 class="text-lg mb-4">{{ $t('me.appearance') }}</h2>
       <div class="flex gap-2">
         <UiButton
           v-for="m in (['system', 'light', 'dark'] as const)"
@@ -116,7 +116,7 @@
     </UiCard>
 
     <UiCard padded>
-      <h2 class="text-lg font-semibold mb-4">{{ $t('me.language') }}</h2>
+      <h2 class="text-lg mb-4">{{ $t('me.language') }}</h2>
       <div class="flex flex-wrap gap-2">
         <UiButton
           v-for="l in (locales as Array<{ code: string, name: string }>)"

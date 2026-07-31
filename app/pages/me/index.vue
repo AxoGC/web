@@ -5,7 +5,7 @@
         <div class="flex flex-col md:flex-row items-start gap-6">
           <UiAvatar :src="auth.user.avatar" :name="auth.user.username" size="xl" />
           <div class="flex-1 min-w-0">
-            <h1 class="text-2xl font-bold">{{ auth.user.username }}</h1>
+            <h1 class="text-2xl">{{ auth.user.username }}</h1>
             <p class="text-sm text-text-tertiary">{{ auth.user.email }}</p>
             <p v-if="auth.user.bio" class="mt-2 text-text-secondary">{{ auth.user.bio }}</p>
             <div class="mt-3 flex flex-wrap gap-2">
@@ -25,7 +25,7 @@
                 <LucideCalendarCheck :size="20" />
               </div>
               <div>
-                <p class="font-semibold">{{ $t('checkin.title') }}</p>
+                <p>{{ $t('checkin.title') }}</p>
                 <p class="text-xs text-text-tertiary">{{ $t('checkin.calendar') }}</p>
               </div>
             </div>
@@ -38,7 +38,7 @@
                 <LucideLink :size="20" />
               </div>
               <div>
-                <p class="font-semibold">{{ $t('nav.bindings') }}</p>
+                <p>{{ $t('nav.bindings') }}</p>
                 <p class="text-xs text-text-tertiary">{{ $t('server.bind_title') }}</p>
               </div>
             </div>
@@ -51,7 +51,7 @@
                 <LucideHeart :size="20" />
               </div>
               <div>
-                <p class="font-semibold">{{ $t('me.likes_title') }}</p>
+                <p>{{ $t('me.likes_title') }}</p>
                 <p class="text-xs text-text-tertiary">{{ $t('me.likes_subtitle') }}</p>
               </div>
             </div>
@@ -64,7 +64,7 @@
                 <LucideSettings :size="20" />
               </div>
               <div>
-                <p class="font-semibold">{{ $t('nav.settings') }}</p>
+                <p>{{ $t('nav.settings') }}</p>
                 <p class="text-xs text-text-tertiary">{{ $t('me.edit_profile') }}</p>
               </div>
             </div>

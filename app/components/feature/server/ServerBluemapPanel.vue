@@ -1,7 +1,7 @@
 <template>
   <UiCard v-if="bluemapUrl" padded>
     <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
-      <h2 class="text-lg font-semibold">{{ $t('server.bluemap_title') }}</h2>
+      <h2 class="text-lg">{{ $t('server.bluemap_title') }}</h2>
       <div class="flex items-center gap-2">
         <UiButton
           v-if="expanded"

@@ -5,7 +5,7 @@
       <button class="p-2 rounded-md hover:bg-bg-hover" :aria-label="$t('actions.back')" @click="goBack">
         <LucideChevronLeft :size="20" />
       </button>
-      <h1 v-if="$slots.title" class="text-base font-semibold truncate"><slot name="title" /></h1>
+      <h1 v-if="$slots.title" class="text-base truncate"><slot name="title" /></h1>
       <div class="flex-1" />
       <slot name="header-trailing" />
     </header>

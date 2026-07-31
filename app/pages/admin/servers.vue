@@ -1,7 +1,7 @@
 <template>
   <div>
     <header class="flex items-center justify-between gap-3 mb-6">
-      <h1 class="text-2xl font-bold">{{ $t('admin.servers') }}</h1>
+      <h1 class="text-2xl">{{ $t('admin.servers') }}</h1>
       <UiButton @click="openCreate">
         <template #leading><LucidePlus :size="16" /></template>
         {{ $t('actions.create') }}

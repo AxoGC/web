@@ -1,7 +1,7 @@
 <template>
   <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12">
     <header class="mb-6">
-      <h1 class="text-2xl font-bold">{{ $t('pk.title') }}</h1>
+      <h1 class="text-2xl">{{ $t('pk.title') }}</h1>
       <p v-if="server" class="mt-1 text-sm text-text-tertiary flex flex-wrap items-center gap-2">
         <span>{{ $t('pk.on_server') }}</span>
         <NuxtLink
@@ -31,7 +31,7 @@
             <NuxtLink
               v-if="aUser"
               :to="`/users/${aUser.id}`"
-              class="mt-2 font-semibold hover:text-brand-400 truncate max-w-full"
+              class="mt-2 hover:text-brand-400 truncate max-w-full"
             >
               {{ aUser.username }}
             </NuxtLink>
@@ -45,15 +45,15 @@
 
           <!-- Center: VS badge + W/L/Draw -->
           <div class="flex flex-col items-center gap-3 px-2 sm:px-6">
-            <span class="text-3xl sm:text-5xl font-extrabold tracking-widest text-brand-400 leading-none">
+            <span class="text-3xl sm:text-5xl tracking-widest text-brand-400 leading-none">
               VS
             </span>
             <div class="flex items-center gap-3">
-              <span :class="['px-2.5 py-1 rounded text-xs font-bold uppercase', labelClass(aResult)]">
+              <span :class="['px-2.5 py-1 rounded text-xs uppercase', labelClass(aResult)]">
                 {{ $t(`pk.result.${aResult}`) }}
               </span>
               <span class="text-text-tertiary text-xs">{{ aWins }}–{{ bWins }}</span>
-              <span :class="['px-2.5 py-1 rounded text-xs font-bold uppercase', labelClass(bResult)]">
+              <span :class="['px-2.5 py-1 rounded text-xs uppercase', labelClass(bResult)]">
                 {{ $t(`pk.result.${bResult}`) }}
               </span>
             </div>
@@ -65,7 +65,7 @@
             <NuxtLink
               v-if="bUser"
               :to="`/users/${bUser.id}`"
-              class="mt-2 font-semibold hover:text-brand-400 truncate max-w-full"
+              class="mt-2 hover:text-brand-400 truncate max-w-full"
             >
               {{ bUser.username }}
             </NuxtLink>
@@ -92,7 +92,7 @@
               <div
                 :class="[
                   'text-right font-mono tabular-nums',
-                  row.winner === 'a' ? 'text-brand-400 font-semibold' : 'text-text-secondary',
+                  row.winner === 'a' ? 'text-brand-400' : 'text-text-secondary',
                 ]"
               >
                 {{ metrics.formatScore(row.key, row.aValue) }}
@@ -103,7 +103,7 @@
               <div
                 :class="[
                   'text-left font-mono tabular-nums',
-                  row.winner === 'b' ? 'text-amber-400 font-semibold' : 'text-text-secondary',
+                  row.winner === 'b' ? 'text-amber-400' : 'text-text-secondary',
                 ]"
               >
                 {{ metrics.formatScore(row.key, row.bValue) }}

@@ -1,7 +1,7 @@
 <template>
   <div>
     <header class="flex flex-wrap items-center justify-between gap-3 mb-6">
-      <h1 class="text-2xl font-bold">{{ $t('admin.tags') }}</h1>
+      <h1 class="text-2xl">{{ $t('admin.tags') }}</h1>
       <div class="flex items-center gap-3">
         <UiSelect
           v-model="forumId"

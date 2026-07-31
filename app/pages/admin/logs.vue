@@ -1,7 +1,7 @@
 <template>
   <div>
     <header class="flex items-center justify-between gap-3 mb-6 flex-wrap">
-      <h1 class="text-2xl font-bold">{{ $t('admin.logs') }}</h1>
+      <h1 class="text-2xl">{{ $t('admin.logs') }}</h1>
       <div class="flex items-center gap-2">
         <UiInput v-model="action" :placeholder="'action'" size="sm" />
         <UiInput v-model="actorId" :placeholder="'actor_id'" size="sm" />

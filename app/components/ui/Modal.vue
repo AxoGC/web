@@ -12,7 +12,7 @@
         ]"
       >
         <div v-if="$slots.title || title" class="flex items-start justify-between gap-4 mb-3">
-          <DialogTitle as="h2" class="text-xl font-semibold text-text-primary">
+          <DialogTitle as="h2" class="text-xl text-text-primary">
             <slot name="title">{{ title }}</slot>
           </DialogTitle>
           <DialogClose

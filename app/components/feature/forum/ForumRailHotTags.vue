@@ -1,6 +1,6 @@
 <template>
   <UiCard v-if="topTags.length" padded>
-    <h3 class="font-semibold text-sm mb-3">{{ $t('forum.rail_hot_tags') }}</h3>
+    <h3 class="text-sm mb-3">{{ $t('forum.rail_hot_tags') }}</h3>
     <div class="flex flex-wrap gap-1.5">
       <UiTag
         v-for="t in topTags"

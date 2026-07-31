@@ -1,22 +1,22 @@
 <template>
   <div>
-    <h1 class="text-2xl font-bold mb-6">{{ $t('admin.dashboard') }}</h1>
+    <h1 class="text-2xl mb-6">{{ $t('admin.dashboard') }}</h1>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <UiCard padded>
         <p class="text-xs text-text-tertiary uppercase">{{ $t('admin.users') }}</p>
-        <p class="text-2xl font-bold mt-1">{{ stats.users ?? '—' }}</p>
+        <p class="text-2xl mt-1">{{ stats.users ?? '—' }}</p>
       </UiCard>
       <UiCard padded>
         <p class="text-xs text-text-tertiary uppercase">{{ $t('admin.servers') }}</p>
-        <p class="text-2xl font-bold mt-1">{{ stats.servers ?? '—' }}</p>
+        <p class="text-2xl mt-1">{{ stats.servers ?? '—' }}</p>
       </UiCard>
       <UiCard padded>
         <p class="text-xs text-text-tertiary uppercase">{{ $t('admin.donations') }}</p>
-        <p class="text-2xl font-bold mt-1">{{ stats.donations ?? '—' }}</p>
+        <p class="text-2xl mt-1">{{ stats.donations ?? '—' }}</p>
       </UiCard>
       <UiCard padded>
         <p class="text-xs text-text-tertiary uppercase">{{ $t('admin.logs') }}</p>
-        <p class="text-2xl font-bold mt-1">{{ stats.logs ?? '—' }}</p>
+        <p class="text-2xl mt-1">{{ stats.logs ?? '—' }}</p>
       </UiCard>
     </div>
   </div>

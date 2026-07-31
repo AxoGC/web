@@ -1,7 +1,7 @@
 <template>
   <UiCard padded>
     <div class="flex items-center justify-between mb-3">
-      <h2 class="text-lg font-semibold">{{ $t('chat.title') }}</h2>
+      <h2 class="text-lg">{{ $t('chat.title') }}</h2>
       <span class="text-xs" :class="connected ? 'text-success-500' : 'text-text-tertiary'">
         <span class="inline-block w-2 h-2 rounded-full align-middle mr-1"
           :class="connected ? 'bg-success-500' : 'bg-text-tertiary'" />
@@ -33,11 +33,11 @@
             class="leading-snug"
           >
             <span class="text-text-tertiary text-xs mr-1.5">{{ fmtTime(m.ts) }}</span>
-            <span class="inline-block px-1.5 py-0.5 rounded text-[10px] uppercase font-semibold mr-1.5"
+            <span class="inline-block px-1.5 py-0.5 rounded text-[10px] uppercase mr-1.5"
               :class="m.source === 'web' ? 'bg-brand-soft text-brand-400' : 'bg-bg-overlay text-text-secondary'">
               {{ m.source }}
             </span>
-            <span class="font-semibold">{{ m.sender }}</span>
+            <span>{{ m.sender }}</span>
             <span class="text-text-tertiary mr-1.5">:</span>
             <span class="break-words">{{ m.content }}</span>
           </div>

@@ -1,6 +1,6 @@
 <template>
   <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12">
-    <h1 class="text-2xl font-bold mb-6">{{ $t('checkin.title') }}</h1>
+    <h1 class="text-2xl mb-6">{{ $t('checkin.title') }}</h1>
 
     <UiCard padded class="mb-6">
       <div class="flex flex-wrap items-center gap-4">
@@ -9,7 +9,7 @@
             <LucideFlame :size="22" />
           </div>
           <div>
-            <p class="text-2xl font-bold">{{ streak }}</p>
+            <p class="text-2xl">{{ streak }}</p>
             <p class="text-xs text-text-tertiary">{{ $t('checkin.streak', { n: streak }) }}</p>
           </div>
         </div>
@@ -27,7 +27,7 @@
 
     <UiCard padded>
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold">{{ monthLabel }}</h2>
+        <h2 class="text-lg">{{ monthLabel }}</h2>
         <div class="flex gap-1">
           <button class="p-1.5 rounded-md hover:bg-bg-hover" @click="shiftMonth(-1)">
             <LucideChevronLeft :size="16" />

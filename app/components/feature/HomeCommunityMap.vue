@@ -3,16 +3,16 @@
     <UiCard class="overflow-hidden">
       <div v-if="!entries.length" class="p-8">
         <header class="mb-4">
-          <h2 class="text-xl font-semibold">{{ $t('home.community_map_title') }}</h2>
+          <h2 class="text-xl">{{ $t('home.community_map_title') }}</h2>
         </header>
         <UiEmpty :message="$t('home.community_map_empty')" />
       </div>
       <div v-else class="relative">
         <header class="absolute top-0 left-0 z-10 m-3 px-3 py-2">
           <i18n-t keypath="home.community_map_subtitle" tag="h2" class="text-base md:text-lg text-text-primary">
-            <template #provinces><span class="text-xl md:text-2xl font-bold text-brand-400">{{ provinceCount }}</span></template>
-            <template #cities><span class="text-xl md:text-2xl font-bold text-brand-400">{{ cityCount }}</span></template>
-            <template #players><span class="text-xl md:text-2xl font-bold text-brand-400">{{ playerCount }}</span></template>
+            <template #provinces><span class="text-xl md:text-2xl text-brand-400">{{ provinceCount }}</span></template>
+            <template #cities><span class="text-xl md:text-2xl text-brand-400">{{ cityCount }}</span></template>
+            <template #players><span class="text-xl md:text-2xl text-brand-400">{{ playerCount }}</span></template>
           </i18n-t>
         </header>
         <div class="h-[312px] md:h-[480px]">
@@ -37,7 +37,7 @@
               class="z-50 w-64 bg-bg-elevated border border-border-default rounded-md shadow-md p-3 text-sm"
             >
               <div v-if="activeCity" class="space-y-2">
-                <div class="font-semibold">{{ activeCity.coord.name }} · {{ activeCity.entry.count }}</div>
+                <div>{{ activeCity.coord.name }} · {{ activeCity.entry.count }}</div>
                 <ul class="space-y-1.5 max-h-64 overflow-auto">
                   <li v-for="u in activeCity.entry.users" :key="u.id">
                     <NuxtLink :to="`/users/${u.id}`" class="flex items-center gap-2 group min-w-0" @click="popoverOpen = false">

@@ -9,7 +9,7 @@
     </NuxtLink>
 
     <header class="flex items-center justify-between gap-3 mb-6 flex-wrap">
-      <h1 class="text-2xl font-bold">{{ $t('log_query.title') }}</h1>
+      <h1 class="text-2xl">{{ $t('log_query.title') }}</h1>
       <UiButton v-if="auth.isLoggedIn" size="sm" @click="dialogOpen = true">
         <template #leading><LucideSearch :size="14" /></template>
         {{ $t('log_query.submit_button') }}

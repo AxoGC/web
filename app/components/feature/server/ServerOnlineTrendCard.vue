@@ -1,7 +1,7 @@
 <template>
   <UiCard padded>
     <div class="flex items-center justify-between mb-4">
-      <h2 class="text-lg font-semibold">{{ $t('server.online_trend') }}</h2>
+      <h2 class="text-lg">{{ $t('server.online_trend') }}</h2>
       <div class="flex items-center gap-1">
         <button
           v-for="r in (['24h','7d','30d'] as const)"

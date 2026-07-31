@@ -11,7 +11,7 @@
       <LucideServer v-else :size="28" class="text-text-tertiary" />
     </div>
     <div class="flex-1 min-w-0">
-      <h1 class="text-2xl font-bold flex flex-wrap items-center gap-2">
+      <h1 class="text-2xl flex flex-wrap items-center gap-2">
         <span>{{ server.name }}</span>
         <UiTag variant="info">{{ typeLabel(server.type) }}</UiTag>
       </h1>

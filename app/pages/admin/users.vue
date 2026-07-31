@@ -1,7 +1,7 @@
 <template>
   <div>
     <header class="flex items-center justify-between flex-wrap gap-3 mb-6">
-      <h1 class="text-2xl font-bold">{{ $t('admin.users') }}</h1>
+      <h1 class="text-2xl">{{ $t('admin.users') }}</h1>
       <div class="flex items-center gap-2">
         <UiInput v-model="q" :placeholder="$t('actions.search')" :leading-icon="LucideSearch" size="sm" />
         <UiSelect

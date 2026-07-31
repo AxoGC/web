@@ -1,6 +1,6 @@
 <template>
   <div class="max-w-3xl">
-    <h1 class="text-2xl font-bold mb-6">{{ $t('admin.config') }}</h1>
+    <h1 class="text-2xl mb-6">{{ $t('admin.config') }}</h1>
 
     <UiCard padded>
       <div v-if="loading" class="space-y-3">

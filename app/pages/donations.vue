@@ -1,6 +1,6 @@
 <template>
   <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12">
-    <h1 class="text-2xl font-bold mb-6">{{ $t('donation.list_title') }}</h1>
+    <h1 class="text-2xl mb-6">{{ $t('donation.list_title') }}</h1>
     <div v-if="pending" class="space-y-2">
       <UiSkeleton v-for="i in 6" :key="i" :height="56" />
     </div>
@@ -14,7 +14,7 @@
           :key="i"
           class="flex items-center gap-4 px-5 py-3 border-b border-border-subtle last:border-b-0"
         >
-          <span :class="['w-8 h-8 rounded-full grid place-items-center text-sm font-bold', rankClass(i + 1)]">
+          <span :class="['w-8 h-8 rounded-full grid place-items-center text-sm', rankClass(i + 1)]">
             {{ i + 1 }}
           </span>
           <UiAvatar :name="d.display_name" size="sm" />
@@ -27,7 +27,7 @@
               <span v-if="d.message" class="ml-2 text-xs text-text-tertiary">{{ d.message }}</span>
             </p>
           </div>
-          <span class="font-mono font-semibold text-brand-400">¥{{ d.amount.toFixed(2) }}</span>
+          <span class="font-mono text-brand-400">¥{{ d.amount.toFixed(2) }}</span>
         </li>
       </ul>
     </UiCard>

@@ -1,7 +1,7 @@
 <template>
   <UiCard padded>
     <div class="flex items-center justify-between mb-3">
-      <h3 class="font-semibold text-sm">{{ $t('forum.rail_feed_title') }}</h3>
+      <h3 class="text-sm">{{ $t('forum.rail_feed_title') }}</h3>
       <div class="inline-flex rounded-md bg-bg-overlay p-0.5 text-xs">
         <button
           v-for="m in (['hot','latest'] as const)"

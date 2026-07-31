@@ -1,7 +1,7 @@
 <template>
   <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12">
     <header class="mb-6">
-      <h1 class="text-2xl font-bold">{{ $t('nav.search') }}</h1>
+      <h1 class="text-2xl">{{ $t('nav.search') }}</h1>
       <form class="mt-4 flex gap-2" @submit.prevent="onSubmit">
         <UiInput v-model="qInput" :placeholder="$t('search.placeholder')" :leading-icon="LucideSearch" />
         <UiButton type="submit">{{ $t('actions.search') }}</UiButton>
@@ -32,7 +32,7 @@
     </div>
     <div v-else class="space-y-8">
       <section v-if="data?.posts?.length">
-        <h2 class="text-sm font-semibold uppercase text-text-tertiary mb-3">{{ $t('search.type_post') }}</h2>
+        <h2 class="text-sm uppercase text-text-tertiary mb-3">{{ $t('search.type_post') }}</h2>
         <ul class="space-y-2">
           <li v-for="p in data.posts" :key="`p${p.id}`">
             <NuxtLink :to="`/posts/${p.id}`" class="flex items-center gap-3 p-3 bg-bg-elevated border border-border-subtle rounded-md hover:border-border-default">
@@ -44,7 +44,7 @@
         </ul>
       </section>
       <section v-if="data?.users?.length">
-        <h2 class="text-sm font-semibold uppercase text-text-tertiary mb-3">{{ $t('search.type_user') }}</h2>
+        <h2 class="text-sm uppercase text-text-tertiary mb-3">{{ $t('search.type_user') }}</h2>
         <ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
           <li v-for="u in data.users" :key="`u${u.id}`">
             <NuxtLink :to="`/users/${u.id}`" class="flex items-center gap-3 p-3 bg-bg-elevated border border-border-subtle rounded-md hover:border-border-default">
@@ -55,7 +55,7 @@
         </ul>
       </section>
       <section v-if="data?.servers?.length">
-        <h2 class="text-sm font-semibold uppercase text-text-tertiary mb-3">{{ $t('search.type_server') }}</h2>
+        <h2 class="text-sm uppercase text-text-tertiary mb-3">{{ $t('search.type_server') }}</h2>
         <ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
           <li v-for="s in data.servers" :key="`s${s.id}`">
             <NuxtLink :to="`/servers/${s.id}`" class="flex items-center gap-3 p-3 bg-bg-elevated border border-border-subtle rounded-md hover:border-border-default">

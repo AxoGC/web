@@ -1,6 +1,6 @@
 <template>
   <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12">
-    <h1 class="text-2xl font-bold mb-6">{{ $t('forum.list_title') }}</h1>
+    <h1 class="text-2xl mb-6">{{ $t('forum.list_title') }}</h1>
 
     <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
       <!-- Main column: forum cards -->

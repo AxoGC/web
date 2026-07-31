@@ -1,9 +1,9 @@
 <template>
   <div class="max-w-3xl">
-    <h1 class="text-2xl font-bold mb-6">{{ $t('admin.donations') }}</h1>
+    <h1 class="text-2xl mb-6">{{ $t('admin.donations') }}</h1>
 
     <UiCard padded class="mb-6">
-      <h2 class="text-lg font-semibold mb-4">{{ $t('donation.admin_add') }}</h2>
+      <h2 class="text-lg mb-4">{{ $t('donation.admin_add') }}</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <UiField :label="$t('donation.admin_username')">
           <UiInput v-model="form.username" type="text" autocomplete="off" />
@@ -27,7 +27,7 @@
       </div>
     </UiCard>
 
-    <h2 class="text-lg font-semibold mb-3">Recent</h2>
+    <h2 class="text-lg mb-3">Recent</h2>
     <UiCard>
       <ul>
         <li

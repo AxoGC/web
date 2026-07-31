@@ -1,6 +1,6 @@
 <template>
   <UiCard padded>
-    <h1 class="text-2xl font-bold mb-1">{{ $t('auth.reset_password_title') }}</h1>
+    <h1 class="text-2xl mb-1">{{ $t('auth.reset_password_title') }}</h1>
     <p class="text-sm text-text-tertiary mb-6">{{ $t('brand.tagline') }}</p>
 
     <UiEmpty v-if="!token" :message="$t('auth.reset_password_token_missing')" />

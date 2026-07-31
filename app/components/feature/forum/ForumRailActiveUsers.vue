@@ -1,6 +1,6 @@
 <template>
   <UiCard v-if="items.length" padded>
-    <h3 class="font-semibold text-sm">{{ $t('forum.rail_active_title') }}</h3>
+    <h3 class="text-sm">{{ $t('forum.rail_active_title') }}</h3>
     <p class="text-xs text-text-tertiary mt-0.5 mb-3">{{ $t('forum.rail_active_subtitle') }}</p>
     <ul class="space-y-2">
       <li

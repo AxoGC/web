@@ -17,7 +17,7 @@
         </div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 mb-1">
-            <h3 class="font-semibold truncate text-text-primary group-hover:text-brand-400">{{ server.name }}</h3>
+            <h3 class="truncate text-text-primary group-hover:text-brand-400">{{ server.name }}</h3>
             <UiTag size="sm" variant="info">{{ typeLabel(server.type) }}</UiTag>
           </div>
           <div class="flex items-center gap-3 text-xs text-text-tertiary">

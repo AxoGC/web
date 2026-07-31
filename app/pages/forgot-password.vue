@@ -1,6 +1,6 @@
 <template>
   <UiCard padded>
-    <h1 class="text-2xl font-bold mb-1">{{ $t('auth.forgot_password_title') }}</h1>
+    <h1 class="text-2xl mb-1">{{ $t('auth.forgot_password_title') }}</h1>
     <p class="text-sm text-text-tertiary mb-6">{{ $t('auth.forgot_password_hint') }}</p>
 
     <form v-if="!sent" class="space-y-4" @submit.prevent="onSubmit">

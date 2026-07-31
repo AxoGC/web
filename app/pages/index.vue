@@ -6,7 +6,7 @@
       v-else
       class="rounded-xl bg-gradient-to-br from-brand-soft/40 via-bg-elevated to-bg-elevated border border-border-subtle p-8 md:p-12"
     >
-      <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-text-primary">
+      <h1 class="text-3xl md:text-4xl tracking-tight text-text-primary">
         {{ $t('home.hero_title') }}
       </h1>
       <p class="mt-3 max-w-2xl text-base text-text-secondary">
@@ -31,7 +31,7 @@
     <!-- Live servers -->
     <section>
       <header class="flex items-end justify-between mb-4">
-        <h2 class="text-xl font-semibold">{{ $t('home.online_servers') }}</h2>
+        <h2 class="text-xl">{{ $t('home.online_servers') }}</h2>
         <NuxtLink to="/servers" class="text-sm text-brand-400 hover:text-brand-500">{{ $t('home.view_all') }} →</NuxtLink>
       </header>
       <div v-if="serversPending" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -59,7 +59,7 @@
     <!-- Hot threads -->
     <section>
       <header class="flex items-end justify-between mb-4">
-        <h2 class="text-xl font-semibold">{{ $t('home.hot_posts') }}</h2>
+        <h2 class="text-xl">{{ $t('home.hot_posts') }}</h2>
         <NuxtLink to="/forums" class="text-sm text-brand-400 hover:text-brand-500">{{ $t('home.view_all') }} →</NuxtLink>
       </header>
       <div v-if="forumsPending" class="space-y-2">

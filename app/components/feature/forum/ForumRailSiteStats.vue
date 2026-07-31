@@ -1,6 +1,6 @@
 <template>
   <UiCard padded>
-    <h3 class="font-semibold text-sm mb-3">{{ $t('forum.rail_site_stats') }}</h3>
+    <h3 class="text-sm mb-3">{{ $t('forum.rail_site_stats') }}</h3>
     <dl class="grid grid-cols-2 gap-y-2 gap-x-3 text-sm">
       <div class="flex items-center gap-1.5 text-text-tertiary">
         <LucideMessageSquare :size="14" />
