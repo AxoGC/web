@@ -219,28 +219,30 @@ function pinPathData(r: number): string {
 }
 
 // Layout for up to 4 avatars sharing one pin head: individual avatar circles
-// stay a fixed size (AVATAR_R) and overlap inside the (larger) head circle,
-// rather than shrinking to fit. Positions are relative to the head center;
-// array order is top-to-bottom z-stacking (index 0 drawn last, on top),
-// matching the order users are returned in. 5+ players falls back to a
-// single avatar + count badge until that population size is worth designing
-// a dedicated layout for.
-function avatarOffsets(n: number): { dx: number, dy: number }[] {
+// stay a fixed size (AVATAR_R), but their distance from the head center is
+// *not* fixed — it's set so each avatar circle is internally tangent to the
+// (headcount-scaled) head circle, i.e. center-to-center distance = headR -
+// AVATAR_R. That distance grows with headR, so more players both enlarges
+// the head circle and spreads its avatars further apart, keeping every
+// avatar touching the inside of the border instead of overflowing past it
+// (as a fixed offset would once the head circle shrinks/grows with count).
+// Positions are relative to the head center; array order is top-to-bottom
+// z-stacking (index 0 drawn last, on top), matching the order users are
+// returned in. 5+ players falls back to a single avatar + count badge until
+// that population size is worth designing a dedicated layout for.
+function avatarOffsets(n: number, headR: number): { dx: number, dy: number }[] {
+  const dist = headR - AVATAR_R
   switch (n) {
-    case 2: {
-      const off = AVATAR_R * 0.6
-      return [{ dx: -off, dy: 0 }, { dx: off, dy: 0 }]
-    }
-    case 3: {
-      const r = AVATAR_R * 0.62
+    case 2:
+      return [{ dx: -dist, dy: 0 }, { dx: dist, dy: 0 }]
+    case 3:
       return [
-        { dx: 0, dy: -r },
-        { dx: -r * 0.866, dy: r * 0.5 },
-        { dx: r * 0.866, dy: r * 0.5 },
+        { dx: 0, dy: -dist },
+        { dx: -dist * 0.866, dy: dist * 0.5 },
+        { dx: dist * 0.866, dy: dist * 0.5 },
       ]
-    }
     case 4: {
-      const off = AVATAR_R * 0.5
+      const off = dist / Math.SQRT2
       return [
         { dx: -off, dy: -off },
         { dx: off, dy: -off },
@@ -341,7 +343,7 @@ const chartOption = computed(() => {
         ]
 
         const shown = item.entry.users.slice(0, layoutN)
-        const offsets = avatarOffsets(shown.length)
+        const offsets = avatarOffsets(shown.length, headR)
         shown.forEach((u, i) => {
           const { dx, dy } = offsets[i]!
           const cy = headY + dy
