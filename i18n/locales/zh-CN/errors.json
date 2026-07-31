@@ -121,7 +121,6 @@
 
   "QUERY_LIST_FAILED": "查询请求列表加载失败",
   "QUERY_REQUEST_NOT_FOUND": "查询请求不存在",
-  "APPROVE_FAILED": "批准失败",
   "REJECT_FAILED": "驳回失败",
   "DELETE_FAILED": "删除失败"
 }

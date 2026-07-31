@@ -85,9 +85,12 @@ const toast = useToast()
 const { t } = useI18n()
 const { formatAuditTimestamp } = useAuditTime()
 
-const TABS = ['pending', 'approved', 'rejected', 'all'] as const
+// Submissions are granted instantly now (see logquery.Service.Submit) — the
+// "pending" status can only appear on legacy rows from before that change,
+// so the default view is "approved", not "pending".
+const TABS = ['approved', 'rejected', 'pending', 'all'] as const
 type Tab = typeof TABS[number]
-const status = ref<Tab>('pending')
+const status = ref<Tab>('approved')
 
 const items = ref<LogQueryRequestItem[]>([])
 const total = ref(0)

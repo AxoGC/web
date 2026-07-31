@@ -92,9 +92,13 @@ function onPage(p: number) {
   void load()
 }
 
-function onSubmitted() {
+// Submit now runs and grants the query instantly, so drop straight into the
+// detail view with the result the requester just asked for, instead of
+// leaving them to find it in the (now page-1) list.
+function onSubmitted(item: LogQueryRequestItem) {
   page.value = 1
   void load()
+  openDetail(item)
 }
 
 function openDetail(item: LogQueryRequestItem) {

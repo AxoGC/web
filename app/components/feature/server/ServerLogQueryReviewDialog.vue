@@ -16,14 +16,12 @@
             {{ $t(`log_query.status_${request.status}`) }}
           </UiTag>
         </ServerLogQueryInfoRow>
-        <template v-if="!isPending">
-          <ServerLogQueryInfoRow :label="$t('log_query.field_from')">
-            {{ request.approved_from_ts ? formatTime(request.approved_from_ts) : '—' }}
-          </ServerLogQueryInfoRow>
-          <ServerLogQueryInfoRow :label="$t('log_query.field_to')">
-            {{ request.approved_to_ts ? formatTime(request.approved_to_ts) : '—' }}
-          </ServerLogQueryInfoRow>
-        </template>
+        <ServerLogQueryInfoRow :label="$t('log_query.field_from')">
+          {{ request.approved_from_ts ? formatTime(request.approved_from_ts) : '—' }}
+        </ServerLogQueryInfoRow>
+        <ServerLogQueryInfoRow :label="$t('log_query.field_to')">
+          {{ request.approved_to_ts ? formatTime(request.approved_to_ts) : '—' }}
+        </ServerLogQueryInfoRow>
       </div>
       <ServerLogQueryInfoRow :label="$t('admin.qr_reason')">
         <span class="whitespace-pre-wrap">{{ request.reason }}</span>
@@ -32,15 +30,14 @@
         <span class="whitespace-pre-wrap">{{ request.reject_reason }}</span>
       </ServerLogQueryInfoRow>
 
-      <template v-if="isPending">
-        <p class="text-xs text-text-tertiary">{{ $t('admin.qr_override_hint') }}</p>
-
-        <UiField :label="$t('log_query.field_from')" horizontal label-width="w-[84px]">
-          <UiDateTimePicker v-model="fromTs" />
-        </UiField>
-        <UiField :label="$t('log_query.field_to')" horizontal label-width="w-[84px]">
-          <UiDateTimePicker v-model="toTs" />
-        </UiField>
+      <template v-if="request.status === 'approved'">
+        <div class="pt-3 border-t border-border-subtle">
+          <p class="text-xs font-medium text-text-tertiary uppercase tracking-wide mb-2">
+            {{ $t('log_query.result_title') }}
+          </p>
+          <UiSkeleton v-if="loadingRows" variant="card" :height="120" />
+          <ServerLogQueryResultTable v-else :rows="detailRows ?? []" :category="request.category" />
+        </div>
 
         <UiField :label="$t('admin.qr_reject_reason')" :help="$t('admin.qr_reject_reason_hint')">
           <UiTextarea
@@ -49,66 +46,32 @@
             :placeholder="$t('admin.qr_reject_reason_placeholder')"
           />
         </UiField>
-
-        <template v-if="filterKeys.length">
-          <p class="text-xs font-medium text-text-tertiary uppercase tracking-wide pt-1">
-            {{ $t('log_query.filters_title') }}
-          </p>
-          <UiField v-if="filterKeys.includes('action')" :label="$t('log_query.filter_action')" horizontal label-width="w-[84px]">
-            <UiSelect v-model="filters.action" :options="actionOptions" :placeholder="$t('log_query.filter_unset')" />
-          </UiField>
-          <UiField v-if="filterKeys.includes('block_id')" :label="$t('log_query.filter_block_id')" horizontal label-width="w-[84px]">
-            <ServerLogFieldSearchInput
-              v-model="filters.block_id"
-              :server-id="request.target_server_id"
-              :category="request.category"
-              field="block_id"
-              placeholder="minecraft:chest"
-            />
-          </UiField>
-          <UiField v-if="filterKeys.includes('item_id')" :label="$t('log_query.filter_item_id')" horizontal label-width="w-[84px]">
-            <ServerLogFieldSearchInput
-              v-model="filters.item_id"
-              :server-id="request.target_server_id"
-              :category="request.category"
-              field="item_id"
-              placeholder="minecraft:diamond"
-            />
-          </UiField>
-          <UiField v-if="filterKeys.includes('entity_type')" :label="$t('log_query.filter_entity_type')">
-            <UiInput v-model="filters.entity_type" placeholder="minecraft:zombie" />
-          </UiField>
-          <UiField v-if="filterKeys.includes('world')" :label="$t('log_query.filter_world')" horizontal label-width="w-[84px]">
-            <UiSelect v-model="filters.world" :options="worldOptions" :placeholder="$t('log_query.filter_unset')" />
-          </UiField>
-          <UiField v-if="filterKeys.includes('pos_range')" :label="$t('log_query.filter_pos_range')" horizontal label-width="w-[84px]">
-            <ServerLogPosRangeField v-model="filters.pos_range" />
-          </UiField>
-        </template>
       </template>
     </div>
 
     <template #footer>
-      <template v-if="isPending">
-        <UiButton variant="ghost" class="text-danger" :loading="busy === 'reject'" @click="doReject">
-          {{ $t('admin.qr_reject') }}
-        </UiButton>
-        <UiButton :loading="busy === 'approve'" @click="doApprove">
-          {{ $t('admin.qr_approve') }}
-        </UiButton>
-      </template>
-      <UiButton v-else variant="ghost" @click="onUpdateOpen(false)">{{ $t('actions.close') }}</UiButton>
+      <UiButton v-if="request?.status === 'approved'" variant="ghost" class="text-danger" @click="confirmOpen = true">
+        {{ $t('admin.qr_reject') }}
+      </UiButton>
+      <UiButton variant="ghost" @click="onUpdateOpen(false)">{{ $t('actions.close') }}</UiButton>
     </template>
   </UiModal>
+
+  <UiConfirmModal
+    :open="confirmOpen"
+    :title="$t('admin.qr_reject')"
+    :message="$t('admin.qr_reject_confirm')"
+    variant="danger"
+    :loading="busy === 'reject'"
+    @update:open="confirmOpen = $event"
+    @confirm="doReject"
+  />
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import type { LogQueryRequestItem } from '~/types/api'
-import {
-  filterKeysForCategory, actionValuesForCategory, actionI18nKey, logQueryStatusVariant,
-  worldOptionValues, worldI18nKey,
-} from '~/composables/useLogCategories'
+import { logQueryStatusVariant } from '~/composables/useLogCategories'
 import { ApiError } from '~/composables/useApi'
 import { useToast } from '~/composables/useToast'
 
@@ -124,70 +87,39 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const toast = useToast()
 
-const isPending = computed(() => props.request?.status === 'pending')
-const filterKeys = computed(() => filterKeysForCategory(props.request?.category ?? ''))
-const actionOptions = computed(() =>
-  actionValuesForCategory(props.request?.category ?? '').map(v => ({ value: v, label: t(actionI18nKey(v)) })),
-)
-const worldOptions = computed(() =>
-  worldOptionValues().map(v => ({ value: v, label: t(worldI18nKey(v)) })),
-)
-
-const fromTs = ref<number | undefined>(undefined)
-const toTs = ref<number | undefined>(undefined)
-const filters = reactive<Record<string, string>>({ action: '', block_id: '', item_id: '', entity_type: '', world: '', pos_range: '' })
 const rejectReason = ref('')
-const busy = ref<'approve' | 'reject' | null>(null)
+const busy = ref<'reject' | null>(null)
+const confirmOpen = ref(false)
+
+const detailRows = ref<Record<string, unknown>[] | null>(null)
+const loadingRows = ref(false)
+
+// Admin needs to see the actual evidence to decide whether to pull it — same
+// on-demand fetch as the public detail dialog, since the list/review payload
+// never carries the (possibly huge) row set.
+watch(() => [props.open, props.request?.id] as const, async ([isOpen, id]) => {
+  detailRows.value = null
+  rejectReason.value = ''
+  confirmOpen.value = false
+  if (!isOpen || !id || props.request?.status !== 'approved') return
+  loadingRows.value = true
+  try {
+    const full = await useApi<LogQueryRequestItem>(`/api/query-requests/${id}`)
+    detailRows.value = full.rows ?? []
+  } catch (e) {
+    if (e instanceof ApiError) toast.fromError(e)
+  } finally {
+    loadingRows.value = false
+  }
+}, { immediate: true })
 
 function formatTime(unixSeconds: number) {
   return new Date(unixSeconds * 1000).toLocaleString()
 }
 
-// Re-seed the editable overrides from the requester's original values every
-// time a (pending) request is opened, so stale edits from a previously
-// reviewed request never leak into the next one.
-watch(() => props.request, (r) => {
-  fromTs.value = r?.from_ts
-  toTs.value = r?.to_ts
-  rejectReason.value = ''
-  const src = (r?.filters ?? {}) as Record<string, string | undefined>
-  filters.action = src.action ?? ''
-  filters.block_id = src.block_id ?? ''
-  filters.item_id = src.item_id ?? ''
-  filters.entity_type = src.entity_type ?? ''
-  filters.world = src.world ?? ''
-  filters.pos_range = src.pos_range ?? ''
-}, { immediate: true })
-
 function onUpdateOpen(value: boolean) {
   if (busy.value) return
   emit('update:open', value)
-}
-
-async function doApprove() {
-  if (!props.request) return
-  busy.value = 'approve'
-  try {
-    const activeFilters: Record<string, string> = {}
-    for (const k of filterKeys.value) {
-      if (filters[k]) activeFilters[k] = filters[k]
-    }
-    await useApi(`/api/admin/query-requests/${props.request.id}/approve`, {
-      method: 'POST',
-      body: {
-        from_ts: fromTs.value,
-        to_ts: toTs.value,
-        filters: activeFilters,
-      },
-    })
-    toast.success(t('admin.qr_approved_toast'))
-    emit('update:open', false)
-    emit('resolved')
-  } catch (e) {
-    if (e instanceof ApiError) toast.fromError(e)
-  } finally {
-    busy.value = null
-  }
 }
 
 async function doReject() {
@@ -199,6 +131,7 @@ async function doReject() {
       body: { reason: rejectReason.value.trim() },
     })
     toast.success(t('admin.qr_rejected_toast'))
+    confirmOpen.value = false
     emit('update:open', false)
     emit('resolved')
   } catch (e) {

@@ -5,7 +5,7 @@
         <UiSelect v-model="category" :options="categoryOptions" />
       </UiField>
 
-      <UiField :label="$t('log_query.field_reason')" required>
+      <UiField :label="$t('log_query.field_reason')" required :help="$t('log_query.reason_disclaimer')">
         <UiTextarea
           v-model="reason"
           :rows="3"
