@@ -192,6 +192,15 @@ const provinceRegions = computed(() => {
 })
 
 const PIN_R = 14
+const PIN_STROKE_WIDTH = 1.5
+// The 2x/3x/4x-person head-circle scaling (sqrt(count), see renderItem) is
+// defined on this — the solid fill disc actually visible inside the white
+// ring — not on the path's own centerline radius. Canvas strokes straddle
+// the path outline (half in, half out), and that white ring stays a fixed
+// 1.5px wide regardless of headcount, so scaling the centerline radius
+// directly would leave the visible fill disc growing at a slightly-off
+// ratio once that constant border width is netted out.
+const PIN_FILL_R = PIN_R - PIN_STROKE_WIDTH / 2
 const AVATAR_R = PIN_R - 2
 // Head-center distance of r*sqrt(2) from the tip is what makes the tip a
 // true right angle with both sides tangent to the circle (classic pin
@@ -304,7 +313,8 @@ const chartOption = computed(() => {
         const [x, y] = api.coord([item.coord.lng, item.coord.lat])
         const count = item.entry.count
         const layoutN = Math.min(count, 4)
-        const headR = count <= 4 ? PIN_R * Math.sqrt(count) : PIN_R
+        const fillR = count <= 4 ? PIN_FILL_R * Math.sqrt(count) : PIN_FILL_R
+        const headR = fillR + PIN_STROKE_WIDTH / 2
         const headY = pinHeadY(headR)
         const imgSize = AVATAR_R * 2
 
@@ -321,7 +331,7 @@ const chartOption = computed(() => {
             type: 'path',
             shape: { pathData: pinPathData(headR) },
             position: [x, y],
-            style: { fill: '#28abce', stroke: '#fff', lineWidth: 1.5 },
+            style: { fill: '#28abce', stroke: '#fff', lineWidth: PIN_STROKE_WIDTH },
             z2: zBase + 10,
           },
         ]
