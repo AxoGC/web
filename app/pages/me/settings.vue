@@ -68,13 +68,18 @@
         </div>
       </UiField>
 
-      <UiField :label="$t('me.username')" :help="$t('me.username_hint', { cost: renameUsernameCost, point: auth.user?.point ?? 0 })">
+      <UiField
+        :label="$t('me.username')"
+        :help="usernameCooldownActive
+          ? $t('me.username_cooldown_active', { date: formatDate(Math.floor((usernameNextAvailableAt ?? 0) / 1000)) })
+          : $t('me.username_hint')"
+      >
         <div class="flex gap-2">
           <UiInput v-model="newUsername" :placeholder="$t('me.username_placeholder')" class="flex-1" />
           <UiButton
             variant="secondary"
             :loading="renaming"
-            :disabled="!newUsername.trim() || newUsername.trim() === auth.user?.username"
+            :disabled="!newUsername.trim() || newUsername.trim() === auth.user?.username || usernameCooldownActive"
             @click="renameUsername"
           >
             {{ $t('me.username_change') }}
@@ -142,6 +147,7 @@ import { useTheme } from '~/composables/useTheme'
 import { useToast } from '~/composables/useToast'
 import { ApiError } from '~/composables/useApi'
 import { useCityCoords, type CityCoord } from '~/composables/useCityCoords'
+import { formatDate } from '~/utils/format'
 import type { MeDTO } from '~/stores/auth'
 
 definePageMeta({ layout: 'default', middleware: ['auth'], ssr: false })
@@ -157,11 +163,20 @@ const bioErr = ref('')
 const saving = ref(false)
 const uploading = ref(false)
 
-// Mirrors user.RenameUsernameCost (core) — display-only; the backend is the
-// actual authority on cost and re-validates everything server-side.
-const renameUsernameCost = 50
+// Mirrors user.UsernameRenameCooldown (core) — display-only; the backend is
+// the actual authority and re-validates the cooldown server-side.
+const usernameRenameCooldownMs = 24 * 60 * 60 * 1000
 const newUsername = ref('')
 const renaming = ref(false)
+
+const usernameNextAvailableAt = computed(() => {
+  const at = auth.user?.username_renamed_at
+  return at ? at * 1000 + usernameRenameCooldownMs : null
+})
+const usernameCooldownActive = computed(() => {
+  const next = usernameNextAvailableAt.value
+  return !!next && next > Date.now()
+})
 
 // Avatar URL from backend always points at /media/users/<id>?v=<unix>; when
 // avatar_at is null, ?v=0 → backend serves namespace default. So a non-zero
@@ -295,7 +310,7 @@ async function removeAvatar() {
 async function renameUsername() {
   const name = newUsername.value.trim()
   if (!name || name === auth.user?.username) return
-  if (!confirm(t('me.username_confirm', { name, cost: renameUsernameCost }))) return
+  if (!confirm(t('me.username_confirm', { name }))) return
   renaming.value = true
   try {
     const u = await useApi<MeDTO>('/api/users/me/username', {

@@ -14,6 +14,8 @@ export interface MeDTO {
   status: 'active' | 'banned'
   point: number
   created_at: number
+  /** Unix timestamp of the last self-service username rename, if any. */
+  username_renamed_at?: number
 }
 
 interface State {

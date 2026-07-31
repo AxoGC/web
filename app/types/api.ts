@@ -88,6 +88,8 @@ export interface MeDTO extends PublicUser {
   status: string
   /** Site-wide point balance — see promotion claims / VIP debit. */
   point: number
+  /** Unix timestamp of the last self-service username rename, if any. */
+  username_renamed_at?: number
 }
 
 export interface CityMapEntry {
