@@ -162,12 +162,16 @@ const playerCount = computed(() => points.value.reduce((sum, p) => sum + p.entry
 // Capped well short of full saturation (BLEND_MAX) so even the busiest
 // province stays a light tint — the pins are solid brand blue and need to
 // read clearly against the fill, not blend into it. Canvas can't resolve
-// CSS custom properties, so literal per-theme colors — pure white reads
-// fine as "blank" in light mode but is jarringly bright in dark mode.
+// CSS custom properties, so literal per-theme colors — matched to the
+// `--bg-base` token (the recessed layer beneath `--bg-elevated`, which is
+// what the card itself, and thus the transparent area outside China's
+// border, renders as) rather than pure white/near-black, so an empty
+// province reads as a faint gray tile instead of blending into that
+// surrounding blank space.
 const { resolved: themeMode } = useTheme()
 const MAP_BASE = {
-  light: { area: [255, 255, 255], border: '#d8dce2', hoverArea: '#eef2f5' },
-  dark: { area: [28, 31, 38], border: '#2f343f', hoverArea: '#232730' },
+  light: { area: [246, 247, 249], border: '#d8dce2', hoverArea: '#eef2f5' },
+  dark: { area: [15, 17, 21], border: '#2f343f', hoverArea: '#232730' },
 } as const
 
 const BLEND_MIN = 0.12
