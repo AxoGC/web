@@ -63,13 +63,40 @@
           <UiField :label="$t('admin.forum_form_icon')">
             <UiInput v-model="form.icon" placeholder="https://…" />
           </UiField>
-          <UiField :label="$t('admin.forum_form_banner')">
-            <UiInput v-model="form.banner_url" placeholder="https://…" />
-          </UiField>
           <UiField :label="$t('admin.forum_form_sort')">
             <UiInput v-model.number="form.sort" type="number" />
           </UiField>
         </div>
+
+        <UiField :label="$t('admin.forum_form_banner')">
+          <p v-if="!editing" class="text-xs text-text-tertiary">
+            {{ $t('admin.forum_form_banner_save_first') }}
+          </p>
+          <div v-else class="w-56">
+            <UiImageUpload
+              :file="null"
+              :preview-url="editing.banner_url"
+              :max-size-mb="5"
+              aspect-ratio="16 / 9"
+              :allow-clear="false"
+              :alt="editing.name"
+              @update:file="onPickBanner"
+            />
+            <p v-if="uploadingBanner" class="text-sm text-text-secondary mt-2">
+              {{ $t('me.background_uploading') }}
+            </p>
+            <UiButton
+              v-else-if="editing.banner_url"
+              variant="ghost"
+              size="sm"
+              class="mt-2"
+              :disabled="uploadingBanner"
+              @click="removeBanner"
+            >
+              {{ $t('admin.forum_form_banner_remove') }}
+            </UiButton>
+          </div>
+        </UiField>
       </div>
       <template #footer>
         <UiButton variant="ghost" @click="formOpen = false">{{ $t('actions.cancel') }}</UiButton>
@@ -110,10 +137,10 @@ const form = reactive({
   slug: '',
   description: '',
   icon: '',
-  banner_url: '',
   sort: 0,
 })
 const saving = ref(false)
+const uploadingBanner = ref(false)
 
 const deleteOpen = ref(false)
 const deleteTarget = ref<Forum | null>(null)
@@ -135,7 +162,6 @@ function openCreate() {
   form.slug = ''
   form.description = ''
   form.icon = ''
-  form.banner_url = ''
   form.sort = 0
   formOpen.value = true
 }
@@ -146,9 +172,38 @@ function openEdit(f: Forum) {
   form.slug = f.slug
   form.description = f.description || ''
   form.icon = f.icon || ''
-  form.banner_url = f.banner_url || ''
   form.sort = f.sort ?? 0
   formOpen.value = true
+}
+
+async function onPickBanner(file: File | null) {
+  if (!file || !editing.value) return
+  uploadingBanner.value = true
+  try {
+    const fd = new FormData()
+    fd.append('image', file)
+    const f = await useApi<Forum>(`/api/admin/forums/${editing.value.id}/banner`, { method: 'POST', form: fd })
+    editing.value = f
+    await load()
+  } catch (e) {
+    if (e instanceof ApiError) toast.fromError(e)
+  } finally {
+    uploadingBanner.value = false
+  }
+}
+
+async function removeBanner() {
+  if (!editing.value) return
+  uploadingBanner.value = true
+  try {
+    const f = await useApi<Forum>(`/api/admin/forums/${editing.value.id}/banner`, { method: 'DELETE' })
+    editing.value = f
+    await load()
+  } catch (e) {
+    if (e instanceof ApiError) toast.fromError(e)
+  } finally {
+    uploadingBanner.value = false
+  }
 }
 
 async function submitForm() {
@@ -159,7 +214,6 @@ async function submitForm() {
         name: form.name,
         description: form.description,
         icon: form.icon,
-        banner_url: form.banner_url,
         sort: Number(form.sort) || 0,
       }
       await useApi(`/api/admin/forums/${editing.value.id}`, { method: 'PATCH', body })
@@ -169,7 +223,6 @@ async function submitForm() {
         slug: form.slug,
         description: form.description,
         icon: form.icon,
-        banner_url: form.banner_url,
         sort: Number(form.sort) || 0,
       }
       await useApi('/api/admin/forums', { method: 'POST', body })
