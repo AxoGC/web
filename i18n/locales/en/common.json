@@ -248,6 +248,8 @@
     "stats_7d": "7d",
     "stats_30d": "30d",
     "online_trend": "Online players",
+    "online_trend_tooltip_count": "{n} online",
+    "online_trend_tooltip_more": "+{n} more",
     "online_players": "Players online",
     "no_online_players": "Nobody is online right now",
     "leaderboard": "Leaderboard",

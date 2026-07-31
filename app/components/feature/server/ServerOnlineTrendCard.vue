@@ -36,6 +36,14 @@ import { useTheme } from '~/composables/useTheme'
 
 const props = defineProps<{ serverId: string | number }>()
 const range = ref<'24h' | '7d' | '30d'>('24h')
+const { t, locale } = useI18n()
+
+const MAX_TOOLTIP_PLAYERS = 10
+
+const HTML_ESCAPES: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;' }
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, c => HTML_ESCAPES[c]!)
+}
 
 const { data: stats, refresh } = await useAsyncData(
   () => `server.stats.${props.serverId}.${range.value}`,
@@ -75,6 +83,33 @@ const chartOption = computed(() => {
       backgroundColor: c.tooltipBg,
       borderColor: c.tooltipBorder,
       textStyle: { color: c.tooltipText },
+      // Custom formatter so hovering a point shows who was online at that
+      // sample, not just the count — styled to match UiTooltip (text-xs,
+      // same color tokens as the rest of the chart).
+      formatter: (params: unknown) => {
+        const p = (params as { dataIndex: number, axisValue: number }[])[0]
+        if (!p) return ''
+        const point = pts[p.dataIndex]
+        if (!point) return ''
+        const time = new Date(p.axisValue).toLocaleString(locale.value)
+        const players = point.players || []
+        const shown = players.slice(0, MAX_TOOLTIP_PLAYERS)
+        const more = players.length - shown.length
+        const nameRows = shown.length
+          ? shown.map(n => `<div class="truncate">${escapeHtml(n)}</div>`).join('')
+          : `<div style="color:${c.label}">${escapeHtml(t('server.no_online_players'))}</div>`
+        const moreRow = more > 0
+          ? `<div style="color:${c.label}" class="mt-0.5">${escapeHtml(t('server.online_trend_tooltip_more', { n: more }))}</div>`
+          : ''
+        return `
+          <div class="text-xs" style="min-width:120px">
+            <div style="color:${c.label}" class="mb-1">${escapeHtml(time)}</div>
+            <div class="mb-1" style="font-weight:500">${escapeHtml(t('server.online_trend_tooltip_count', { n: point.online }))}</div>
+            ${nameRows}
+            ${moreRow}
+          </div>
+        `
+      },
     },
     series: [{
       type: 'line',

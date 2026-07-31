@@ -248,6 +248,8 @@
     "stats_7d": "7 天",
     "stats_30d": "30 天",
     "online_trend": "在线人数趋势",
+    "online_trend_tooltip_count": "{n} 人在线",
+    "online_trend_tooltip_more": "还有 {n} 人",
     "online_players": "当前在线",
     "no_online_players": "当前没有玩家在线",
     "leaderboard": "排行榜",

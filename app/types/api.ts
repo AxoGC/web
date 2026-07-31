@@ -339,6 +339,7 @@ export interface AdminServerItem extends ServerSummary {
 export interface OnlineStatPoint {
   recorded_at: number
   online: number
+  players?: string[]
 }
 
 export interface LeaderboardItem {
