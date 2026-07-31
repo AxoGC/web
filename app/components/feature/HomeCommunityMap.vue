@@ -252,13 +252,21 @@ const chartOption = computed(() => {
         const headY = pinHeadY(headR)
         const imgSize = AVATAR_R * 2
 
+        // zrender sorts z2 globally across every shape in the scene, not
+        // per group — so pins further south (larger pixel y) need their
+        // *whole* stack of shapes to outrank a pin further north's whole
+        // stack, not just tie at each shape's own local z2 (10-22 below).
+        // Bucketing by rounded y and spacing buckets 100 apart gives each
+        // pin's local z2 range room without colliding with its neighbors'.
+        const zBase = Math.round(y) * 100
+
         const children: Record<string, unknown>[] = [
           {
             type: 'path',
             shape: { pathData: pinPathData(headR) },
             position: [x, y],
             style: { fill: '#28abce', stroke: '#fff', lineWidth: 1.5 },
-            z2: 10,
+            z2: zBase + 10,
           },
         ]
 
@@ -268,7 +276,7 @@ const chartOption = computed(() => {
           const { dx, dy } = offsets[i]!
           const cy = headY + dy
           const layerIndex = shown.length - 1 - i
-          const z2 = 11 + layerIndex * 3
+          const z2 = zBase + 11 + layerIndex * 3
           // Same fallback as UiAvatar: a colored circle + initials, drawn
           // underneath so it still shows if the avatar image never loads
           // (zrender's Image element has no built-in @error swap like the
@@ -315,7 +323,7 @@ const chartOption = computed(() => {
             position: [x, y],
             shape: { cx: bx, cy: by, r: badgeR },
             style: { fill: '#ef4444', stroke: '#fff', lineWidth: 1 },
-            z2: 14,
+            z2: zBase + 14,
           })
           children.push({
             type: 'text',
@@ -330,7 +338,7 @@ const chartOption = computed(() => {
               align: 'center',
               verticalAlign: 'middle',
             },
-            z2: 15,
+            z2: zBase + 15,
           })
         }
         if (myCity && item.cityCode === myCity) {
@@ -346,7 +354,7 @@ const chartOption = computed(() => {
               align: 'center',
               verticalAlign: 'top',
             },
-            z2: 20,
+            z2: zBase + 20,
           })
         }
         return { type: 'group', children }
