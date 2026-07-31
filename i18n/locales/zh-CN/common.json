@@ -354,12 +354,8 @@
   },
   "profile": {
     "joined_at": "加入于 {date}",
-    "last_login": "最后上线",
+    "last_login": "最后上线 {time}",
     "last_login_never": "从未登录",
-    "checkin_streak": "连续签到",
-    "checkin_streak_value": "{n} 天",
-    "checkin_total": "累计签到",
-    "checkin_total_value": "{n} 次",
     "bindings_title": "绑定的游戏账号",
     "bindings_empty": "该用户尚未绑定任何游戏号",
     "bindings_playtime": "在线时长 {value}",

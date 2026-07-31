@@ -91,9 +91,9 @@ watch(canvasEl, async (el) => {
 
 onBeforeUnmount(disposeViewer)
 
-// Compact glance radar: axis names are omitted (the stat grid alongside
-// already spells out label + value), so this is purely the shape at a
-// smaller size than the dedicated player-stats page's chart.
+// Compact glance radar — same visual language as the dedicated player-stats
+// page's chart, just smaller: axis names shrink to fit and the radius backs
+// off to leave them room inside the fixed 160x144 box.
 const chartOption = computed(() => {
   const list = props.axes
   if (!list.length || !list.some(a => a.value > 0)) return null
@@ -101,12 +101,16 @@ const chartOption = computed(() => {
   return {
     backgroundColor: 'transparent',
     radar: {
-      indicator: list.map(() => ({ max: 100 })),
+      indicator: list.map(a => ({ name: props.metrics.labelFor(props.serverId, a.key), max: 100 })),
       shape: 'polygon',
       splitNumber: 4,
-      center: ['50%', '50%'],
-      radius: '68%',
-      axisName: { show: false },
+      center: ['50%', '52%'],
+      radius: '48%',
+      axisName: {
+        color: '#4dc0df',
+        fontSize: 9,
+        fontWeight: 600,
+      },
       splitLine: {
         lineStyle: {
           color: [

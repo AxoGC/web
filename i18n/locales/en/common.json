@@ -354,12 +354,8 @@
   },
   "profile": {
     "joined_at": "Joined {date}",
-    "last_login": "Last seen",
+    "last_login": "Last seen {time}",
     "last_login_never": "Never signed in",
-    "checkin_streak": "Check-in streak",
-    "checkin_streak_value": "{n} days",
-    "checkin_total": "Total check-ins",
-    "checkin_total_value": "{n} times",
     "bindings_title": "Linked game accounts",
     "bindings_empty": "This user hasn't linked any game account yet",
     "bindings_playtime": "Play time {value}",

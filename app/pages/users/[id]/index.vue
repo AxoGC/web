@@ -57,6 +57,14 @@
                   >
                     {{ user.role }}
                   </UiTag>
+                  <FollowButton
+                    v-if="!isSelf"
+                    :user-id="user.id"
+                    :is-following="!!followStats?.is_following"
+                    :follower-count="followStats?.follower_count ?? 0"
+                    :following-count="followStats?.following_count ?? 0"
+                    @change="onFollowChange"
+                  />
                 </div>
                 <p
                   v-if="user.bio"
@@ -67,23 +75,19 @@
                 <p :class="['mt-2 text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">
                   {{ $t('profile.joined_at', { date: formatDate(user.created_at) }) }}
                 </p>
-              </div>
-              <div v-if="!isSelf" class="shrink-0">
-                <FollowButton
-                  :user-id="user.id"
-                  :is-following="!!followStats?.is_following"
-                  :follower-count="followStats?.follower_count ?? 0"
-                  :following-count="followStats?.following_count ?? 0"
-                  @change="onFollowChange"
-                />
+                <p :class="['mt-1 text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">
+                  {{ lastLoginLine }}
+                </p>
               </div>
             </div>
 
-            <!-- Inline stats strip. Six cells: follow + presence + check-in + likes
-                 received. Likes-received was hoisted up from the bottom card so the
-                 passive aggregate sits with the other passive stats and the lower
-                 card can focus on active output (posts/comments). -->
-            <div class="mt-5 grid grid-cols-3 sm:grid-cols-6 gap-3 text-center">
+            <!-- Inline stats strip: follow + presence + likes received.
+                 Check-in streak/total were dropped from here (points system
+                 already surfaces those); likes-received stays hoisted up from
+                 the bottom card so the passive aggregate sits with the other
+                 passive stats and the lower card can focus on active output
+                 (posts/comments). -->
+            <div class="mt-5 grid grid-cols-3 gap-3 text-center">
               <NuxtLink
                 :to="`/users/${user.id}/followers`"
                 :class="['rounded-md py-1 transition-colors', hasBg ? 'hover:bg-white/10' : 'hover:bg-bg-hover']"
@@ -98,22 +102,6 @@
                 <div :class="['text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">{{ $t('profile.following') }}</div>
                 <div class="mt-1 text-sm font-medium">{{ followStats?.following_count ?? 0 }}</div>
               </NuxtLink>
-              <div>
-                <div :class="['text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">{{ $t('profile.last_login') }}</div>
-                <div class="mt-1 text-sm font-medium">{{ lastLoginText }}</div>
-              </div>
-              <div>
-                <div :class="['text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">{{ $t('profile.checkin_streak') }}</div>
-                <div class="mt-1 text-sm font-medium">
-                  {{ $t('profile.checkin_streak_value', { n: stats?.checkin_streak ?? 0 }) }}
-                </div>
-              </div>
-              <div>
-                <div :class="['text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">{{ $t('profile.checkin_total') }}</div>
-                <div class="mt-1 text-sm font-medium">
-                  {{ $t('profile.checkin_total_value', { n: stats?.checkin_total ?? 0 }) }}
-                </div>
-              </div>
               <div>
                 <div :class="['text-xs', hasBg ? 'text-white/70' : 'text-text-tertiary']">{{ $t('profile.forum_likes') }}</div>
                 <div class="mt-1 text-sm font-medium">{{ stats?.forum_likes_received ?? 0 }}</div>
@@ -444,7 +432,7 @@ function onFollowChange(v: { is_following: boolean; follower_count: number; foll
 const now = useNow()
 const lastLoginText = computed(() => {
   const ts = user.value?.last_login_at
-  if (!ts) return t('profile.last_login_never')
+  if (!ts) return ''
   const r = relativeTime(ts, now.value)
   if (r.kind === 'just_now') return t('common.just_now')
   if (r.kind === 'minutes_ago') return t('common.minutes_ago', { n: r.n })
@@ -452,6 +440,11 @@ const lastLoginText = computed(() => {
   if (r.kind === 'days_ago') return t('common.days_ago', { n: r.n })
   return r.date ?? ''
 })
+// Full display line: "Never signed in" reads as its own sentence, not as a
+// {time} filling into "Last seen ___" (that combination reads redundant).
+const lastLoginLine = computed(() => user.value?.last_login_at
+  ? t('profile.last_login', { time: lastLoginText.value })
+  : t('profile.last_login_never'))
 
 useHead(() => ({ title: user.value?.username || 'User' }))
 </script>
