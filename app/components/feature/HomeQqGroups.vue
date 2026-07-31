@@ -27,10 +27,8 @@
             >
           </div>
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium truncate">
-              <UiTag size="sm" class="mr-1.5">{{ $t(`home.qq_role.${g.role}`) }}</UiTag>
-            </p>
-            <p class="text-[10px] text-text-tertiary font-mono mt-0.5 truncate">{{ g.id }}</p>
+            <p class="text-base font-medium truncate">{{ $t(`home.qq_role.${g.role}`) }}</p>
+            <p class="text-sm text-text-tertiary font-mono mt-0.5 truncate">{{ g.id }}</p>
           </div>
         </UiCard>
       </a>

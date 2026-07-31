@@ -105,10 +105,10 @@
     "community": "Join our QQ groups",
     "qq_join": "Join",
     "qq_role": {
-      "main": "Main",
-      "mcje": "Java",
-      "bedrock": "Bedrock",
-      "dst": "Don't Starve"
+      "main": "Axolotland Main QQ Group",
+      "mcje": "Minecraft: Java Edition",
+      "bedrock": "Minecraft: Bedrock Edition",
+      "dst": "Don't Starve Together"
     },
     "community_map_title": "Community Map",
     "community_map_subtitle": "Meet {players} players from {provinces} provinces and {cities} cities on Axolotland",

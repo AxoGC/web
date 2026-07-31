@@ -105,10 +105,10 @@
     "community": "加入 QQ 群",
     "qq_join": "加入",
     "qq_role": {
-      "main": "主群",
-      "mcje": "Java 版",
-      "bedrock": "基岩版",
-      "dst": "饥荒"
+      "main": "Axolotland 主QQ群",
+      "mcje": "我的世界Java版",
+      "bedrock": "我的世界基岩版",
+      "dst": "饥荒联机版"
     },
     "community_map_title": "社区地图",
     "community_map_subtitle": "在 Axolotland 遇见来自 {provinces} 个省份、{cities} 座城市的 {players} 名玩家",
