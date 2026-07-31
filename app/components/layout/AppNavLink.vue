@@ -2,10 +2,10 @@
   <NuxtLink
     :to="to"
     :class="[
-      'inline-flex items-center h-9 px-3 rounded-md text-sm font-medium transition-colors',
+      'inline-flex items-center h-9 px-3 rounded-md text-sm transition-colors',
       isActive
-        ? 'text-text-primary bg-bg-overlay'
-        : 'text-text-secondary hover:text-text-primary hover:bg-bg-hover',
+        ? 'text-brand-500 font-semibold'
+        : 'text-text-secondary font-medium hover:text-text-primary hover:bg-bg-hover',
     ]"
   >
     <slot />
