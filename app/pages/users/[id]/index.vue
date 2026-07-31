@@ -181,23 +181,14 @@
                 </div>
               </div>
 
-              <div
+              <ProfileBindingStatsPanel
                 v-if="bindingStats[bindingKey(b)]?.length"
-                class="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2"
-              >
-                <div
-                  v-for="axis in bindingStats[bindingKey(b)]"
-                  :key="axis.key"
-                  class="bg-bg-overlay/40 rounded px-2.5 py-1.5"
-                >
-                  <p class="text-[10px] text-text-tertiary uppercase tracking-wide">
-                    {{ metrics.labelFor(b.server_id, axis.key) }}
-                  </p>
-                  <p class="text-sm font-medium text-text-primary">
-                    {{ metrics.formatScore(b.server_id, axis.key, axis.value) }}
-                  </p>
-                </div>
-              </div>
+                class="mt-3"
+                :server-id="b.server_id"
+                :game-name="b.game_name"
+                :axes="bindingStats[bindingKey(b)]!.slice(0, 6)"
+                :metrics="metrics"
+              />
             </li>
           </ul>
           <!-- Collapse-by-default: long binding lists crowd the profile card,
@@ -216,9 +207,30 @@
         </UiCard>
 
         <UiCard flat>
-          <h2 class="text-lg mb-2">{{ $t('profile.forum_title') }}</h2>
-          <UiTabs v-model="activityTab" :tabs="activityTabs">
-            <UiTabPanel value="posts">
+          <div class="flex items-center justify-between mb-2 gap-3">
+            <h2 class="text-lg">{{ $t('profile.forum_title') }}</h2>
+            <div role="radiogroup" :aria-label="$t('profile.forum_title')" class="flex items-center gap-1 text-sm shrink-0">
+              <label
+                v-for="tab in activityTabs"
+                :key="tab.value"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border cursor-pointer transition"
+                :class="activityTab === tab.value
+                  ? 'border-brand-500 bg-brand-500/10 text-brand-300'
+                  : 'border-border-subtle hover:bg-bg-overlay text-text-secondary'"
+              >
+                <input
+                  v-model="activityTab"
+                  type="radio"
+                  name="profile-activity-tab"
+                  :value="tab.value"
+                  class="accent-brand-500"
+                >
+                <span>{{ tab.label }}</span>
+              </label>
+            </div>
+          </div>
+          <div class="mt-4">
+            <div v-show="activityTab === 'posts'">
               <UiEmpty v-if="!recentPosts.length" :message="$t('profile.forum_empty_posts')" />
               <ul v-else class="divide-y divide-border-subtle">
                 <li v-for="p in recentPosts" :key="p.id" class="py-2.5">
@@ -233,8 +245,8 @@
                   </NuxtLink>
                 </li>
               </ul>
-            </UiTabPanel>
-            <UiTabPanel value="comments">
+            </div>
+            <div v-show="activityTab === 'comments'">
               <UiEmpty v-if="!recentComments.length" :message="$t('profile.forum_empty_comments')" />
               <ul v-else class="divide-y divide-border-subtle">
                 <li v-for="c in recentComments" :key="c.id" class="py-2.5">
@@ -248,8 +260,8 @@
                   </NuxtLink>
                 </li>
               </ul>
-            </UiTabPanel>
-          </UiTabs>
+            </div>
+          </div>
         </UiCard>
       </div>
     </div>
