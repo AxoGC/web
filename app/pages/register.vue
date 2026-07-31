@@ -1,7 +1,6 @@
 <template>
   <UiCard padded>
-    <h1 class="text-2xl font-bold mb-1">{{ $t('auth.register_title') }}</h1>
-    <p class="text-sm text-text-tertiary mb-6">{{ $t('brand.tagline') }}</p>
+    <h1 class="text-2xl font-bold mb-6">{{ $t('auth.register_title') }}</h1>
 
     <form class="space-y-4" @submit.prevent="onSubmit">
       <UiField :label="$t('auth.email')" :error="errors.email">

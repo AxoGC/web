@@ -6,65 +6,57 @@
       <h2 class="text-lg font-semibold mb-4">{{ $t('me.edit_profile') }}</h2>
 
       <UiField :label="$t('me.avatar')">
-        <div class="flex items-start gap-4">
-          <!-- Square preview; instant upload on file select. -->
-          <div class="w-28 shrink-0">
-            <UiImageUpload
-              :file="null"
-              :preview-url="avatarPreview"
-              :max-size-mb="5"
-              aspect-ratio="1 / 1"
-              :allow-clear="false"
-              :placeholder="$t('me.avatar_hint')"
-              :alt="auth.user?.username || ''"
-              @update:file="onPickAvatar"
-            />
-          </div>
-          <div class="flex flex-col gap-2 pt-1">
-            <p v-if="uploading" class="text-sm text-text-secondary">{{ $t('me.avatar_uploading') }}</p>
-            <p v-else class="text-sm text-text-tertiary">{{ $t('me.avatar_hint') }}</p>
-            <UiButton
-              v-if="hasUploadedAvatar"
-              variant="ghost"
-              size="sm"
-              :disabled="uploading"
-              @click="removeAvatar"
-            >
-              {{ $t('me.avatar_remove') }}
-            </UiButton>
-          </div>
+        <!-- Square preview; instant upload on file select. -->
+        <div class="w-28">
+          <UiImageUpload
+            :file="null"
+            :preview-url="avatarPreview"
+            :max-size-mb="5"
+            aspect-ratio="1 / 1"
+            :allow-clear="false"
+            :placeholder="$t('me.avatar_hint')"
+            :alt="auth.user?.username || ''"
+            @update:file="onPickAvatar"
+          />
+          <p v-if="uploading" class="text-sm text-text-secondary mt-2">{{ $t('me.avatar_uploading') }}</p>
+          <UiButton
+            v-else-if="hasUploadedAvatar"
+            variant="ghost"
+            size="sm"
+            class="mt-2"
+            :disabled="uploading"
+            @click="removeAvatar"
+          >
+            {{ $t('me.avatar_remove') }}
+          </UiButton>
         </div>
       </UiField>
 
       <UiField :label="$t('me.background')">
-        <div class="flex items-start gap-4">
-          <!-- Wider preview (16:9-ish) — this is the profile-card banner,
-               not a square crop. -->
-          <div class="w-56 shrink-0">
-            <UiImageUpload
-              :file="null"
-              :preview-url="backgroundPreview"
-              :max-size-mb="5"
-              aspect-ratio="16 / 9"
-              :allow-clear="false"
-              :placeholder="$t('me.background_hint')"
-              :alt="auth.user?.username || ''"
-              @update:file="onPickBackground"
-            />
-          </div>
-          <div class="flex flex-col gap-2 pt-1">
-            <p v-if="uploadingBg" class="text-sm text-text-secondary">{{ $t('me.background_uploading') }}</p>
-            <p v-else class="text-sm text-text-tertiary">{{ $t('me.background_hint') }}</p>
-            <UiButton
-              v-if="hasBackground"
-              variant="ghost"
-              size="sm"
-              :disabled="uploadingBg"
-              @click="removeBackground"
-            >
-              {{ $t('me.background_remove') }}
-            </UiButton>
-          </div>
+        <!-- Wider preview (16:9-ish) — this is the profile-card banner,
+             not a square crop. -->
+        <div class="w-56">
+          <UiImageUpload
+            :file="null"
+            :preview-url="backgroundPreview"
+            :max-size-mb="5"
+            aspect-ratio="16 / 9"
+            :allow-clear="false"
+            :placeholder="$t('me.background_hint')"
+            :alt="auth.user?.username || ''"
+            @update:file="onPickBackground"
+          />
+          <p v-if="uploadingBg" class="text-sm text-text-secondary mt-2">{{ $t('me.background_uploading') }}</p>
+          <UiButton
+            v-else-if="hasBackground"
+            variant="ghost"
+            size="sm"
+            class="mt-2"
+            :disabled="uploadingBg"
+            @click="removeBackground"
+          >
+            {{ $t('me.background_remove') }}
+          </UiButton>
         </div>
       </UiField>
 
@@ -98,7 +90,7 @@
             v-if="selectedProvince"
             v-model="selectedCityCode"
             :options="citiesInProvince"
-            class="flex-1"
+            class="w-full sm:flex-1"
           />
         </div>
       </UiField>
