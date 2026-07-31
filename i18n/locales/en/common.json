@@ -144,7 +144,17 @@
     "rules_password": "8–64 chars, mixing letters and digits",
     "logged_in": "Signed in",
     "registered": "Welcome aboard!",
-    "logged_out": "Signed out"
+    "logged_out": "Signed out",
+    "forgot_password_link": "Forgot password?",
+    "forgot_password_title": "Reset your password",
+    "forgot_password_hint": "Enter the email you registered with and we'll send you a password reset link.",
+    "forgot_password_submit": "Send reset email",
+    "forgot_password_sent": "If that email is registered, we've sent a password reset link — check your inbox (and spam folder).",
+    "reset_password_title": "Set a new password",
+    "reset_password_submit": "Reset password",
+    "reset_password_success": "Password reset — sign in with your new password",
+    "reset_password_token_missing": "This link is invalid or has expired — request a new one.",
+    "password_mismatch": "Passwords don't match"
   },
   "forum": {
     "list_title": "Forums",

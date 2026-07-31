@@ -20,6 +20,8 @@
   "USERNAME_TAKEN": "用户名已被占用",
   "USERNAME_INVALID": "用户名格式不正确（3-32 字符）",
   "PASSWORD_TOO_WEAK": "密码强度不足（至少 8 位，含字母和数字）",
+  "PASSWORD_RESET_TOKEN_INVALID": "重置链接无效或已过期，请重新申请",
+  "PASSWORD_RESET_FAILED": "密码重置失败，请稍后再试",
   "USER_NOT_FOUND": "用户不存在",
   "USER_BANNED": "账号已被封禁",
   "BIO_TOO_LONG": "签名过长",

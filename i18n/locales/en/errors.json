@@ -20,6 +20,8 @@
   "USERNAME_TAKEN": "Username already taken.",
   "USERNAME_INVALID": "Username must be 3–32 characters.",
   "PASSWORD_TOO_WEAK": "Password must be 8+ chars with letters and digits.",
+  "PASSWORD_RESET_TOKEN_INVALID": "This reset link is invalid or has expired — please request a new one.",
+  "PASSWORD_RESET_FAILED": "Failed to reset password — try again later.",
   "USER_NOT_FOUND": "User not found.",
   "USER_BANNED": "Account is banned.",
   "BIO_TOO_LONG": "Bio is too long.",

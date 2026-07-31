@@ -11,6 +11,10 @@
         <UiInput v-model="password" type="password" autocomplete="current-password" :leading-icon="LucideLock" />
       </UiField>
 
+      <p class="text-right text-sm">
+        <NuxtLink to="/forgot-password" class="text-brand-400 hover:underline">{{ $t('auth.forgot_password_link') }}</NuxtLink>
+      </p>
+
       <UiButton type="submit" :loading="submitting" block>{{ $t('auth.login_title') }}</UiButton>
     </form>
 
