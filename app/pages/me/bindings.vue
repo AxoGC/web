@@ -70,6 +70,7 @@ import type { DstMeta, ServerSummary, BindStatus, BindCode } from '~/types/api'
 import { ApiError } from '~/composables/useApi'
 import { useToast } from '~/composables/useToast'
 import { extractEndpoints, formatEndpoint } from '~/composables/useServerConnect'
+import { primaryServerType } from '~/composables/useServerTypes'
 
 definePageMeta({ layout: 'default', middleware: ['auth'], ssr: false })
 const toast = useToast()
@@ -133,12 +134,13 @@ async function requestCode(sid: number) {
 }
 
 function connectHint(s: ServerSummary): string {
-  if (s.type === 'dst') {
+  const primary = primaryServerType(s.type)
+  if (primary === 'dst') {
     const name = (s.meta as DstMeta | undefined)?.find_by_name
     return name ? t('server.dst_search_name_short', { name }) : ''
   }
   const eps = extractEndpoints(s)
-  return eps.length ? formatEndpoint(s.type, eps[0]!) : ''
+  return eps.length ? formatEndpoint(primary, eps[0]!) : ''
 }
 
 function askUnbind(sid: number) {

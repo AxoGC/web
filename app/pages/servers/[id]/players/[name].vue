@@ -101,6 +101,7 @@
 import { computed, ref, watch } from 'vue'
 import type { PlayerStats, PublicUser, ServerSummary, StatsAxis } from '~/types/api'
 import { gameTypeIcon } from '~/composables/useGameTypeIcon'
+import { primaryServerType } from '~/composables/useServerTypes'
 
 definePageMeta({ layout: 'detail' })
 const route = useRoute()
@@ -117,7 +118,7 @@ const { data: server } = await useAsyncData(
 )
 
 const serverIconBroken = ref(false)
-const serverIconSrc = computed(() => server.value?.icon || gameTypeIcon(server.value?.type))
+const serverIconSrc = computed(() => server.value?.icon || gameTypeIcon(primaryServerType(server.value?.type)))
 watch(serverIconSrc, () => { serverIconBroken.value = false })
 
 const statusLabel = computed(() => {

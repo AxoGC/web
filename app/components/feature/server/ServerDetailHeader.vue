@@ -50,6 +50,7 @@ import type { ServerDetail } from '~/types/api'
 import { useAuthStore } from '~/stores/auth'
 import { gameTypeIcon } from '~/composables/useGameTypeIcon'
 import { logCategoriesForGameType } from '~/composables/useLogCategories'
+import { primaryServerType } from '~/composables/useServerTypes'
 
 const props = defineProps<{ server: ServerDetail }>()
 const { t } = useI18n()
@@ -60,7 +61,7 @@ const hasLogCategories = computed(() => logCategoriesForGameType(props.server.ty
 const bindDialogOpen = ref(false)
 
 const iconBroken = ref(false)
-const iconSrc = computed(() => props.server.icon || gameTypeIcon(props.server.type))
+const iconSrc = computed(() => props.server.icon || gameTypeIcon(primaryServerType(props.server.type)))
 watch(iconSrc, () => { iconBroken.value = false })
 
 const statusLabel = computed(() => ({

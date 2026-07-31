@@ -25,7 +25,10 @@ import type { ServerDetail, ServerEndpoint } from '~/types/api'
 const props = defineProps<{ server: ServerDetail }>()
 const conn = useServerConnect(() => props.server)
 const endpoints = computed(() => conn.extractEndpoints(props.server))
+// Hardcode 'mc-java' rather than props.server.type: this card can be shown
+// alongside other connect cards on a multi-type server, and the
+// port-omission default must always be Java's regardless.
 function display(ep: ServerEndpoint) {
-  return conn.formatEndpoint(props.server.type, ep)
+  return conn.formatEndpoint('mc-java', ep)
 }
 </script>

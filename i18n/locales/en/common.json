@@ -407,6 +407,7 @@
     "token_reset": "Token reset (shown once)",
     "server_form_name": "Name",
     "server_form_type": "Type",
+    "server_form_also_bedrock": "Also reachable by Bedrock players",
     "server_form_desc": "Description",
     "server_form_meta": "Meta (JSON)",
     "server_form_connect": "How players connect",

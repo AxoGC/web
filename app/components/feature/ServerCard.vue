@@ -38,13 +38,15 @@ import { computed, ref, watch } from 'vue'
 import type { DstMeta, ServerSummary } from '~/types/api'
 import { extractEndpoints, formatEndpoint } from '~/composables/useServerConnect'
 import { gameTypeIcon } from '~/composables/useGameTypeIcon'
+import { primaryServerType } from '~/composables/useServerTypes'
 
 const props = defineProps<{ server: ServerSummary }>()
 const { t } = useI18n()
 const typeLabel = useServerTypeLabel()
+const primaryType = computed(() => primaryServerType(props.server.type))
 
 const iconBroken = ref(false)
-const iconSrc = computed(() => props.server.icon || gameTypeIcon(props.server.type))
+const iconSrc = computed(() => props.server.icon || gameTypeIcon(primaryType.value))
 // Reset the broken flag if the icon source changes (e.g. server.icon gets uploaded
 // after the page rendered with the game-type fallback that didn't exist on disk).
 watch(iconSrc, () => { iconBroken.value = false })
@@ -59,11 +61,11 @@ const statusLabel = computed(() => {
 
 // One-line connect hint for the list view. DST has no host:port so show its search name.
 const connectHint = computed(() => {
-  if (props.server.type === 'dst') {
+  if (primaryType.value === 'dst') {
     const name = (props.server.meta as DstMeta | undefined)?.find_by_name
     return name ? t('server.dst_search_name_short', { name }) : ''
   }
   const eps = extractEndpoints(props.server)
-  return eps.length ? formatEndpoint(props.server.type, eps[0]!) : ''
+  return eps.length ? formatEndpoint(primaryType.value, eps[0]!) : ''
 })
 </script>

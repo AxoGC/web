@@ -23,6 +23,6 @@ const props = defineProps<{ server: ServerDetail }>()
 const conn = useServerConnect(() => props.server)
 const endpoints = computed(() => conn.extractEndpoints(props.server))
 function display(ep: ServerEndpoint) {
-  return conn.formatEndpoint(props.server.type, ep)
+  return conn.formatEndpoint('terraria', ep)
 }
 </script>

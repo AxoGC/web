@@ -18,6 +18,7 @@ import ServerDetailMcBedrock from '~/components/feature/server/details/ServerDet
 import ServerDetailDst from '~/components/feature/server/details/ServerDetailDst.vue'
 import ServerDetailTerraria from '~/components/feature/server/details/ServerDetailTerraria.vue'
 import ServerDetailGeneric from '~/components/feature/server/details/ServerDetailGeneric.vue'
+import { primaryServerType } from '~/composables/useServerTypes'
 
 definePageMeta({ layout: 'detail' })
 
@@ -43,7 +44,7 @@ const VARIANTS: Record<string, Component> = {
   'terraria': ServerDetailTerraria,
 }
 const variant = computed<Component>(() =>
-  (server.value && VARIANTS[server.value.type]) || ServerDetailGeneric,
+  (server.value && VARIANTS[primaryServerType(server.value.type)]) || ServerDetailGeneric,
 )
 
 if (import.meta.client) {

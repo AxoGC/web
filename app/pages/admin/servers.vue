@@ -72,6 +72,10 @@
           </UiField>
           <UiField :label="$t('admin.server_form_type')" required>
             <UiSelect v-model="form.type" :options="typeOptions" :disabled="!!editing" />
+            <label v-if="form.type === 'mc-java'" class="inline-flex items-center gap-2 mt-2 cursor-pointer">
+              <input v-model="alsoBedrock" type="checkbox" class="accent-brand-500 w-4 h-4">
+              <span class="text-sm">{{ $t('admin.server_form_also_bedrock') }}</span>
+            </label>
           </UiField>
           <UiField :label="$t('admin.server_form_visible')">
             <label class="inline-flex items-center gap-2 mt-2 cursor-pointer">
@@ -151,6 +155,7 @@ import type { AdminServerItem, DstMeta, ServerType } from '~/types/api'
 import { ApiError } from '~/composables/useApi'
 import { useToast } from '~/composables/useToast'
 import { extractEndpoints, formatEndpoint } from '~/composables/useServerConnect'
+import { parseServerTypes, primaryServerType } from '~/composables/useServerTypes'
 import { emptyDoc, isEmptyDoc } from '~/utils/tiptap'
 
 definePageMeta({ layout: 'admin', middleware: ['admin'], ssr: false })
@@ -189,6 +194,11 @@ const form = reactive<{
   metaExtras: {},
   visible: true,
 })
+// Whether this mc-java server is also reachable by Bedrock clients. Kept
+// separate from form.type (which stays the plain primary type so the
+// connect/meta subforms and the type <select> don't have to deal with a
+// comma-separated value) — folded into the submitted `type` at save time.
+const alsoBedrock = ref(false)
 // Draft-upload ids the description editor collected this session; stamped
 // to server_id on submit so they don't get orphan-GC'd the way a bare
 // embedded URL would be. Reset on every open — ids already attached from a
@@ -218,7 +228,7 @@ const consoleTarget = ref<AdminServerItem | null>(null)
 const busyId = ref<number | null>(null)
 
 const CONSOLE_SUPPORTED: ReadonlySet<string> = new Set(['mc-java', 'mc-bedrock'])
-function supportsConsole(type: string) { return CONSOLE_SUPPORTED.has(type) }
+function supportsConsole(type: string) { return CONSOLE_SUPPORTED.has(primaryServerType(type)) }
 
 function openConsole(s: AdminServerItem) {
   if (!supportsConsole(s.type)) return
@@ -238,13 +248,14 @@ async function load() {
 
 /** Human summary of how to connect, shown in the table. */
 function connectHint(s: AdminServerItem): string {
-  if (s.type === 'dst') {
+  const primary = primaryServerType(s.type)
+  if (primary === 'dst') {
     const n = (s.meta as DstMeta | undefined)?.find_by_name
     return n ? `🔎 ${n}` : '—'
   }
   const eps = extractEndpoints(s)
   if (!eps.length) return '—'
-  const first = formatEndpoint(s.type, eps[0]!)
+  const first = formatEndpoint(primary, eps[0]!)
   return eps.length > 1 ? `${first} (+${eps.length - 1})` : first
 }
 
@@ -255,6 +266,7 @@ function openCreate() {
   form.description = emptyDoc()
   form.metaExtras = {}
   form.visible = true
+  alsoBedrock.value = false
   connectInitial.value = null
   connectPayload.value = {}
   attachmentIds.value = []
@@ -266,7 +278,8 @@ const CONNECT_KEYS = new Set(['endpoints', 'find_by_name', 'password_hint'])
 function openEdit(s: AdminServerItem) {
   editing.value = s
   form.name = s.name
-  form.type = s.type
+  form.type = primaryServerType(s.type)
+  alsoBedrock.value = form.type === 'mc-java' && parseServerTypes(s.type).includes('mc-bedrock')
   form.visible = s.visible
   form.description = (s.description && !isEmptyDoc(s.description)) ? s.description : emptyDoc()
   const fullMeta = (s.meta || {}) as Record<string, unknown>
@@ -295,14 +308,15 @@ async function submitForm() {
   }
   const meta = { ...extra, ...connectPayload.value }
 
+  const type = form.type === 'mc-java' && alsoBedrock.value ? 'mc-java,mc-bedrock' : form.type
   const body: Record<string, unknown> = {
     name: form.name,
+    type,
     description: isEmptyDoc(form.description) ? null : form.description,
     meta,
     visible: form.visible,
     attachment_ids: attachmentIds.value,
   }
-  if (!editing.value) body.type = form.type
 
   saving.value = true
   try {

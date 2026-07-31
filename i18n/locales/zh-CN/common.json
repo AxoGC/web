@@ -407,6 +407,7 @@
     "token_reset": "Token 已重置（仅显示一次）",
     "server_form_name": "名称",
     "server_form_type": "类型",
+    "server_form_also_bedrock": "同时支持基岩版玩家连接",
     "server_form_desc": "简介",
     "server_form_meta": "Meta（JSON）",
     "server_form_connect": "玩家连接方式",

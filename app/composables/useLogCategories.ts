@@ -1,4 +1,5 @@
 import type { LogCategory, ServerType } from '~/types/api'
+import { primaryServerType } from '~/composables/useServerTypes'
 
 /**
  * Frontend's hardcoded copy of core's `behaviorlog.gameTypeCategories` map
@@ -25,7 +26,7 @@ const CATEGORY_FILTER_KEYS: Record<LogCategory, string[]> = {
 
 export function logCategoriesForGameType(type: ServerType | string | undefined | null): LogCategory[] {
   if (!type) return []
-  return GAME_TYPE_CATEGORIES[type] ?? []
+  return GAME_TYPE_CATEGORIES[primaryServerType(type)] ?? []
 }
 
 export function filterKeysForCategory(category: LogCategory | ''): string[] {

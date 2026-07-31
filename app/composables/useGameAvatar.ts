@@ -1,4 +1,5 @@
 import type { ServerType } from '~/types/api'
+import { primaryServerType } from '~/composables/useServerTypes'
 
 export interface GameAvatar {
   /** External avatar URL if the game has a stable per-name avatar source. */
@@ -13,8 +14,9 @@ export interface GameAvatar {
  * games have no per-name avatar source.
  */
 export function useGameAvatar(type: ServerType | undefined | null) {
+  const primary = primaryServerType(type)
   function avatarFor(name: string, size = 32): GameAvatar {
-    if (type === 'mc-java') {
+    if (primary === 'mc-java') {
       return {
         src: `https://mc-heads.net/avatar/${encodeURIComponent(name)}/${size}`,
         pixelated: true,
