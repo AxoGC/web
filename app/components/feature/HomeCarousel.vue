@@ -4,7 +4,10 @@
     @mouseenter="paused = true"
     @mouseleave="paused = false"
   >
-    <div class="relative w-full" :style="{ aspectRatio: '21 / 9' }">
+    <!-- Aspect ratio narrows as viewport widens: a flat 21:9 banner turns into
+         a sliver on phones, so mobile gets a taller 4:3 box, tablets a 16:9
+         middle ground, and only lg+ keeps the wide cinematic 21:9 look. -->
+    <div class="relative w-full aspect-[4/3] sm:aspect-video lg:aspect-[21/9]">
       <div
         class="absolute inset-0 flex transition-transform duration-500 ease-out"
         :style="{ transform: `translateX(-${index * 100}%)` }"
