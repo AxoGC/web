@@ -254,6 +254,7 @@
     "no_online_players": "Nobody is online right now",
     "leaderboard": "Leaderboard",
     "metric": "Metric",
+    "my_player_title": "My Character",
     "connect_title": "How to Connect",
     "connect_missing": "No connection info configured",
     "bedrock_address": "Address",

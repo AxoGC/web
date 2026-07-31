@@ -28,6 +28,7 @@
     "nuxt-lucide-icons": "2.1.0",
     "pinia": "^3.0.4",
     "reka-ui": "^2.9.7",
+    "skinview3d": "3.4.2",
     "tailwindcss": "^4.3.0",
     "typescript": "^6.0.3",
     "vee-validate": "^4.15.1",

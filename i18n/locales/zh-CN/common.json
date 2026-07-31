@@ -254,6 +254,7 @@
     "no_online_players": "当前没有玩家在线",
     "leaderboard": "排行榜",
     "metric": "指标",
+    "my_player_title": "我的角色",
     "connect_title": "连接方式",
     "connect_missing": "尚未配置连接信息",
     "bedrock_address": "地址",
