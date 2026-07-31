@@ -53,6 +53,9 @@
       <HomeQqGroups />
     </div>
 
+    <!-- Games we've played -->
+    <HomeGamesMarquee />
+
     <!-- Curated one-liners carousel -->
     <HomeOneliners />
 
