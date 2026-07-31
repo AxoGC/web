@@ -48,13 +48,21 @@
         <UiField class="col-span-3" :label="$t('admin.endpoint_label')">
           <UiInput v-model="ep.label" :placeholder="$t('admin.endpoint_label_ph')" />
         </UiField>
-        <UiField class="col-span-8" :label="$t('admin.endpoint_address')" required>
+        <UiField :class="alsoBedrock ? 'col-span-5' : 'col-span-8'" :label="$t('admin.endpoint_address')" required>
           <UiInput
             :model-value="endpointInputs[i]"
             :placeholder="`play.example.com:${defaultPort ?? ''}`"
             @update:model-value="onAddressInput(i, $event)"
           />
           <p v-if="addressErrors[i]" class="text-xs text-danger mt-1">{{ addressErrors[i] }}</p>
+        </UiField>
+        <UiField v-if="alsoBedrock" class="col-span-3" :label="$t('admin.endpoint_type')">
+          <UiSelect
+            :model-value="ep.type || ''"
+            :options="endpointTypeOptions"
+            size="sm"
+            @update:model-value="v => setEndpointType(ep, v)"
+          />
         </UiField>
         <div class="col-span-1 pb-1">
           <UiButton variant="ghost" size="sm" @click="removeAt(i)">
@@ -78,6 +86,12 @@ const props = defineProps<{
   type: ServerType
   /** Initial connection payload extracted from server.meta (for edit mode). */
   initial: Record<string, unknown> | null
+  /**
+   * Whether this mc-java server is also reachable by Bedrock clients — only
+   * then does an endpoint's game matter, since Java-only and hybrid servers
+   * both use this same "Java / Terraria" branch of the form.
+   */
+  alsoBedrock?: boolean
 }>()
 
 /** Emits the connection-related meta fields. Parent merges these into the full meta. */
@@ -91,6 +105,15 @@ const help = computed(() => {
   if (props.type === 'mc-bedrock') return t('admin.endpoint_help', { port: defaultPort.value || '—' })
   return t('admin.endpoint_address_help', { port: defaultPort.value || '—' })
 })
+
+// "Shared" (no type) means the endpoint is shown under every connect card
+// rendered for this server — the only sane default for single-type servers,
+// and still the right default when adding a new row on a hybrid one.
+const endpointTypeOptions = computed(() => [
+  { value: '', label: t('admin.endpoint_type_shared') },
+  { value: 'mc-java', label: t('admin.endpoint_type_java') },
+  { value: 'mc-bedrock', label: t('admin.endpoint_type_bedrock') },
+])
 
 // --- Endpoint-based state ---
 // `endpoints` is the canonical structured shape (host + port). For Java /
@@ -111,6 +134,9 @@ function removeAt(i: number) {
   endpoints.value.splice(i, 1)
   endpointInputs.value.splice(i, 1)
   addressErrors.value.splice(i, 1)
+}
+function setEndpointType(ep: ServerEndpoint, v: string | number) {
+  ep.type = (v === 'mc-java' || v === 'mc-bedrock') ? v : undefined
 }
 
 /**
@@ -183,7 +209,7 @@ function hydrate() {
     addressErrors.value = []
   } else {
     endpoints.value = Array.isArray(m.endpoints)
-      ? m.endpoints.map(e => ({ label: e.label, host: e.host, port: e.port }))
+      ? m.endpoints.map(e => ({ label: e.label, host: e.host, port: e.port, type: e.type }))
       : []
     if (!endpoints.value.length) endpoints.value.push({ host: '' })
     endpointInputs.value = endpoints.value.map(joinAddress)
@@ -210,6 +236,7 @@ watch(
           ...(e.label ? { label: e.label } : {}),
           host: e.host.trim(),
           ...(e.port ? { port: Number(e.port) } : {}),
+          ...(e.type ? { type: e.type } : {}),
         }))
       emit('update:connect', clean.length ? { endpoints: clean } : {})
     }

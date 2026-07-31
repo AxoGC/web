@@ -24,7 +24,9 @@ import type { ServerDetail, ServerEndpoint } from '~/types/api'
 
 const props = defineProps<{ server: ServerDetail }>()
 const conn = useServerConnect(() => props.server)
-const endpoints = computed(() => conn.extractEndpoints(props.server))
+// Endpoints tagged for another client (e.g. mc-bedrock on a multi-type
+// server) belong to that card instead — only untagged/mc-java ones are ours.
+const endpoints = computed(() => conn.extractEndpoints(props.server).filter(e => !e.type || e.type === 'mc-java'))
 // Hardcode 'mc-java' rather than props.server.type: this card can be shown
 // alongside other connect cards on a multi-type server, and the
 // port-omission default must always be Java's regardless.

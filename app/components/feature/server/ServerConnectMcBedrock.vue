@@ -31,7 +31,9 @@ import type { ServerDetail, ServerEndpoint } from '~/types/api'
 
 const props = defineProps<{ server: ServerDetail }>()
 const conn = useServerConnect(() => props.server)
-const endpoints = computed(() => conn.extractEndpoints(props.server))
+// Endpoints tagged for another client (e.g. mc-java on a multi-type server)
+// belong to that card instead — only untagged/mc-bedrock ones are ours.
+const endpoints = computed(() => conn.extractEndpoints(props.server).filter(e => !e.type || e.type === 'mc-bedrock'))
 function portOf(ep: ServerEndpoint) {
   return ep.port ?? defaultPortFor('mc-bedrock')!
 }

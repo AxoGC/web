@@ -254,6 +254,14 @@ export interface ServerEndpoint {
   host: string
   /** Optional port. Omit when it equals the game's default (JE 25565 / BE 19132 / Terraria 7777). */
   port?: number
+  /**
+   * Which client this endpoint is for, on a multi-type server (e.g. a
+   * mc-java server also reachable via mc-bedrock) where Java and Bedrock
+   * connect through genuinely different addresses, not just different
+   * ports on the same host. Omitted (or on a single-type server) means the
+   * endpoint is shown under every connect card that's rendered.
+   */
+  type?: 'mc-java' | 'mc-bedrock'
 }
 
 /** Polymorphic per-game meta payload. Backend stores this as opaque JSONB. */

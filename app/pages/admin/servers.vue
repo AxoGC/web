@@ -94,6 +94,7 @@
           <ServerAdminConnectForm
             :type="form.type"
             :initial="connectInitial"
+            :also-bedrock="alsoBedrock"
             @update:connect="onConnectChange"
           />
         </fieldset>
