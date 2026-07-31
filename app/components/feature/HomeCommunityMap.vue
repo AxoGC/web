@@ -247,13 +247,15 @@ function avatarOffsets(n: number): { dx: number, dy: number }[] {
 const MY_PIN_LABEL_COLOR = { light: '#6b7280', dark: '#9199a6' } as const
 
 // Pin "drop" entrance: rendered via ECharts custom series' declarative
-// enter animation (enterFrom + enterAnimation on the group returned by
-// renderItem) rather than hand-rolled keyframes — it's the documented way
-// to animate elements newly added to a custom series, and it only fires
-// once per element's actual first appearance (later re-renders from theme
-// toggles/resizes just update the already-mounted element, no replay).
-// Gating series `data` on `pinsRevealed` (empty → full) is what makes every
-// pin "newly added" the moment they're allowed to appear.
+// enter animation (enterFrom + enterAnimation) rather than hand-rolled
+// keyframes — it's the documented way to animate elements newly added to a
+// custom series, and it only fires once per element's actual first
+// appearance (later re-renders from theme toggles/resizes just update the
+// already-mounted element, no replay). Gating series `data` on
+// `pinsRevealed` (empty → full) is what makes every pin "newly added" the
+// moment they're allowed to appear. The fall (position) animates on the
+// group; the fade (opacity) is applied per child leaf element instead — see
+// the renderItem comment below for why.
 const PIN_DROP_OFFSET = PIN_R / 2
 const PIN_DROP_DURATION = 550
 const PIN_DROP_STAGGER_MS = 50
@@ -411,17 +413,33 @@ const chartOption = computed(() => {
             z2: zBase + 20,
           })
         }
-        const dropAnim = animatePins
-          ? {
-              enterFrom: { style: { opacity: 0 }, position: [0, -PIN_DROP_OFFSET] },
-              enterAnimation: {
-                duration: PIN_DROP_DURATION,
-                delay: Math.min(params.dataIndex * PIN_DROP_STAGGER_MS, PIN_DROP_STAGGER_MAX),
-                easing: 'quarticOut' as const,
-              },
-            }
-          : {}
-        return { type: 'group', children, ...dropAnim }
+        if (animatePins) {
+          const enterAnimation = {
+            duration: PIN_DROP_DURATION,
+            delay: Math.min(params.dataIndex * PIN_DROP_STAGGER_MS, PIN_DROP_STAGGER_MAX),
+            easing: 'quarticOut' as const,
+          }
+          // ECharts' custom-series group container has no `style` of its own
+          // (only Displayable leaf elements do), so an `enterFrom: { style:
+          // { opacity: 0 } }` set on the *group* is silently a no-op — the
+          // pin would render fully opaque the instant it's created and just
+          // sit there for its stagger `delay` before the position tween
+          // kicks in, reading as a hover-then-drop rather than a clean fall.
+          // The fall (position) animates fine on the group since x/y are
+          // real group transform props; the fade has to be applied to each
+          // child leaf instead so it's actually invisible during the delay.
+          children.forEach((child) => {
+            child.enterFrom = { style: { opacity: 0 } }
+            child.enterAnimation = enterAnimation
+          })
+          return {
+            type: 'group',
+            children,
+            enterFrom: { position: [0, -PIN_DROP_OFFSET] },
+            enterAnimation,
+          }
+        }
+        return { type: 'group', children }
       },
     }],
   }
