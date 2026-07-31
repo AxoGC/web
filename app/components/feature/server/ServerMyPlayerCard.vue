@@ -136,7 +136,7 @@ const onSegments = computed(() => mergedOnIntervals.value.map(([s, e]) => ({
 const playedMinutes = computed(() => Math.round(
   mergedOnIntervals.value.reduce((sum, [s, e]) => sum + (e - s), 0) / 60000,
 ))
-const playedLabel = computed(() => t('metric.play_time_fmt', {
+const playedLabel = computed(() => t('server.today_played', {
   h: Math.floor(playedMinutes.value / 60),
   m: playedMinutes.value % 60,
 }))

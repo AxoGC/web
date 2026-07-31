@@ -255,6 +255,7 @@
     "leaderboard": "Leaderboard",
     "metric": "Metric",
     "my_player_title": "My Info",
+    "today_played": "Played {h}h {m}m today",
     "connect_title": "How to Connect",
     "connect_missing": "No connection info configured",
     "bedrock_address": "Address",
