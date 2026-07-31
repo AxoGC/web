@@ -119,13 +119,17 @@
         <UiCard flat>
           <h2 class="text-lg mb-2">{{ $t('profile.bindings_title') }}</h2>
           <UiEmpty v-if="sortedBindings.length === 0" :message="$t('profile.bindings_empty')" />
-          <ul v-else class="divide-y divide-border-subtle">
+          <!-- Two per row on wide screens rather than one wide row each — each
+               cell keeps the exact same (mobile) internal layout regardless of
+               viewport, so grid-cols-2 is purely a "fit more cards per row"
+               change, not a per-cell reflow. -->
+          <ul v-else class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <li
               v-for="b in visibleBindings"
               :key="b.server_id"
-              class="py-3"
+              class="rounded-lg border border-border-subtle p-3"
             >
-              <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+              <div class="flex flex-col gap-2">
                 <div class="flex-1 min-w-0">
                   <div class="flex flex-wrap items-center gap-2">
                     <NuxtLink
@@ -154,7 +158,7 @@
                     </span>
                   </div>
                 </div>
-                <div class="flex items-center gap-2 shrink-0">
+                <div class="flex items-center gap-2 flex-wrap">
                   <NuxtLink
                     v-if="viewerBindingsByServer[b.server_id] && user"
                     :to="pkLink(b)"
@@ -169,14 +173,7 @@
                 </div>
               </div>
 
-              <ProfileBindingStatsPanel
-                v-if="bindingStats[bindingKey(b)]?.length"
-                class="mt-3"
-                :server-id="b.server_id"
-                :game-name="b.game_name"
-                :axes="bindingStats[bindingKey(b)]!.slice(0, 6)"
-                :metrics="metrics"
-              />
+              <PlayerActivityPanel class="mt-3" :server-id="b.server_id" :game-name="b.game_name" />
             </li>
           </ul>
           <!-- Collapse-by-default: long binding lists crowd the profile card,
@@ -263,9 +260,7 @@ import { formatDate, relativeTime } from '~/utils/format'
 import { useAuthStore } from '~/stores/auth'
 import type {
   FollowStats,
-  PlayerStats,
   PublicUser,
-  StatsAxis,
   UserBinding,
   UserProfileStats,
   UserRecentComment,
@@ -318,35 +313,8 @@ const visibleBindings = computed<UserBinding[]>(() =>
   bindingsExpanded.value ? sortedBindings.value : sortedBindings.value.slice(0, BINDINGS_PREVIEW),
 )
 
-const metrics = useMetricsRegistry()
 const typeLabel = useServerTypeLabel()
 const presence = usePresence()
-
-function bindingKey(b: UserBinding) {
-  return `${b.server_id}:${b.game_name}`
-}
-
-// One stats fetch per binding; failures (offline server, unknown player) are
-// silently dropped — the binding row still renders, just without the inline
-// numbers. Each binding's server has its own metric defs (PLAN §10.6), so we
-// also prime the metrics registry for each unique server_id in parallel.
-const { data: bindingStatsResp } = await useAsyncData(
-  () => `user.${id.value}.binding-stats`,
-  async () => {
-    const items = bindingsResp.value?.items ?? []
-    if (!items.length) return {} as Record<string, StatsAxis[]>
-    const uniqueServerIds = Array.from(new Set(items.map(b => b.server_id)))
-    await Promise.all(uniqueServerIds.map(sid => metrics.loadFor(sid)))
-    const results = await Promise.all(items.map(b =>
-      useApi<PlayerStats>(`/api/servers/${b.server_id}/players/${encodeURIComponent(b.game_name)}/stats`)
-        .then(r => [bindingKey(b), r.stats ?? []] as const)
-        .catch(() => [bindingKey(b), [] as StatsAxis[]] as const),
-    ))
-    return Object.fromEntries(results)
-  },
-  { watch: [() => bindingsResp.value?.items?.length] },
-)
-const bindingStats = computed<Record<string, StatsAxis[]>>(() => bindingStatsResp.value ?? {})
 
 // Viewer's own bindings — only fetched when logged in and viewing someone else.
 // Used to gate the per-row PK button: PK is only meaningful when both sides
