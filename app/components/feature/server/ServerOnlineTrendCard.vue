@@ -83,6 +83,10 @@ const chartOption = computed(() => {
       backgroundColor: c.tooltipBg,
       borderColor: c.tooltipBorder,
       textStyle: { color: c.tooltipText },
+      // echarts' tooltip DOM defaults to white-space:nowrap, which would
+      // clip the wrapped player-name block instead of letting it wrap —
+      // override it here since it can't be set from the formatter's own HTML.
+      extraCssText: 'white-space: normal;',
       // Custom formatter so hovering a point shows who was online at that
       // sample, not just the count — styled to match UiTooltip (text-xs,
       // same color tokens as the rest of the chart).
