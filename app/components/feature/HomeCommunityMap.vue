@@ -197,7 +197,7 @@ const provinceRegions = computed(() => {
 
 const PIN_R = 14
 const PIN_STROKE_WIDTH = 1.5
-// The 2x/3x/4x-person head-circle scaling (sqrt(count), see renderItem) is
+// The 2x/3x/4x-person head-circle scaling (cbrt(count), see renderItem) is
 // defined on this — the solid fill disc actually visible inside the white
 // ring — not on the path's own centerline radius. Canvas strokes straddle
 // the path outline (half in, half out), and that white ring stays a fixed
@@ -317,7 +317,7 @@ const chartOption = computed(() => {
         const [x, y] = api.coord([item.coord.lng, item.coord.lat])
         const count = item.entry.count
         const layoutN = Math.min(count, 4)
-        const fillR = count <= 4 ? PIN_FILL_R * Math.sqrt(count) : PIN_FILL_R
+        const fillR = count <= 4 ? PIN_FILL_R * Math.cbrt(count) : PIN_FILL_R
         const headR = fillR + PIN_STROKE_WIDTH / 2
         const headY = pinHeadY(headR)
         const imgSize = AVATAR_R * 2
