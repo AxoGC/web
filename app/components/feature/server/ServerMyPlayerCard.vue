@@ -40,11 +40,11 @@
 
     <div v-if="axes.length" class="flex gap-4">
       <ClientOnly>
-        <div v-show="skinAvailable" class="shrink-0">
-          <canvas ref="canvasEl" class="w-24 h-36" />
+        <div v-show="skinAvailable" class="shrink-0" :style="{ width: canvasBoxPx.w + 'px', height: canvasBoxPx.h + 'px' }">
+          <canvas ref="canvasEl" class="block" />
         </div>
       </ClientOnly>
-      <dl class="flex-1 min-w-0 flex flex-col justify-center gap-2">
+      <dl ref="statsEl" class="flex-1 min-w-0 flex flex-col justify-center gap-2">
         <div v-for="axis in axes" :key="axis.key" class="flex items-center justify-between gap-3 text-sm">
           <dt class="text-text-tertiary truncate">{{ metrics.labelFor(axis.key) }}</dt>
           <dd class="font-mono text-text-primary tabular-nums">{{ metrics.formatScore(axis.key, axis.value) }}</dd>
@@ -192,7 +192,7 @@ watch([canvasEl, playerName], async ([el, name]) => {
   skinAvailable.value = false
   if (!el || !name) return
   const { SkinViewer } = await import('skinview3d')
-  const v = new SkinViewer({ canvas: el, width: 96, height: 144 })
+  const v = new SkinViewer({ canvas: el, width: canvasBoxPx.value.w, height: canvasBoxPx.value.h })
   v.autoRotate = true
   v.autoRotateSpeed = 0.8
   try {
@@ -205,5 +205,31 @@ watch([canvasEl, playerName], async ([el, name]) => {
   }
 }, { immediate: true })
 
-onBeforeUnmount(disposeViewer)
+// The stat list sets the row height; the skin viewer just follows it,
+// keeping the original 2:3 (w:h) proportions instead of the old fixed
+// 96x144. viewer.setSize keeps the WebGL render target in sync — SkinViewer
+// writes its own pixel width/height as inline style, so CSS alone can't
+// stretch the canvas to match.
+const statsEl = ref<HTMLElement | null>(null)
+const canvasBoxPx = ref({ w: 96, h: 144 })
+const CANVAS_ASPECT = 96 / 144
+let resizeObserver: ResizeObserver | null = null
+
+watch(statsEl, (el) => {
+  resizeObserver?.disconnect()
+  resizeObserver = null
+  if (!el || typeof ResizeObserver === 'undefined') return
+  resizeObserver = new ResizeObserver(([entry]) => {
+    const h = Math.round(entry.contentRect.height)
+    if (h <= 0) return
+    canvasBoxPx.value = { w: Math.round(h * CANVAS_ASPECT), h }
+    viewer?.setSize(canvasBoxPx.value.w, canvasBoxPx.value.h)
+  })
+  resizeObserver.observe(el)
+}, { immediate: true })
+
+onBeforeUnmount(() => {
+  disposeViewer()
+  resizeObserver?.disconnect()
+})
 </script>
