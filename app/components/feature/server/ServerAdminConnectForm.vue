@@ -60,15 +60,13 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import type { ServerJoinMethod, ServerType } from '~/types/api'
-import { buildMcbeDeepLink, defaultPortForMethod } from '~/composables/useServerConnect'
+import { defaultPortForMethod } from '~/composables/useServerConnect'
 
 const props = defineProps<{
   /** Server's primary game type — only used to pick a sensible default `type` for new/first rows. */
   type: ServerType
   /** Initial connection payload extracted from server.meta (for edit mode): `{ join_methods: [...] }`. */
   initial: Record<string, unknown> | null
-  /** Server display name, needed to build the mcbe deep-link's "External servers" list entry. */
-  serverName: string
 }>()
 
 /** Emits `{ join_methods: ServerJoinMethod[] }` (or `{}` when the list is empty). Parent merges into form.meta. */
@@ -174,8 +172,7 @@ function buildClean(row: MethodDraft): ServerJoinMethod | null {
     case 'mcbe': {
       const host = row.host.trim()
       if (!host || !row.port) return null
-      const port = Number(row.port)
-      return { type: 'mcbe', ...(label ? { label } : {}), host, port, url: buildMcbeDeepLink(props.serverName, host, port, label) }
+      return { type: 'mcbe', ...(label ? { label } : {}), host, port: Number(row.port) }
     }
     case 'terraria': {
       const host = row.host.trim()
@@ -190,10 +187,9 @@ function buildClean(row: MethodDraft): ServerJoinMethod | null {
   }
 }
 
-// Emit the connection payload whenever any row (or the server name feeding
-// mcbe's deep link) changes.
+// Emit the connection payload whenever any row changes.
 watch(
-  () => [JSON.stringify(rows.value), props.serverName],
+  () => JSON.stringify(rows.value),
   () => {
     const clean = rows.value.map(buildClean).filter((m): m is ServerJoinMethod => m !== null)
     emit('update:connect', clean.length ? { join_methods: clean } : {})

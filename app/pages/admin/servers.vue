@@ -94,7 +94,6 @@
           <ServerAdminConnectForm
             :type="form.type"
             :initial="connectInitial"
-            :server-name="form.name"
             @update:connect="onConnectChange"
           />
         </fieldset>

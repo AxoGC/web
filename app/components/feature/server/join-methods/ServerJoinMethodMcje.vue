@@ -12,6 +12,6 @@
 import type { McjeJoinMethod } from '~/types/api'
 import { useCopy } from '~/composables/useServerConnect'
 
-defineProps<{ method: McjeJoinMethod }>()
+defineProps<{ method: McjeJoinMethod, serverName?: string }>()
 const { copy } = useCopy()
 </script>

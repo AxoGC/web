@@ -27,6 +27,6 @@
 import type { DstJoinMethod } from '~/types/api'
 import { useCopy } from '~/composables/useServerConnect'
 
-defineProps<{ method: DstJoinMethod }>()
+defineProps<{ method: DstJoinMethod, serverName?: string }>()
 const { copy } = useCopy()
 </script>

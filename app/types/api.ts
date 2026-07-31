@@ -268,8 +268,6 @@ export interface McbeJoinMethod {
   label?: string
   host: string
   port: number
-  /** `minecraft://` deep link (Win10/mobile "add external server"). Computed from host/port/label — not hand-authored. */
-  url: string
 }
 export interface DstJoinMethod {
   type: 'dst'

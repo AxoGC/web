@@ -12,6 +12,6 @@
 import type { SvJoinMethod } from '~/types/api'
 import { useCopy } from '~/composables/useServerConnect'
 
-defineProps<{ method: SvJoinMethod }>()
+defineProps<{ method: SvJoinMethod, serverName?: string }>()
 const { copy } = useCopy()
 </script>

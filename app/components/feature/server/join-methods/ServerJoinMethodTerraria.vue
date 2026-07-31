@@ -12,6 +12,6 @@
 import type { TerrariaJoinMethod } from '~/types/api'
 import { useCopy } from '~/composables/useServerConnect'
 
-defineProps<{ method: TerrariaJoinMethod }>()
+defineProps<{ method: TerrariaJoinMethod, serverName?: string }>()
 const { copy } = useCopy()
 </script>
