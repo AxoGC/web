@@ -95,18 +95,20 @@ const chartOption = computed(() => {
         const players = point.players || []
         const shown = players.slice(0, MAX_TOOLTIP_PLAYERS)
         const more = players.length - shown.length
-        const nameRows = shown.length
-          ? shown.map(n => `<div class="truncate">${escapeHtml(n)}</div>`).join('')
-          : `<div style="color:${c.label}">${escapeHtml(t('server.no_online_players'))}</div>`
-        const moreRow = more > 0
-          ? `<div style="color:${c.label}" class="mt-0.5">${escapeHtml(t('server.online_trend_tooltip_more', { n: more }))}</div>`
-          : ''
+        // Comma-joined and wrapped instead of one row per player — keeps the
+        // tooltip short even at 10 names. Long names hyphen-break rather than
+        // pushing the box wide.
+        let names = shown.length
+          ? shown.map(escapeHtml).join(', ')
+          : `<span style="color:${c.label}">${escapeHtml(t('server.no_online_players'))}</span>`
+        if (more > 0) {
+          names += `<span style="color:${c.label}"> ${escapeHtml(t('server.online_trend_tooltip_more', { n: more }))}</span>`
+        }
         return `
-          <div class="text-xs" style="min-width:120px">
+          <div class="text-xs" style="width:200px">
             <div style="color:${c.label}" class="mb-1">${escapeHtml(time)}</div>
             <div class="mb-1" style="font-weight:500">${escapeHtml(t('server.online_trend_tooltip_count', { n: point.online }))}</div>
-            ${nameRows}
-            ${moreRow}
+            <div style="overflow-wrap:break-word;word-break:break-word;hyphens:auto;">${names}</div>
           </div>
         `
       },
