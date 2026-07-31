@@ -254,7 +254,7 @@ const MY_PIN_LABEL_COLOR = { light: '#6b7280', dark: '#9199a6' } as const
 // toggles/resizes just update the already-mounted element, no replay).
 // Gating series `data` on `pinsRevealed` (empty → full) is what makes every
 // pin "newly added" the moment they're allowed to appear.
-const PIN_DROP_OFFSET = 36
+const PIN_DROP_OFFSET = PIN_R / 2
 const PIN_DROP_DURATION = 550
 const PIN_DROP_STAGGER_MS = 50
 const PIN_DROP_STAGGER_MAX = 600
@@ -417,7 +417,7 @@ const chartOption = computed(() => {
               enterAnimation: {
                 duration: PIN_DROP_DURATION,
                 delay: Math.min(params.dataIndex * PIN_DROP_STAGGER_MS, PIN_DROP_STAGGER_MAX),
-                easing: 'bounceOut' as const,
+                easing: 'quarticOut' as const,
               },
             }
           : {}
