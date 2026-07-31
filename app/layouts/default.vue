@@ -30,6 +30,7 @@
         >
           <div class="flex items-center gap-3">
             <img src="/logo.webp" :alt="$t('brand.name')" class="block h-6 w-auto object-contain opacity-80" />
+            <span class="font-sans italic font-semibold text-text-tertiary">SINCE 2017</span>
             <span>{{ $t('footer.copyright', { year: new Date().getFullYear() }) }}</span>
           </div>
           <a
