@@ -114,7 +114,10 @@
     "community_map_title": "Community Map",
     "community_map_subtitle": "Meet {players} players from {provinces} provinces and {cities} cities on Axolotland",
     "community_map_more": "{n} more players",
-    "community_map_empty": "No players have shared their city yet — light up the first pin in your profile settings"
+    "community_map_empty": "No players have shared their city yet — light up the first pin in your profile settings",
+    "community_map_hint_guest": "Log in and click \"Settings\" in the top-right to set your city — light up your own spot!",
+    "community_map_hint_no_city": "Click \"Settings\" in the top-right to set your city — light up your own spot!",
+    "community_map_me": "Me"
   },
   "oneliner": {
     "submit_cta": "Submit",

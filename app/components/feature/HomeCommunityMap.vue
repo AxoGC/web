@@ -14,6 +14,7 @@
             <template #cities><span class="text-xl md:text-2xl text-brand-400">{{ cityCount }}</span></template>
             <template #players><span class="text-xl md:text-2xl text-brand-400">{{ playerCount }}</span></template>
           </i18n-t>
+          <p v-if="cityHintText" class="mt-1 text-xs text-text-tertiary">{{ cityHintText }}</p>
         </header>
         <div class="h-[312px] md:h-[480px]">
           <ClientOnly>
@@ -65,11 +66,24 @@ import type { CityMapEntry } from '~/types/api'
 import { useCityCoords, type CityCoord } from '~/composables/useCityCoords'
 import { initials, colorForName } from '~/utils/format'
 import { useTheme } from '~/composables/useTheme'
+import { useAuthStore } from '~/stores/auth'
+
+const { t } = useI18n()
+const auth = useAuthStore()
 
 const { data } = await useAsyncData('home.city_map', () =>
   useApi<{ items: CityMapEntry[] }>('/api/users/by-city').catch(() => ({ items: [] as CityMapEntry[] })),
 )
 const entries = computed(() => data.value?.items ?? [])
+
+// Second subtitle line nudging players to opt in to the map: hidden once
+// they've already set a city, worded differently for guests (need to log in
+// first) vs. logged-in players who just haven't filled in a city yet.
+const myCityCode = computed(() => auth.user?.city_code)
+const cityHintText = computed(() => {
+  if (myCityCode.value) return null
+  return auth.isLoggedIn ? t('home.community_map_hint_no_city') : t('home.community_map_hint_guest')
+})
 
 const cityCoords = ref<Record<string, CityCoord>>({})
 const mapRegistered = ref(false)
@@ -187,10 +201,18 @@ function avatarOffsets(n: number): { dx: number, dy: number }[] {
   }
 }
 
+// Faded label under the current user's own pin tip — same per-theme muted
+// tone as other canvas-rendered secondary text in the app (e.g. the online-
+// trend chart's axis labels), since canvas can't resolve CSS custom
+// properties the way regular DOM text can.
+const MY_PIN_LABEL_COLOR = { light: '#6b7280', dark: '#9199a6' } as const
+
 const chartOption = computed(() => {
   if (!mapRegistered.value) return null
   const pts = points.value
   const base = MAP_BASE[themeMode.value]
+  const myCity = myCityCode.value
+  const myLabelColor = MY_PIN_LABEL_COLOR[themeMode.value]
 
   return {
     backgroundColor: 'transparent',
@@ -309,6 +331,22 @@ const chartOption = computed(() => {
               verticalAlign: 'middle',
             },
             z2: 15,
+          })
+        }
+        if (myCity && item.cityCode === myCity) {
+          children.push({
+            type: 'text',
+            position: [x, y],
+            style: {
+              text: t('home.community_map_me'),
+              x: 0,
+              y: 4,
+              fill: myLabelColor,
+              fontSize: 10,
+              align: 'center',
+              verticalAlign: 'top',
+            },
+            z2: 20,
           })
         }
         return { type: 'group', children }

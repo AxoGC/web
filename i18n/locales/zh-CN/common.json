@@ -114,7 +114,10 @@
     "community_map_title": "社区地图",
     "community_map_subtitle": "在 Axolotland 遇见来自 {provinces} 个省份、{cities} 座城市的 {players} 名玩家",
     "community_map_more": "还有 {n} 位玩家",
-    "community_map_empty": "还没有玩家公开自己的城市，去个人设置里点亮第一个坐标吧"
+    "community_map_empty": "还没有玩家公开自己的城市，去个人设置里点亮第一个坐标吧",
+    "community_map_hint_guest": "登录账号，点击右上角「设置」并填写城市，点亮自己的坐标吧！",
+    "community_map_hint_no_city": "点击右上角「设置」并填写城市，点亮自己的坐标吧！",
+    "community_map_me": "我"
   },
   "oneliner": {
     "submit_cta": "投一句",
