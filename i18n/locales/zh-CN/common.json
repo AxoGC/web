@@ -302,7 +302,7 @@
     "streak": "连续签到 {n} 天",
     "calendar": "签到日历",
     "reward": "奖励：{type} +{amount}",
-    "checked_in": "签到成功！"
+    "checked_in": "签到成功，获得 {amount} 点数！"
   },
   "search": {
     "placeholder": "搜索帖子、用户、服务器…",

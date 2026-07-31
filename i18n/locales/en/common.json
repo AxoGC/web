@@ -302,7 +302,7 @@
     "streak": "Streak: {n} days",
     "calendar": "Calendar",
     "reward": "Reward: {type} +{amount}",
-    "checked_in": "Checked in!"
+    "checked_in": "Checked in — +{amount} points!"
   },
   "search": {
     "placeholder": "Search threads, users, servers…",

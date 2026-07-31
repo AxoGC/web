@@ -125,7 +125,7 @@ async function onCheckIn() {
   try {
     const r = await useApi<CheckInResult>('/api/checkins', { method: 'POST' })
     streak.value = r.streak
-    toast.success(t('checkin.checked_in'))
+    toast.success(t('checkin.checked_in', { amount: r.reward.amount }))
     await load()
   } catch (e) {
     if (e instanceof ApiError) toast.fromError(e)
