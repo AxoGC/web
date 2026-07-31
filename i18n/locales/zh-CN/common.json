@@ -294,6 +294,7 @@
   },
   "donation": {
     "list_title": "捐赠榜",
+    "list_subtitle": "感谢你的捐赠，我们会努力做的更好。Axolotland Gaming Club 是非盈利性的，捐赠后你可以在捐赠榜中留言，但不会获得任何奖励回报。",
     "anonymous": "匿名玩家",
     "amount": "金额",
     "donated_at": "捐赠时间",

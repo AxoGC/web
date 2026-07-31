@@ -294,6 +294,7 @@
   },
   "donation": {
     "list_title": "Donors",
+    "list_subtitle": "Thank you for your donation — we'll keep working to make things better. Axolotland Gaming Club is non-profit; after donating you may leave a message on this leaderboard, but no rewards are given in return.",
     "anonymous": "Anonymous",
     "amount": "Amount",
     "donated_at": "Date",
