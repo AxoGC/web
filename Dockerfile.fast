@@ -1,0 +1,17 @@
+# Packages an already-built .output/ (produced remotely, see /root/deploy.sh)
+# into the same runtime image the full Dockerfile's second stage produces.
+# No compile happens here — keep this in sync with Dockerfile's runtime stage.
+FROM node:22-alpine
+WORKDIR /app
+
+COPY --chown=node:node .output ./.output
+
+ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=3000
+ENV NUXT_API_INTERNAL=http://127.0.0.1:8080
+ENV NUXT_PUBLIC_API_BASE=
+
+USER node
+EXPOSE 3000
+CMD ["node", ".output/server/index.mjs"]
