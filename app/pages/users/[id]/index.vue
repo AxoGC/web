@@ -129,8 +129,11 @@
               :key="b.server_id"
               class="rounded-lg border border-border-subtle p-3"
             >
-              <div class="flex flex-col gap-2">
-                <div class="flex-1 min-w-0">
+              <!-- Online/offline duration and "bound at" both moved into
+                   PlayerActivityPanel's own tick bar below — this header is
+                   now just identity (server + character) and the PK action. -->
+              <div class="flex flex-row items-start justify-between gap-2">
+                <div class="flex flex-col min-w-0">
                   <div class="flex flex-wrap items-center gap-2">
                     <NuxtLink
                       :to="`/servers/${b.server_id}/players/${encodeURIComponent(b.game_name)}`"
@@ -140,37 +143,17 @@
                     </NuxtLink>
                     <UiTag size="sm">{{ typeLabel(b.server_type) }}</UiTag>
                   </div>
-                  <div class="mt-1 text-xs text-text-tertiary flex items-center gap-2 flex-wrap">
-                    <span>{{ b.game_name }}</span>
-                    <span
-                      :class="[
-                        'inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px]',
-                        b.is_online ? 'bg-emerald-500/10 text-emerald-400' : 'bg-bg-overlay text-text-tertiary',
-                      ]"
-                    >
-                      <span
-                        :class="[
-                          'inline-block w-1.5 h-1.5 rounded-full',
-                          b.is_online ? 'bg-emerald-400' : 'bg-text-tertiary',
-                        ]"
-                      />
-                      {{ presence({ isOnline: b.is_online, joinedAt: b.joined_at, lastSeenAt: b.last_seen_at }) }}
-                    </span>
-                  </div>
+                  <div class="mt-1 text-xs text-text-tertiary truncate">{{ b.game_name }}</div>
                 </div>
-                <div class="flex items-center gap-2 flex-wrap">
-                  <NuxtLink
-                    v-if="viewerBindingsByServer[b.server_id] && user"
-                    :to="pkLink(b)"
-                  >
-                    <UiButton size="sm" variant="primary">
-                      {{ $t('pk.cta') }}
-                    </UiButton>
-                  </NuxtLink>
-                  <div v-if="b.bound_at" class="text-xs text-text-tertiary">
-                    {{ $t('profile.bindings_bound_at', { date: formatDate(b.bound_at) }) }}
-                  </div>
-                </div>
+                <NuxtLink
+                  v-if="viewerBindingsByServer[b.server_id] && user"
+                  class="shrink-0"
+                  :to="pkLink(b)"
+                >
+                  <UiButton size="sm" variant="primary">
+                    {{ $t('pk.cta') }}
+                  </UiButton>
+                </NuxtLink>
               </div>
 
               <PlayerActivityPanel class="mt-3" :server-id="b.server_id" :game-name="b.game_name" />
@@ -314,7 +297,6 @@ const visibleBindings = computed<UserBinding[]>(() =>
 )
 
 const typeLabel = useServerTypeLabel()
-const presence = usePresence()
 
 // Viewer's own bindings — only fetched when logged in and viewing someone else.
 // Used to gate the per-row PK button: PK is only meaningful when both sides

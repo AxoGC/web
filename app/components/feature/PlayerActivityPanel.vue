@@ -30,7 +30,7 @@
       </div>
       <div class="flex items-center justify-between text-xs mt-1">
         <span :class="isOnlineNow ? 'text-brand-400 font-medium' : 'text-text-tertiary'">
-          {{ isOnlineNow ? $t('common.online') : $t('common.offline') }}
+          {{ statusLabel }}
         </span>
         <span class="text-text-secondary">{{ playedLabel }}</span>
       </div>
@@ -156,6 +156,25 @@ const isOnlineNow = computed(() => {
   const pts = onlineStats.value?.points ?? []
   const last = pts[pts.length - 1]
   return !!last?.players?.includes(props.gameName)
+})
+
+function hm(ms: number) {
+  const minutes = Math.round(ms / 60000)
+  return { h: Math.floor(minutes / 60), m: minutes % 60 }
+}
+
+// Duration of the *current* continuous state, derived from the merged
+// interval that touches "now": if online, that's the run since it started
+// (its end is always clamped to now); if offline, it's the time since the
+// most recent run ended. No online run at all in the window means "offline
+// for at least the whole visible day" — the window length is the best lower
+// bound we have from this data.
+const statusLabel = computed(() => {
+  const last = mergedOnIntervals.value[mergedOnIntervals.value.length - 1]
+  if (isOnlineNow.value) {
+    return t('server.online_for', hm(last ? nowMs - last[0] : 0))
+  }
+  return t('server.offline_for', hm(last ? nowMs - last[1] : windowMs))
 })
 
 // Ruler ticks at local-time 6-hour marks (00:00/06:00/12:00/18:00) that fall
