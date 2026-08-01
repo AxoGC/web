@@ -231,7 +231,7 @@ async function runCommand(body: { kind: string, target?: string, reason?: string
   } catch (e) {
     if (e instanceof ApiError) {
       toast.fromError(e)
-      pushHistory(displayCmd, false, e.message)
+      pushHistory(displayCmd, false, t(`errors.${e.code}`))
     }
   } finally {
     running.value = false
