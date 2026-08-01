@@ -688,7 +688,6 @@
     "detail_title": "申领详情",
     "revoke_reason": "撤销理由",
     "revoke_penalty": "额外扣除",
-    "revoke_section_title": "撤销申领（管理员）",
     "revoke_reason_placeholder": "说明撤销理由，将对所有人展示",
     "revoke_penalty_placeholder": "额外扣除点数（可选，默认 0）",
     "revoke_button": "撤销并追回点数",

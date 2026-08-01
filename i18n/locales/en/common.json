@@ -688,7 +688,6 @@
     "detail_title": "Claim Detail",
     "revoke_reason": "Revoke Reason",
     "revoke_penalty": "Extra Penalty",
-    "revoke_section_title": "Revoke Claim (Admin)",
     "revoke_reason_placeholder": "Explain why — shown publicly",
     "revoke_penalty_placeholder": "Extra points to deduct (optional, default 0)",
     "revoke_button": "Revoke & Claw Back",

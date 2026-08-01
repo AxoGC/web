@@ -25,29 +25,6 @@
       <PromotionClaimInfoRow v-if="claim.status === 'revoked' && claim.revoke_reason" :label="$t('promotion.revoke_reason')">
         <span class="whitespace-pre-wrap">{{ claim.revoke_reason }}</span>
       </PromotionClaimInfoRow>
-
-      <template v-if="auth.isAdmin && claim.status === 'granted'">
-        <div class="pt-3 border-t border-border-subtle space-y-3">
-          <p class="text-xs font-medium text-text-tertiary uppercase tracking-wide">
-            {{ $t('promotion.revoke_section_title') }}
-          </p>
-          <UiField :label="$t('promotion.revoke_reason')">
-            <UiTextarea
-              v-model="revokeReason"
-              :rows="2"
-              :placeholder="$t('promotion.revoke_reason_placeholder')"
-            />
-          </UiField>
-          <UiField :label="$t('promotion.revoke_penalty')">
-            <UiInput
-              v-model.number="revokePenalty"
-              type="number"
-              min="0"
-              :placeholder="$t('promotion.revoke_penalty_placeholder')"
-            />
-          </UiField>
-        </div>
-      </template>
     </div>
 
     <template #footer>
@@ -96,7 +73,25 @@
     :loading="revoking"
     @update:open="confirmRevokeOpen = $event"
     @confirm="doRevoke"
-  />
+  >
+    <div class="mt-3 space-y-3">
+      <UiField :label="$t('promotion.revoke_reason')">
+        <UiTextarea
+          v-model="revokeReason"
+          :rows="2"
+          :placeholder="$t('promotion.revoke_reason_placeholder')"
+        />
+      </UiField>
+      <UiField :label="$t('promotion.revoke_penalty')">
+        <UiInput
+          v-model.number="revokePenalty"
+          type="number"
+          min="0"
+          :placeholder="$t('promotion.revoke_penalty_placeholder')"
+        />
+      </UiField>
+    </div>
+  </UiConfirmModal>
 
   <AdminPointsCorrectionDialog
     v-model:open="pointsDialogOpen"

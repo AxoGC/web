@@ -1,6 +1,7 @@
 <template>
   <UiModal :open="open" :title="title" @update:open="onClose">
     <p class="text-text-secondary">{{ message }}</p>
+    <slot />
     <template #footer>
       <UiButton variant="ghost" @click="onClose(false)">
         {{ cancelText || $t('actions.cancel') }}
