@@ -8,11 +8,12 @@
       {{ $t('server.no_online_players') }}
     </div>
     <div v-else class="max-h-72 overflow-y-auto grid grid-cols-2 gap-x-3 gap-y-1.5">
-      <NuxtLink
+      <button
         v-for="name in players"
         :key="name"
-        :to="`/servers/${serverId}/players/${encodeURIComponent(name)}`"
-        class="flex items-center gap-1.5 min-w-0 text-sm text-text-primary hover:text-brand-400 transition-colors"
+        type="button"
+        class="flex items-center gap-1.5 min-w-0 w-full text-left text-sm text-text-primary hover:text-brand-400 transition-colors"
+        @click="goToPlayer(serverId, name)"
       >
         <img
           v-if="avatarFor(name).src"
@@ -23,7 +24,7 @@
           referrerpolicy="no-referrer"
         >
         <span class="font-medium truncate">{{ name }}</span>
-      </NuxtLink>
+      </button>
     </div>
   </UiCard>
 </template>
@@ -42,6 +43,8 @@ const { avatarFor: rawAvatarFor } = useGameAvatar(props.type)
 function avatarFor(name: string) {
   return rawAvatarFor(name, 32)
 }
+
+const goToPlayer = usePlayerNavigate()
 </script>
 
 <style scoped>

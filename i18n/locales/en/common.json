@@ -70,17 +70,6 @@
     "hours_ago": "{n} h ago",
     "just_now": "Just now"
   },
-  "presence": {
-    "online_now": "Online",
-    "online_for": "Online for {duration}",
-    "offline_for": "Offline for {duration}",
-    "never_online": "Never online",
-    "just_now": "a moment",
-    "unit_minutes": "{n} min",
-    "unit_hours": "{n} h",
-    "unit_days": "{n} d",
-    "unit_months": "{n} mo"
-  },
   "theme": {
     "light": "Light",
     "dark": "Dark",

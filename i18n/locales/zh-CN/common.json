@@ -70,17 +70,6 @@
     "hours_ago": "{n} 小时前",
     "just_now": "刚刚"
   },
-  "presence": {
-    "online_now": "在线",
-    "online_for": "已在线 {duration}",
-    "offline_for": "已离线 {duration}",
-    "never_online": "从未上线",
-    "just_now": "片刻",
-    "unit_minutes": "{n} 分钟",
-    "unit_hours": "{n} 小时",
-    "unit_days": "{n} 天",
-    "unit_months": "{n} 个月"
-  },
   "theme": {
     "light": "浅色",
     "dark": "深色",

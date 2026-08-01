@@ -37,12 +37,13 @@
               {{ item.rank }}
             </span>
             <UiAvatar :name="item.name" size="xs" />
-            <NuxtLink
-              :to="`/servers/${id}/players/${encodeURIComponent(item.name)}`"
-              class="flex-1 font-medium hover:text-brand-400 truncate"
+            <button
+              type="button"
+              class="flex-1 font-medium hover:text-brand-400 truncate text-left"
+              @click="goToPlayer(id, item.name)"
             >
               {{ item.name }}
-            </NuxtLink>
+            </button>
             <span class="font-mono text-xs text-text-secondary tabular-nums">
               {{ formatScore(key, item.score) }}
             </span>
@@ -62,6 +63,7 @@ const route = useRoute()
 const id = computed(() => String(route.params.id))
 
 const { keys, labelFor, formatScore, ready } = useServerMetrics(id)
+const goToPlayer = usePlayerNavigate()
 
 // Per-axis state. Reactive object keyed by metric key so each card loads
 // independently — one slow / failing axis doesn't block the others.

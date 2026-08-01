@@ -17,12 +17,13 @@
       >
         <span class="flex-1 text-text-secondary truncate">{{ metrics.labelFor(row.metric) }}</span>
         <template v-if="row.name">
-          <NuxtLink
-            :to="`/servers/${serverId}/players/${encodeURIComponent(row.name)}`"
-            class="font-medium truncate max-w-[8rem] hover:text-brand-400"
+          <button
+            type="button"
+            class="font-medium truncate max-w-[8rem] text-left hover:text-brand-400"
+            @click="goToPlayer(serverId, row.name)"
           >
             {{ row.name }}
-          </NuxtLink>
+          </button>
           <span class="font-mono text-xs text-text-tertiary tabular-nums">
             {{ metrics.formatScore(row.metric, row.score) }}
           </span>
@@ -39,6 +40,7 @@ import type { MetricChampion } from '~/types/api'
 
 const props = defineProps<{ serverId: string | number }>()
 const metrics = useServerMetrics(toRef(props, 'serverId'))
+const goToPlayer = usePlayerNavigate()
 
 const { data } = await useAsyncData(
   () => `server.champions.${props.serverId}`,
