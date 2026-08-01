@@ -15,6 +15,12 @@
       </div>
     </header>
 
+    <UiCard v-if="guideHtml" padded class="mb-6">
+      <h2 class="text-lg mb-3">{{ $t('promotion.guide_title') }}</h2>
+      <!-- eslint-disable-next-line vue/no-v-html -->
+      <div v-html="guideHtml" />
+    </UiCard>
+
     <div v-if="pending" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <UiSkeleton v-for="i in 6" :key="i" variant="card" :height="120" />
     </div>
@@ -55,6 +61,10 @@ const dialogOpen = ref(false)
 const detailOpen = ref(false)
 const detailTarget = ref<PromotionClaimItem | null>(null)
 
+// Admin-curated copy, fetched from nginx's own /static/ tree (not the backend
+// API) — same pattern as HomeGamesMarquee — so edits don't need a rebuild.
+const guideHtml = ref('')
+
 async function load() {
   pending.value = true
   try {
@@ -89,6 +99,13 @@ function onRevoked() {
 }
 
 onMounted(load)
+onMounted(async () => {
+  try {
+    guideHtml.value = await $fetch<string>('/static/points/guide.html')
+  } catch {
+    guideHtml.value = ''
+  }
+})
 
 useHead(() => ({ title: t('promotion.title') }))
 </script>

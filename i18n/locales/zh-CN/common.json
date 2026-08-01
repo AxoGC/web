@@ -18,7 +18,7 @@
     "profile": "个人主页",
     "checkin": "签到",
     "bindings": "绑定游戏号",
-    "points": "点数申领"
+    "points": "积分申领"
   },
   "actions": {
     "save": "保存",
@@ -303,7 +303,7 @@
     "streak": "连续签到 {n} 天",
     "calendar": "签到日历",
     "reward": "奖励：{type} +{amount}",
-    "checked_in": "签到成功，获得 {amount} 点数！"
+    "checked_in": "签到成功，获得 {amount} 积分！"
   },
   "search": {
     "placeholder": "搜索帖子、用户、服务器…",
@@ -666,36 +666,37 @@
     "direction_put": "放入"
   },
   "promotion": {
-    "title": "点数申领",
-    "current_points": "当前点数",
+    "title": "积分申领",
+    "current_points": "当前积分",
     "list_empty": "暂无申领记录",
     "submit_button": "我要申领",
     "dialog_title": "提交推广证明",
-    "field_points": "申领点数",
-    "field_points_help": "自行填写希望申领的点数，暂无上限，管理员将事后核实证据是否与申领点数相称",
-    "field_points_placeholder": "请输入点数",
-    "error_points_required": "请填写申领点数（大于 0）",
+    "field_points": "申领积分",
+    "field_points_help": "自行填写希望申领的积分，暂无上限，管理员将事后核实证据是否与申领积分相称",
+    "field_points_placeholder": "请输入积分",
+    "error_points_required": "请填写申领积分（大于 0）",
     "field_description": "申领说明",
     "field_description_placeholder": "说明你是如何宣传服务器的（视频/截图链接、或如聊天邀人等无链接的证明方式均可），内容将公开展示",
     "error_description_required": "请填写申领说明",
     "col_user": "申领人",
-    "col_points": "点数",
+    "col_points": "积分",
     "col_status": "状态",
     "col_created_at": "申领时间",
     "status_granted": "已发放",
     "status_revoked": "已撤销",
-    "submit_success": "申领已提交，点数已即时发放，管理员将事后复核",
+    "submit_success": "申领已提交，积分已即时发放，管理员将事后复核",
     "detail_title": "申领详情",
     "revoke_reason": "撤销理由",
     "revoke_penalty": "额外扣除",
     "revoke_reason_placeholder": "说明撤销理由，将对所有人展示",
-    "revoke_penalty_placeholder": "额外扣除点数（可选，默认 0）",
-    "revoke_button": "撤销并追回点数",
+    "revoke_penalty_placeholder": "额外扣除积分（可选，默认 0）",
+    "revoke_button": "撤销并追回积分",
     "revoke_confirm_title": "确认撤销申领？",
-    "revoke_confirm_message": "将追回 {points} 点数，可以填写理由，或额外扣除点数作为惩罚。",
+    "revoke_confirm_message": "将追回 {points} 积分，可以填写理由，或额外扣除积分作为惩罚。",
     "correct_points_button": "拨正积分",
     "revoked_toast": "已撤销该申领",
-    "delete_confirm": "确定要删除这条申领记录吗？此操作不会追回点数，仅删除记录本身，且无法撤销。",
-    "deleted_toast": "已删除该申领记录"
+    "delete_confirm": "确定要删除这条申领记录吗？此操作不会追回积分，仅删除记录本身，且无法撤销。",
+    "deleted_toast": "已删除该申领记录",
+    "guide_title": "积分说明"
   }
 }
