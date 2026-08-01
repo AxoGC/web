@@ -693,7 +693,6 @@
     "revoke_button": "撤销并追回点数",
     "revoke_confirm_title": "确认撤销申领？",
     "revoke_confirm_message": "将追回 {points} 点数{penalty}。撤销理由：{reason}",
-    "revoke_confirm_penalty_part": "，并额外扣除 {penalty} 点数作为惩罚",
     "revoke_confirm_no_penalty_part": "，不带额外惩罚",
     "revoke_confirm_no_reason": "（未填写）",
     "correct_points_button": "拨正积分",

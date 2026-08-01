@@ -133,15 +133,15 @@ watch(() => props.claim?.id, () => {
   pointsDialogOpen.value = false
 })
 
+// Static subtitle describing the base action (only varies by which claim is
+// being revoked) — the actual penalty/reason the admin enters live in the
+// fields below it, not previewed back into this sentence.
 const revokeConfirmMessage = computed(() => {
   if (!props.claim) return ''
-  const penalty = revokePenalty.value && revokePenalty.value > 0 ? Math.floor(revokePenalty.value) : 0
   return t('promotion.revoke_confirm_message', {
     points: props.claim.points,
-    penalty: penalty > 0
-      ? t('promotion.revoke_confirm_penalty_part', { penalty })
-      : t('promotion.revoke_confirm_no_penalty_part'),
-    reason: revokeReason.value.trim() || t('promotion.revoke_confirm_no_reason'),
+    penalty: t('promotion.revoke_confirm_no_penalty_part'),
+    reason: t('promotion.revoke_confirm_no_reason'),
   })
 })
 

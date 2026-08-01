@@ -693,7 +693,6 @@
     "revoke_button": "Revoke & Claw Back",
     "revoke_confirm_title": "Confirm revoke?",
     "revoke_confirm_message": "This will claw back {points} points{penalty}. Reason: {reason}",
-    "revoke_confirm_penalty_part": ", plus an extra {penalty}-point penalty",
     "revoke_confirm_no_penalty_part": ", with no extra penalty",
     "revoke_confirm_no_reason": "(none provided)",
     "correct_points_button": "Correct points",
