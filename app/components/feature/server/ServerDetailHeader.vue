@@ -1,4 +1,13 @@
 <template>
+  <button
+    type="button"
+    class="md:hidden inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary mb-4"
+    @click="goBack"
+  >
+    <LucideChevronLeft :size="16" />
+    {{ $t('actions.back') }}
+  </button>
+
   <header class="flex items-start gap-4 mb-6">
     <div class="w-16 h-16 p-2 rounded-lg bg-bg-overlay overflow-hidden grid place-items-center shrink-0">
       <img
@@ -50,6 +59,7 @@ import { primaryServerType } from '~/composables/useServerTypes'
 const props = defineProps<{ server: ServerDetail }>()
 const { t } = useI18n()
 const auth = useAuthStore()
+const goBack = useGoBack()
 const typeLabel = useServerTypeLabel()
 const hasLogCategories = computed(() => logCategoriesForGameType(props.server.type).length > 0)
 

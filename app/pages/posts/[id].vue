@@ -2,6 +2,14 @@
   <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12">
     <template v-if="post">
       <header class="mb-6">
+        <button
+          type="button"
+          class="md:hidden inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary mb-3"
+          @click="goBack"
+        >
+          <LucideChevronLeft :size="16" />
+          {{ $t('actions.back') }}
+        </button>
         <div class="flex items-center gap-2 text-sm text-text-tertiary mb-3">
           <NuxtLink :to="`/forums/${post.forum.slug}`" class="hover:text-brand-400">
             <LucideHash :size="12" class="inline mr-1" />{{ post.forum.name }}
@@ -239,6 +247,7 @@ import type { PostDetail, CommentItem } from '~/types/api'
 
 definePageMeta({ layout: 'detail' })
 
+const goBack = useGoBack()
 const route = useRoute()
 const auth = useAuthStore()
 const toast = useToast()

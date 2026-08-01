@@ -1,5 +1,13 @@
 <template>
   <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12">
+    <NuxtLink
+      :to="`/servers/${id}`"
+      class="md:hidden inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary mb-4"
+    >
+      <LucideChevronLeft :size="16" />
+      {{ $t('actions.back') }}
+    </NuxtLink>
+
     <UiCard v-if="server" padded class="mb-4">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 p-1 rounded-md bg-bg-overlay overflow-hidden grid place-items-center shrink-0">

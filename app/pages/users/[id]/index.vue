@@ -259,10 +259,7 @@ const auth = useAuthStore()
 const toast = useToast()
 const id = computed(() => String(route.params.id))
 
-function goBack() {
-  if (history.length > 1) router.back()
-  else router.push('/')
-}
+const goBack = useGoBack()
 
 async function copyLink() {
   try {

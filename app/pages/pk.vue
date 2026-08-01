@@ -1,5 +1,14 @@
 <template>
   <div class="px-4 lg:px-6 py-6 pb-20 md:pb-12">
+    <button
+      type="button"
+      class="md:hidden inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary mb-4"
+      @click="goBack"
+    >
+      <LucideChevronLeft :size="16" />
+      {{ $t('actions.back') }}
+    </button>
+
     <header class="mb-6">
       <h1 class="text-2xl">{{ $t('pk.title') }}</h1>
       <p v-if="server" class="mt-1 text-sm text-text-tertiary flex flex-wrap items-center gap-2">
@@ -149,6 +158,7 @@ import type { PlayerStats, PublicUser, ServerSummary, StatsAxis } from '~/types/
 definePageMeta({ layout: 'detail' })
 useHead({ title: 'VS' })
 
+const goBack = useGoBack()
 const route = useRoute()
 
 const serverId = computed(() => String(route.query.server_id || ''))
