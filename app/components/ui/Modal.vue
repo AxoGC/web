@@ -28,7 +28,7 @@
         <div class="text-text-primary">
           <slot />
         </div>
-        <div v-if="$slots.footer" class="mt-6 flex items-center justify-end gap-2">
+        <div v-if="$slots.footer" class="mt-6 flex flex-wrap items-center justify-end gap-2">
           <slot name="footer" />
         </div>
       </DialogContent>

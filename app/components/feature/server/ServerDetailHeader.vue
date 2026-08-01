@@ -30,7 +30,7 @@
           {{ server.online }}/{{ server.max }}
         </span>
       </div>
-      <div class="flex items-center gap-2">
+      <div class="flex flex-wrap items-center gap-2">
         <NuxtLink v-if="hasLogCategories" :to="`/servers/${server.id}/logs`">
           <UiButton variant="secondary" size="sm">
             <template #leading><LucideSearch :size="14" /></template>

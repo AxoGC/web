@@ -91,7 +91,7 @@
         </div>
       </UiField>
 
-      <div class="flex items-center justify-end gap-2 mt-6">
+      <div class="flex flex-wrap items-center justify-end gap-2 mt-6">
         <NuxtLink :to="back">
           <UiButton variant="ghost">{{ $t('actions.cancel') }}</UiButton>
         </NuxtLink>

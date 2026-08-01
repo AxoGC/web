@@ -58,7 +58,7 @@ const variantClasses: Record<Variant, string> = {
 }
 
 const classes = computed(() => [
-  'inline-flex items-center justify-center font-medium transition-colors select-none',
+  'inline-flex items-center justify-center font-medium transition-colors select-none whitespace-nowrap shrink-0',
   'focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60 focus-visible:ring-offset-0',
   sizeClasses[props.size],
   variantClasses[props.variant],

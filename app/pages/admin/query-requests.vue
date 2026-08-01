@@ -2,7 +2,7 @@
   <div>
     <header class="flex items-center justify-between gap-3 mb-6 flex-wrap">
       <h1 class="text-2xl">{{ $t('admin.query_requests') }}</h1>
-      <div class="flex gap-2">
+      <div class="flex flex-wrap gap-2">
         <UiButton
           v-for="tab in TABS"
           :key="tab"

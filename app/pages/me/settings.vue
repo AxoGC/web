@@ -102,7 +102,7 @@
 
     <UiCard padded class="mb-6">
       <h2 class="text-lg mb-4">{{ $t('me.appearance') }}</h2>
-      <div class="flex gap-2">
+      <div class="flex flex-wrap gap-2">
         <UiButton
           v-for="m in (['system', 'light', 'dark'] as const)"
           :key="m"
