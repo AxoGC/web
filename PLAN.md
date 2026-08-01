@@ -1784,7 +1784,7 @@ PLATFORM_SMTP_PORT=465
 PLATFORM_SMTP_USER=no-reply@example.com
 PLATFORM_SMTP_PASSWORD=<smtp 密码或 App Password>
 PLATFORM_SMTP_FROM=no-reply@example.com
-PLATFORM_SMTP_FROM_NAME=游戏服务平台
+PLATFORM_SMTP_FROM_NAME=Axolotland Gaming Club
 
 # 附件
 PLATFORM_UPLOAD_DIR=/data/uploads               # 容器内挂载点
@@ -1802,7 +1802,7 @@ PLATFORM_POLL_TIMEOUT=20s                       # /api/srv/poll 长轮询挂起�
 
 ### 12.3 邮件模板
 
-注册验证码邮件用简单 HTML 模板：标题"游戏服务平台 - 邮箱验证"，正文显示 6 位数字验证码 + "5 分钟内有效"。模板放 `internal/email/templates/`，Go embed 编译进二进制。
+注册验证码邮件用简单 HTML 模板：标题"Axolotland Gaming Club - 邮箱验证"，正文显示 6 位数字验证码 + "5 分钟内有效"。模板放 `internal/email/templates/`，Go embed 编译进二进制。
 
 **邮件统一中文，不做国际化**——注册时用户未登录无法读语言偏好；不为此在 User 表加 `language` 字段。前端 UI 国际化（11 种语言）见 5.14 节，与邮件解耦。
 

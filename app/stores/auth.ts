@@ -80,10 +80,18 @@ export const useAuthStore = defineStore('auth', {
       await this.fetchMe()
     },
 
-    async register(email: string, code: string, username: string, password: string) {
-      const data = await useApi<{ access_token: string }>('/api/auth/register', {
+    async requestRegistration(email: string, username: string, password: string) {
+      await useApi('/api/auth/register/request', {
         method: 'POST',
-        body: { email, code, username, password },
+        body: { email, username, password },
+        anonymous: true,
+      })
+    },
+
+    async verifyRegistration(token: string) {
+      const data = await useApi<{ access_token: string }>('/api/auth/register/verify', {
+        method: 'POST',
+        body: { token },
         anonymous: true,
       })
       this.accessToken = data.access_token

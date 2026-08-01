@@ -13,8 +13,6 @@
   "EMAIL_INVALID_FORMAT": "Invalid email format.",
   "EMAIL_ALREADY_REGISTERED": "Email already registered.",
   "EMAIL_RATE_LIMITED": "Too many requests. Try again later.",
-  "EMAIL_CODE_INVALID": "Verification code is incorrect.",
-  "EMAIL_CODE_EXPIRED": "Verification code expired.",
   "EMAIL_SEND_FAILED": "Failed to send email — try again later.",
 
   "USERNAME_TAKEN": "Username already taken.",
@@ -22,6 +20,8 @@
   "PASSWORD_TOO_WEAK": "Password must be 8+ chars with letters and digits.",
   "PASSWORD_RESET_TOKEN_INVALID": "This reset link is invalid or has expired — please request a new one.",
   "PASSWORD_RESET_FAILED": "Failed to reset password — try again later.",
+  "REGISTER_TOKEN_INVALID": "This registration link is invalid or has expired — please sign up again.",
+  "REGISTER_FAILED": "Registration failed — try again later.",
   "USER_NOT_FOUND": "User not found.",
   "USER_BANNED": "Account is banned.",
   "BIO_TOO_LONG": "Bio is too long.",
