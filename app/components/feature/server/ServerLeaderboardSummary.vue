@@ -9,28 +9,30 @@
         </UiButton>
       </NuxtLink>
     </div>
-    <ul class="space-y-2">
-      <li
+    <div class="grid grid-cols-2 gap-2">
+      <div
         v-for="row in champions"
         :key="row.metric"
-        class="flex items-center gap-3 text-sm"
+        class="bg-bg-overlay/40 rounded px-2.5 py-1.5"
       >
-        <span class="flex-1 text-text-secondary truncate">{{ metrics.labelFor(row.metric) }}</span>
+        <p class="text-[10px] text-text-tertiary uppercase tracking-wide truncate">
+          {{ metrics.labelFor(row.metric) }}
+        </p>
         <template v-if="row.name">
           <button
             type="button"
-            class="font-medium truncate max-w-[8rem] text-left hover:text-brand-400"
+            class="block w-full text-sm font-medium truncate text-left hover:text-brand-400"
             @click="goToPlayer(serverId, row.name)"
           >
             {{ row.name }}
           </button>
-          <span class="font-mono text-xs text-text-tertiary tabular-nums">
+          <p class="text-xs font-mono text-text-tertiary tabular-nums truncate">
             {{ metrics.formatScore(row.metric, row.score) }}
-          </span>
+          </p>
         </template>
-        <span v-else class="text-text-tertiary text-xs">—</span>
-      </li>
-    </ul>
+        <p v-else class="text-sm text-text-tertiary">—</p>
+      </div>
+    </div>
   </UiCard>
 </template>
 
