@@ -273,6 +273,11 @@ const MY_PIN_LABEL_COLOR = { light: '#6b7280', dark: '#9199a6' } as const
 // the renderItem comment below for why.
 const PIN_DROP_OFFSET = PIN_R / 2
 const PIN_DROP_DURATION = 550
+// Per-pin stagger step, up to a total spread cap: below the cap every pin
+// gets the full 50ms step; once there are enough pins that dataIndex * 50ms
+// would blow past the cap, the step shrinks so the stagger still spans every
+// pin evenly instead of the pins beyond index (cap/50) all landing on the
+// same clamped delay and popping in together.
 const PIN_DROP_STAGGER_MS = 50
 const PIN_DROP_STAGGER_MAX = 600
 
@@ -430,9 +435,12 @@ const chartOption = computed(() => {
           })
         }
         if (animatePins) {
+          const stepMs = seriesData.length > 1
+            ? Math.min(PIN_DROP_STAGGER_MS, PIN_DROP_STAGGER_MAX / (seriesData.length - 1))
+            : 0
           const enterAnimation = {
             duration: PIN_DROP_DURATION,
-            delay: Math.min(params.dataIndex * PIN_DROP_STAGGER_MS, PIN_DROP_STAGGER_MAX),
+            delay: params.dataIndex * stepMs,
             easing: 'quarticOut' as const,
           }
           // ECharts' custom-series group container has no `style` of its own
