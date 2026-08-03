@@ -41,6 +41,11 @@
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
+
+  /* Single source of truth for the site's page-content width — used by
+     AppHeader and every layout's <main> so the header bar and the content
+     below it never mismatch. */
+  --container-page: 1280px;
 }
 
 /* Tell v4 to operate dark variant via [data-theme="dark"]. */

@@ -1,6 +1,6 @@
 <template>
   <header class="sticky top-0 z-30 border-b border-border-subtle bg-bg-base/90 backdrop-blur supports-backdrop-filter:bg-bg-base/75">
-    <div class="mx-auto max-w-7xl h-16 px-4 lg:px-6 flex items-center gap-4">
+    <div class="mx-auto max-w-page h-16 px-4 lg:px-6 flex items-center gap-4">
       <NuxtLink to="/" class="flex items-center gap-2 shrink-0 text-text-primary">
         <img src="/logo.webp" alt="logo" class="block h-8 w-auto object-contain md:hidden" />
         <span

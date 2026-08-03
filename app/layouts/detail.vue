@@ -5,7 +5,7 @@
          width for content; pages under this layout implement their own
          mobile back affordance where they need one (see useGoBack). -->
     <AppHeader class="hidden md:flex md:block" />
-    <main class="flex-1 mx-auto w-full max-w-[1080px]">
+    <main class="flex-1 mx-auto w-full max-w-page">
       <slot />
     </main>
     <!-- detail layout hides tab bar on mobile for immersion (plan §5.5.1 C) -->
